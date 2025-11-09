@@ -27,7 +27,7 @@ Example:
 """
 
 from smpub.publisher import Publisher
-from smpub.published import PublishedClass
+from smpub.published import PublishedClass, PublisherContext, discover_api_json
 
 __version__ = "0.1.0"
-__all__ = ["Publisher", "PublishedClass"]
+__all__ = ["Publisher", "PublishedClass", "PublisherContext", "discover_api_json"]

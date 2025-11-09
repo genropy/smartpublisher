@@ -2,7 +2,10 @@
 Publisher - Base class for publishing handlers with CLI/API exposure.
 """
 
+import sys
+import inspect
 from smartswitch import Switcher
+from .published import PublisherContext
 
 
 class Publisher:
@@ -55,23 +58,34 @@ class Publisher:
 
         Args:
             name: Name for the published instance
-            target_object: Object to publish (must inherit from PublishedClass)
+            target_object: Object to publish
             cli: Expose via CLI (default: True)
             openapi: Expose via OpenAPI/HTTP (default: True)
             cli_name: Custom CLI name (default: same as name)
             http_path: Custom HTTP path (default: /{name})
 
         Raises:
-            TypeError: If target_object is not publishable
+            TypeError: If target_object uses __slots__ but doesn't inherit from PublishedClass
         """
-        # Inject parent_api (REQUIRED)
+        # Create and inject PublisherContext
+        context = PublisherContext(target_object)
+        context.parent_api = self.parent_api
+
         try:
-            target_object.parent_api = self.parent_api
+            target_object.publisher = context
         except AttributeError:
             raise TypeError(
                 f"Cannot publish {type(target_object).__name__}: "
-                f"class is not publishable. It must inherit from PublishedClass"
+                f"class uses __slots__ but doesn't inherit from PublishedClass. "
+                f"Either inherit from PublishedClass or don't use __slots__."
             ) from None
+
+        # Link handler's API to parent_api for hierarchical structure
+        if hasattr(target_object.__class__, 'api'):
+            handler_api = target_object.__class__.api
+            # Set parent to establish parent-child relationship
+            # This automatically registers the child via SmartSwitch's parent.setter
+            handler_api.parent = self.parent_api
 
         # Save instance
         self.published_instances[name] = target_object
@@ -108,8 +122,120 @@ class Publisher:
             raise ValueError(f"Unknown mode: {mode}. Use 'cli' or 'http'")
 
     def _run_cli(self):
-        """Run CLI mode (to be implemented)."""
-        raise NotImplementedError("CLI mode not yet implemented")
+        """Run CLI mode."""
+        args = sys.argv[1:]
+
+        # General help
+        if not args or args[0] in ['--help', '-h', 'help']:
+            self._print_cli_help()
+            return
+
+        # Parse: handler_name [method_name] [method_args...]
+        handler_name = args[0]
+
+        # Check if handler exists
+        if handler_name not in self._cli_handlers:
+            print(f"Error: Unknown handler '{handler_name}'")
+            print(f"\nAvailable handlers: {', '.join(self._cli_handlers.keys())}")
+            print(f"Use --help to see full usage")
+            sys.exit(1)
+
+        # Handler help
+        if len(args) == 1 or args[1] in ['--help', '-h', 'help']:
+            self._print_handler_help(handler_name)
+            return
+
+        method_name = args[1]
+        method_args = args[2:]
+
+        # Get handler instance
+        handler = self._cli_handlers[handler_name]
+
+        # Get handler's Switcher
+        if not hasattr(handler.__class__, 'api'):
+            print(f"Error: Handler '{handler_name}' has no API (missing 'api' class variable)")
+            sys.exit(1)
+
+        switcher = handler.__class__.api
+
+        # Build full method name with prefix if needed
+        prefix = switcher.prefix if hasattr(switcher, 'prefix') else ''
+        full_method_name = f"{prefix}{method_name}"
+
+        # Check if method exists on handler
+        if not hasattr(handler, full_method_name):
+            print(f"Error: Method '{method_name}' not found")
+            print(f"Use 'smpub {sys.argv[0]} {handler_name} --help' to see available methods")
+            sys.exit(1)
+
+        # Call method directly
+        try:
+            method = getattr(handler, full_method_name)
+            result = method(*method_args)
+            if result is not None:
+                print(result)
+        except TypeError as e:
+            print(f"Error: {e}")
+            print(f"Use 'smpub {sys.argv[0]} {handler_name} --help' to see method signature")
+            sys.exit(1)
+        except Exception as e:
+            print(f"Error: {e}")
+            sys.exit(1)
+
+    def _print_cli_help(self):
+        """Print general CLI help."""
+        app_name = self.__class__.__name__
+        print(f"\n{app_name} - Publisher Application\n")
+        print("Usage:")
+        print(f"  {sys.argv[0]} <handler> <method> [args...]\n")
+        print("Available handlers:")
+        for name in sorted(self._cli_handlers.keys()):
+            handler = self._cli_handlers[name]
+            doc = handler.__class__.__doc__ or "No description"
+            doc = doc.strip().split('\n')[0]  # First line only
+            print(f"  {name:15} {doc}")
+        print(f"\nUse '{sys.argv[0]} <handler> --help' for handler-specific help")
+
+    def _print_handler_help(self, handler_name):
+        """Print help for a specific handler."""
+        handler = self._cli_handlers[handler_name]
+        handler_class = handler.__class__
+
+        print(f"\nHandler: {handler_name}")
+        if handler_class.__doc__:
+            print(f"Description: {handler_class.__doc__.strip()}\n")
+
+        # Get API schema from handler
+        if not hasattr(handler, 'publisher'):
+            print("No API methods available (handler not properly published)")
+            return
+
+        schema = handler.publisher.get_api_json()
+
+        if not schema['methods']:
+            print("No API methods available")
+            return
+
+        print("Available methods:")
+
+        for method_name in sorted(schema['methods'].keys()):
+            method_info = schema['methods'][method_name]
+
+            # Build parameter string
+            params = []
+            for param in method_info['parameters']:
+                if param['required']:
+                    params.append(f"<{param['name']}:{param['type']}>")
+                else:
+                    default_str = repr(param['default']) if param['default'] is not None else 'None'
+                    params.append(f"[{param['name']}:{param['type']}={default_str}]")
+
+            param_str = ' '.join(params)
+            description = method_info['description'] or "No description"
+
+            print(f"  {method_name:20} {param_str:30} {description}")
+
+        print(f"\nUsage: {sys.argv[0]} {handler_name} <method> [args...]")
 
     def _run_http(self, port: int):
         """Run HTTP mode (to be implemented)."""
