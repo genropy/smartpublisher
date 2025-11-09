@@ -27,6 +27,7 @@ classifiers = [
 
 dependencies = [
     "smartswitch>=0.1.0",
+    "pydantic>=2.0",
 ]
 
 [project.optional-dependencies]
@@ -36,6 +37,9 @@ dev = [
     "black>=23.0",
     "ruff>=0.1.0",
     "mypy>=1.0",
+]
+gum = [
+    "gum-python>=0.1.0",
 ]
 
 [project.urls]

@@ -4,8 +4,11 @@ Publisher - Base class for publishing handlers with CLI/API exposure.
 
 import sys
 import inspect
+from pydantic import ValidationError
 from smartswitch import Switcher
 from .published import PublisherContext
+from .validation import validate_args, format_validation_error
+from .interactive import prompt_for_parameters
 
 
 class Publisher:
@@ -146,7 +149,14 @@ class Publisher:
             return
 
         method_name = args[1]
-        method_args = args[2:]
+
+        # Check for --interactive flag
+        interactive = '--interactive' in args[2:] or '-i' in args[2:]
+        if interactive:
+            # Remove flag from args
+            method_args = [a for a in args[2:] if a not in ['--interactive', '-i']]
+        else:
+            method_args = args[2:]
 
         # Get handler instance
         handler = self._cli_handlers[handler_name]
@@ -168,16 +178,27 @@ class Publisher:
             print(f"Use 'smpub {sys.argv[0]} {handler_name} --help' to see available methods")
             sys.exit(1)
 
-        # Call method directly
+        # Get method
+        method = getattr(handler, full_method_name)
+
+        # Interactive mode: prompt for parameters
+        if interactive:
+            method_args = prompt_for_parameters(method)
+
+        # Validate and convert arguments using Pydantic
         try:
-            method = getattr(handler, full_method_name)
-            result = method(*method_args)
+            validated_params = validate_args(method, method_args)
+        except ValidationError as e:
+            print(f"Error: Invalid arguments")
+            print(format_validation_error(e))
+            print(f"\nUse 'smpub {sys.argv[0]} {handler_name} --help' to see method signature")
+            sys.exit(1)
+
+        # Call method with validated parameters
+        try:
+            result = method(**validated_params)
             if result is not None:
                 print(result)
-        except TypeError as e:
-            print(f"Error: {e}")
-            print(f"Use 'smpub {sys.argv[0]} {handler_name} --help' to see method signature")
-            sys.exit(1)
         except Exception as e:
             print(f"Error: {e}")
             sys.exit(1)
@@ -187,7 +208,10 @@ class Publisher:
         app_name = self.__class__.__name__
         print(f"\n{app_name} - Publisher Application\n")
         print("Usage:")
-        print(f"  {sys.argv[0]} <handler> <method> [args...]\n")
+        print(f"  {sys.argv[0]} <handler> <method> [args...]")
+        print(f"  {sys.argv[0]} <handler> <method> --interactive\n")
+        print("Options:")
+        print("  --interactive, -i  Prompt for parameters interactively (requires gum)\n")
         print("Available handlers:")
         for name in sorted(self._cli_handlers.keys()):
             handler = self._cli_handlers[name]
