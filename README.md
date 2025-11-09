@@ -14,9 +14,11 @@ Build CLI and API applications with automatic command dispatch using [SmartSwitc
 - 🎯 **Publisher Pattern** - Register handlers and expose them via CLI/API
 - 🔀 **SmartSwitch Integration** - Rule-based function dispatch
 - 💻 **CLI Generation** - Automatic command-line interface
+- ✅ **Pydantic Validation** - Automatic type validation and conversion
+- 🎨 **Interactive Mode** - Optional gum-based parameter prompting
 - 🌐 **API Exposure** - OpenAPI/HTTP endpoints (planned)
 - 📝 **Registry System** - Local/global app registration
-- 🎨 **Clean API** - Simple decorator-based handler definition
+- 🏗️ **Clean API** - Simple decorator-based handler definition
 
 ## Installation
 
@@ -169,6 +171,77 @@ smpub myapp users add john john@example.com
        └─ app name
 ```
 
+## Type Validation with Pydantic
+
+smpub automatically validates and converts CLI arguments using Pydantic:
+
+```python
+class Calculator(PublishedClass):
+    api = Switcher(prefix='calc_')
+
+    @api
+    def calc_add(self, a: int, b: int):
+        """Add two integers."""
+        return a + b
+
+    @api
+    def calc_multiply(self, x: float, y: float = 2.0):
+        """Multiply floats with optional multiplier."""
+        return x * y
+```
+
+**CLI Usage:**
+
+```bash
+# Automatic type conversion: "10" → int(10), "20" → int(20)
+smpub calc calculator add 10 20
+# Output: 30
+
+# Default values work automatically
+smpub calc calculator multiply 5.5
+# Output: 11.0 (5.5 * 2.0)
+
+# Validation errors are clear and helpful
+smpub calc calculator add ten twenty
+# Error: Invalid arguments
+# Validation errors:
+#   a: Input should be a valid integer, unable to parse string as an integer
+```
+
+**Supported Types:**
+- `str` - String values
+- `int` - Integer conversion with validation
+- `float` - Floating-point conversion
+- `bool` - Boolean parsing (`True`, `False`, `1`, `0`, `yes`, `no`)
+- Optional parameters with defaults
+
+## Interactive Mode with gum
+
+For a better user experience, use `--interactive` mode with [gum](https://github.com/charmbracelet/gum):
+
+```bash
+# Install gum first
+brew install gum  # macOS
+# See https://github.com/charmbracelet/gum#installation for other platforms
+
+# Use interactive mode - prompts for each parameter
+smpub myapp users add --interactive
+# Interactive prompts:
+# name (str): _
+# email (str): _
+
+# Short form also works
+smpub myapp calculator multiply -i
+# x (float): _
+# y (float) [default: 2.0]: _
+```
+
+**Benefits:**
+- User-friendly prompts with type hints
+- Shows default values for optional parameters
+- Special handling for boolean choices
+- Validates input before execution
+
 ## API Exposure Control
 
 Control which handlers are exposed where:
@@ -192,13 +265,90 @@ self.publish('metrics', handler, cli=False, openapi=False)
 smpub is part of the [Genro-Libs toolkit](https://github.com/softwell/genro-libs), a collection of general-purpose Python developer tools.
 
 **Related Projects:**
+
 - [smartswitch](https://github.com/genropy/smartswitch) - Rule-based function dispatch (used by smpub)
 - [gtext](https://github.com/genropy/gtext) - Text transformation tool
 
+## Architecture
+
+smpub follows a clean layered architecture:
+
+```
+┌─────────────────────────────────────────┐
+│         Your Application                │
+│     (inherits from Publisher)           │
+└─────────────┬───────────────────────────┘
+              │
+              │ initialize() / publish()
+              ▼
+┌─────────────────────────────────────────┐
+│         Publisher Layer                 │
+│  • parent_api (root Switcher)           │
+│  • CLI/OpenAPI exposure control         │
+│  • Argument validation (Pydantic)       │
+│  • Interactive mode support (gum)       │
+└─────────────┬───────────────────────────┘
+              │
+              │ publishes to
+              ▼
+┌─────────────────────────────────────────┐
+│      Handler Instances                  │
+│   (inherit from PublishedClass)         │
+│  • api = Switcher(prefix='...')         │
+│  • publisher: PublisherContext          │
+│  • Business logic methods               │
+└─────────────┬───────────────────────────┘
+              │
+              │ dispatches via
+              ▼
+┌─────────────────────────────────────────┐
+│        SmartSwitch Core                 │
+│  • Parent-child relationships           │
+│  • Method dispatch by name/rules        │
+│  • Hierarchical API navigation          │
+└─────────────────────────────────────────┘
+```
+
+### Key Components
+
+**Publisher**
+- Base class for applications
+- Manages handler registry
+- Controls CLI/API exposure
+- Integrates Pydantic validation
+- Supports interactive parameter input
+
+**PublishedClass**
+- Mixin for handler classes
+- Provides `publisher` slot for context
+- Optional (only needed with `__slots__`)
+
+**PublisherContext**
+- Injected into handlers via `publisher` attribute
+- Provides access to publisher functionality
+- API introspection via `get_api_json()`
+
+**Validation Layer** (Pydantic)
+- Automatic model generation from method signatures
+- Type conversion (string → int, float, bool, etc.)
+- Clear error messages
+
+**Interactive Layer** (gum)
+- Optional user-friendly prompts
+- Type-aware input handling
+- Default value display
+
 ## Requirements
+
+**Core Dependencies:**
 
 - Python 3.10+
 - smartswitch >= 0.1.0
+- pydantic >= 2.0
+
+**Optional Dependencies:**
+
+- [gum](https://github.com/charmbracelet/gum) - For interactive mode (install separately)
 
 ## Development
 
