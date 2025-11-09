@@ -213,10 +213,11 @@ class Publisher:
     def _print_cli_help(self):
         """Print general CLI help."""
         app_name = self.__class__.__name__
+        prog_name = os.path.basename(sys.argv[0])
         print(f"\n{app_name} - Publisher Application\n")
         print("Usage:")
-        print(f"  {sys.argv[0]} <handler> <method> [args...]")
-        print(f"  {sys.argv[0]} <handler> <method> --interactive\n")
+        print(f"  {prog_name} <handler> <method> [args...]")
+        print(f"  {prog_name} <handler> <method> --interactive\n")
         print("Options:")
         print("  --interactive, -i  Prompt for parameters interactively (requires gum)\n")
         print("Available handlers:")
@@ -225,12 +226,13 @@ class Publisher:
             doc = handler.__class__.__doc__ or "No description"
             doc = doc.strip().split("\n")[0]  # First line only
             print(f"  {name:15} {doc}")
-        print(f"\nUse '{sys.argv[0]} <handler> --help' for handler-specific help")
+        print(f"\nUse '{prog_name} <handler> --help' for handler-specific help")
 
     def _print_handler_help(self, handler_name):
         """Print help for a specific handler."""
         handler = self._cli_handlers[handler_name]
         handler_class = handler.__class__
+        prog_name = os.path.basename(sys.argv[0])
 
         print(f"\nHandler: {handler_name}")
         if handler_class.__doc__:
@@ -266,7 +268,7 @@ class Publisher:
 
             print(f"  {method_name:20} {param_str:30} {description}")
 
-        print(f"\nUsage: {sys.argv[0]} {handler_name} <method> [args...]")
+        print(f"\nUsage: {prog_name} {handler_name} <method> [args...]")
 
     def _run_http(self, port: int):
         """

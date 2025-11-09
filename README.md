@@ -40,47 +40,48 @@ pip install smpub[http]
 
 ## Quick Start
 
-### 1. Create a Handler
+### 1. Create Handlers
 
 ```python
 from typing import Literal
 from smpub import PublishedClass
 from smartswitch import Switcher
 
-class MailHandler(PublishedClass):
-    __slots__ = ('config', 'messages')
-    api = Switcher(prefix='mail_')
+class AccountHandler(PublishedClass):
+    __slots__ = ('accounts',)
+    api = Switcher(prefix='account_')
 
     def __init__(self):
-        self.config = {}
+        self.accounts = {}
+
+    @api
+    def account_add(self, name: str, smtp_host: str, smtp_port: int = 587,
+                    username: str = "", use_tls: bool = True,
+                    auth_method: Literal["plain", "login", "oauth2"] = "plain"):
+        """Add a new mail account."""
+        self.accounts[name] = {"smtp_host": smtp_host, "smtp_port": smtp_port,
+                              "username": username, "use_tls": use_tls}
+        return {"success": True, "account": self.accounts[name]}
+
+    @api
+    def account_list(self):
+        """List all accounts."""
+        return {"count": len(self.accounts), "accounts": list(self.accounts.values())}
+
+class MailHandler(PublishedClass):
+    __slots__ = ('account_handler', 'messages')
+    api = Switcher(prefix='mail_')
+
+    def __init__(self, account_handler):
+        self.account_handler = account_handler
         self.messages = []
 
     @api
-    def mail_configure_account(
-        self,
-        smtp_host: str,
-        smtp_port: int = 587,
-        username: str = "",
-        use_tls: bool = True,
-        auth_method: Literal["plain", "login", "oauth2"] = "plain"
-    ):
-        """Configure mail account settings."""
-        self.config = {"smtp_host": smtp_host, "smtp_port": smtp_port,
-                      "username": username, "use_tls": use_tls}
-        return {"success": True, "config": self.config}
-
-    @api
-    def mail_send(
-        self,
-        to: str,
-        subject: str,
-        body: str,
-        priority: Literal["low", "normal", "high"] = "normal",
-        html: bool = False
-    ):
+    def mail_send(self, account: str, to: str, subject: str, body: str,
+                  priority: Literal["low", "normal", "high"] = "normal",
+                  html: bool = False):
         """Send an email message."""
-        message = {"to": to, "subject": subject, "body": body,
-                  "priority": priority, "html": html}
+        message = {"account": account, "to": to, "subject": subject, "body": body}
         self.messages.append(message)
         return {"success": True, "message_id": len(self.messages)}
 ```
@@ -89,15 +90,16 @@ class MailHandler(PublishedClass):
 
 ```python
 from smpub import Publisher
-from .handlers import MailHandler
 
-class MailApp(Publisher):
+class MainClass(Publisher):
     def initialize(self):
-        self.mail = MailHandler()
+        self.account = AccountHandler()
+        self.mail = MailHandler(self.account)
+        self.publish('account', self.account, cli=True, openapi=True)
         self.publish('mail', self.mail, cli=True, openapi=True)
 
 if __name__ == "__main__":
-    app = MailApp()
+    app = MainClass()
     app.run()  # Auto-detect CLI or HTTP mode
 ```
 
@@ -108,11 +110,11 @@ if __name__ == "__main__":
 # Register your app
 smpub add mailapp --path ~/projects/mailapp
 
-# Configure mail account
-smpub mailapp mail configure_account smtp.gmail.com 587 user@example.com
+# Add mail account
+smpub mailapp account add work smtp.gmail.com 587 user@work.com
 
 # Send email
-smpub mailapp mail send recipient@example.com "Hello" "Message body" high false
+smpub mailapp mail send work recipient@example.com "Hello" "Message body"
 ```
 
 **HTTP Mode:**
