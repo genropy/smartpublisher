@@ -21,9 +21,16 @@ class MainClass(Publisher):
         self.beta_handler = L1_beta()
         self.gamma_handler = L1_gamma()
 
-        self.publish('alfa', self.alfa_handler)
-        self.publish('beta', self.beta_handler)
-        self.publish('gamma', self.gamma_handler)
+        # Publish handlers with custom CLI names and HTTP paths
+        self.publish('alfa', self.alfa_handler,
+                    cli_name='alfa',
+                    http_path='/api/alfa')
+        self.publish('beta', self.beta_handler,
+                    cli_name='beta',
+                    http_path='/api/beta')
+        self.publish('gamma', self.gamma_handler,
+                    cli_name='gamma',
+                    http_path='/api/gamma')
 
 
 if __name__ == "__main__":

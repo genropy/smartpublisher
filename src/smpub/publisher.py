@@ -19,7 +19,10 @@ class Publisher:
         class MyApp(Publisher):
             def initialize(self):
                 self.users = UserHandler()
-                self.publish('users', self.users, cli=True, openapi=True)
+                self.publish('users', self.users,
+                           cli=True, openapi=True,
+                           cli_name='users',
+                           http_path='/api/v1/users')
 
         if __name__ == "__main__":
             app = MyApp()
@@ -45,7 +48,8 @@ class Publisher:
 
         self.initialize()
 
-    def publish(self, name: str, target_object, cli: bool = True, openapi: bool = True):
+    def publish(self, name: str, target_object, cli: bool = True, openapi: bool = True,
+                cli_name: str | None = None, http_path: str | None = None):
         """
         Publish an object and register for CLI/OpenAPI exposure.
 
@@ -54,6 +58,8 @@ class Publisher:
             target_object: Object to publish (must inherit from PublishedClass)
             cli: Expose via CLI (default: True)
             openapi: Expose via OpenAPI/HTTP (default: True)
+            cli_name: Custom CLI name (default: same as name)
+            http_path: Custom HTTP path (default: /{name})
 
         Raises:
             TypeError: If target_object is not publishable
@@ -70,11 +76,13 @@ class Publisher:
         # Save instance
         self.published_instances[name] = target_object
 
-        # Register for exposure
+        # Register for exposure with custom names/paths
         if cli:
-            self._cli_handlers[name] = target_object
+            effective_cli_name = cli_name if cli_name is not None else name
+            self._cli_handlers[effective_cli_name] = target_object
         if openapi:
-            self._openapi_handlers[name] = target_object
+            effective_http_path = http_path if http_path is not None else f"/{name}"
+            self._openapi_handlers[effective_http_path] = target_object
 
     def run(self, mode: str | None = None, port: int = 8000):
         """
