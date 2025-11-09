@@ -3,8 +3,8 @@ Validation utilities using Pydantic.
 """
 
 import inspect
-from typing import Any, get_args, get_origin
-from pydantic import BaseModel, Field, ValidationError, create_model
+from typing import Any, get_origin
+from pydantic import BaseModel, ValidationError, create_model
 
 
 def create_pydantic_model(method) -> type[BaseModel]:
@@ -29,7 +29,7 @@ def create_pydantic_model(method) -> type[BaseModel]:
     fields = {}
 
     for param_name, param in sig.parameters.items():
-        if param_name == 'self':
+        if param_name == "self":
             continue
 
         # Get type annotation
@@ -74,7 +74,7 @@ def validate_args(method, args: list[str]) -> dict[str, Any]:
 
     # Get parameter names (excluding 'self')
     sig = inspect.signature(method)
-    param_names = [name for name in sig.parameters.keys() if name != 'self']
+    param_names = [name for name in sig.parameters.keys() if name != "self"]
 
     # Build kwargs dict from positional args
     kwargs = {}
@@ -109,10 +109,10 @@ def format_validation_error(error: ValidationError) -> str:
     """
     lines = ["Validation errors:"]
     for err in error.errors():
-        field = '.'.join(str(x) for x in err['loc'])
-        message = err['msg']
+        field = ".".join(str(x) for x in err["loc"])
+        message = err["msg"]
         lines.append(f"  {field}: {message}")
-    return '\n'.join(lines)
+    return "\n".join(lines)
 
 
 def get_parameter_info(method) -> list[dict[str, Any]]:
@@ -142,7 +142,7 @@ def get_parameter_info(method) -> list[dict[str, Any]]:
     params = []
 
     for param_name, param in sig.parameters.items():
-        if param_name == 'self':
+        if param_name == "self":
             continue
 
         # Get type annotation
@@ -154,19 +154,16 @@ def get_parameter_info(method) -> list[dict[str, Any]]:
             if origin is not None:
                 param_type = str(annotation)
             else:
-                param_type = (annotation.__name__
-                            if hasattr(annotation, '__name__')
-                            else str(annotation))
+                param_type = (
+                    annotation.__name__ if hasattr(annotation, "__name__") else str(annotation)
+                )
 
         # Check if required
         required = param.default == inspect.Parameter.empty
         default = None if required else param.default
 
-        params.append({
-            'name': param_name,
-            'type': param_type,
-            'required': required,
-            'default': default
-        })
+        params.append(
+            {"name": param_name, "type": param_type, "required": required, "default": default}
+        )
 
     return params

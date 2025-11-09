@@ -12,9 +12,7 @@ try:
     from fastapi.responses import JSONResponse
     from pydantic import ValidationError
 except ImportError:
-    raise ImportError(
-        "FastAPI is not installed. Install with: pip install smpub[http]"
-    )
+    raise ImportError("FastAPI is not installed. Install with: pip install smpub[http]")
 
 from ..validation import validate_args
 
@@ -36,29 +34,29 @@ def create_fastapi_app(publisher, **kwargs) -> FastAPI:
 
     # Create FastAPI app
     app = FastAPI(
-        title=kwargs.get('title', app_name),
-        description=kwargs.get('description', app_description),
-        version=kwargs.get('version', '0.1.0'),
-        **{k: v for k, v in kwargs.items() if k not in ['title', 'description', 'version']}
+        title=kwargs.get("title", app_name),
+        description=kwargs.get("description", app_description),
+        version=kwargs.get("version", "0.1.0"),
+        **{k: v for k, v in kwargs.items() if k not in ["title", "description", "version"]},
     )
 
     # Register routes for each handler
     for path, handler_info in publisher._openapi_handlers.items():
-        handler = handler_info['handler']
-        handler_name = handler_info['name']
+        handler = handler_info["handler"]
+        handler_name = handler_info["name"]
 
         # Get API schema
         api_schema = handler.publisher.get_api_json()
 
         # Create routes for each method
-        for method_name, method_info in api_schema['methods'].items():
+        for method_name, method_info in api_schema["methods"].items():
             _create_route(
                 app=app,
                 path=path,
                 method_name=method_name,
                 method_info=method_info,
                 handler=handler,
-                handler_name=handler_name
+                handler_name=handler_name,
             )
 
     return app
@@ -70,7 +68,7 @@ def _create_route(
     method_name: str,
     method_info: Dict[str, Any],
     handler: Any,
-    handler_name: str
+    handler_name: str,
 ):
     """
     Create a FastAPI route for a handler method.
@@ -98,13 +96,13 @@ def _create_route(
     method = getattr(handler, full_method_name)
 
     # Extract docstring for summary
-    docstring = method_info.get('docstring', '')
-    summary = docstring.split('\n')[0] if docstring else method_name
+    docstring = method_info.get("docstring", "")
+    summary = docstring.split("\n")[0] if docstring else method_name
 
     # Build parameter descriptions
     param_descriptions = {}
-    for param in method_info['parameters']:
-        param_descriptions[param['name']] = f"{param['name']} ({param['type']})"
+    for param in method_info["parameters"]:
+        param_descriptions[param["name"]] = f"{param['name']} ({param['type']})"
 
     # Create route handler function
     async def route_handler(body: Dict[str, Any] = Body(default={})):
@@ -112,18 +110,17 @@ def _create_route(
         try:
             # Convert body dict to list of string arguments for validation
             args = []
-            for param in method_info['parameters']:
-                param_name = param['name']
+            for param in method_info["parameters"]:
+                param_name = param["name"]
                 if param_name in body:
                     args.append(str(body[param_name]))
-                elif not param['required']:
+                elif not param["required"]:
                     # Use default value if not provided
-                    if param.get('default') is not None:
-                        args.append(str(param['default']))
+                    if param.get("default") is not None:
+                        args.append(str(param["default"]))
                 else:
                     raise HTTPException(
-                        status_code=422,
-                        detail=f"Missing required parameter: {param_name}"
+                        status_code=422, detail=f"Missing required parameter: {param_name}"
                     )
 
             # Validate using existing Pydantic validation
@@ -133,30 +130,15 @@ def _create_route(
             result = method(**validated_params)
 
             # Return result
-            return JSONResponse(
-                content={
-                    "status": "success",
-                    "result": result
-                }
-            )
+            return JSONResponse(content={"status": "success", "result": result})
 
         except ValidationError as e:
             raise HTTPException(
                 status_code=422,
-                detail={
-                    "status": "error",
-                    "message": "Validation error",
-                    "errors": e.errors()
-                }
+                detail={"status": "error", "message": "Validation error", "errors": e.errors()},
             )
         except Exception as e:
-            raise HTTPException(
-                status_code=500,
-                detail={
-                    "status": "error",
-                    "message": str(e)
-                }
-            )
+            raise HTTPException(status_code=500, detail={"status": "error", "message": str(e)})
 
     # Set function metadata for FastAPI
     route_handler.__name__ = f"{handler_name}_{method_name}"
@@ -168,5 +150,5 @@ def _create_route(
         summary=summary,
         tags=[handler_name],
         response_model=None,
-        name=route_handler.__name__
+        name=route_handler.__name__,
     )(route_handler)

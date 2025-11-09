@@ -3,7 +3,6 @@ Publisher - Base class for publishing handlers with CLI/API exposure.
 """
 
 import sys
-import inspect
 from pydantic import ValidationError
 from smartswitch import Switcher
 from .published import PublisherContext
@@ -47,15 +46,22 @@ class Publisher:
         self._openapi_handlers = {}
 
         # Subclass MUST implement initialize()
-        if not hasattr(self, 'initialize'):
+        if not hasattr(self, "initialize"):
             raise NotImplementedError(
                 f"{self.__class__.__name__} must implement initialize() method"
             )
 
         self.initialize()
 
-    def publish(self, name: str, target_object, cli: bool = True, openapi: bool = True,
-                cli_name: str | None = None, http_path: str | None = None):
+    def publish(
+        self,
+        name: str,
+        target_object,
+        cli: bool = True,
+        openapi: bool = True,
+        cli_name: str | None = None,
+        http_path: str | None = None,
+    ):
         """
         Publish an object and register for CLI/OpenAPI exposure.
 
@@ -84,7 +90,7 @@ class Publisher:
             ) from None
 
         # Link handler's API to parent_api for hierarchical structure
-        if hasattr(target_object.__class__, 'api'):
+        if hasattr(target_object.__class__, "api"):
             handler_api = target_object.__class__.api
             # Set parent to establish parent-child relationship
             # This automatically registers the child via SmartSwitch's parent.setter
@@ -99,10 +105,7 @@ class Publisher:
             self._cli_handlers[effective_cli_name] = target_object
         if openapi:
             effective_http_path = http_path if http_path is not None else f"/{name}"
-            self._openapi_handlers[effective_http_path] = {
-                'handler': target_object,
-                'name': name
-            }
+            self._openapi_handlers[effective_http_path] = {"handler": target_object, "name": name}
 
     def run(self, mode: str | None = None, port: int = 8000):
         """
@@ -115,14 +118,15 @@ class Publisher:
         if mode is None:
             # Auto-detect
             import sys
-            if len(sys.argv) > 1:
-                mode = 'cli'
-            else:
-                mode = 'http'
 
-        if mode == 'cli':
+            if len(sys.argv) > 1:
+                mode = "cli"
+            else:
+                mode = "http"
+
+        if mode == "cli":
             self._run_cli()
-        elif mode == 'http':
+        elif mode == "http":
             self._run_http(port)
         else:
             raise ValueError(f"Unknown mode: {mode}. Use 'cli' or 'http'")
@@ -132,7 +136,7 @@ class Publisher:
         args = sys.argv[1:]
 
         # General help
-        if not args or args[0] in ['--help', '-h', 'help']:
+        if not args or args[0] in ["--help", "-h", "help"]:
             self._print_cli_help()
             return
 
@@ -143,21 +147,21 @@ class Publisher:
         if handler_name not in self._cli_handlers:
             print(f"Error: Unknown handler '{handler_name}'")
             print(f"\nAvailable handlers: {', '.join(self._cli_handlers.keys())}")
-            print(f"Use --help to see full usage")
+            print("Use --help to see full usage")
             sys.exit(1)
 
         # Handler help
-        if len(args) == 1 or args[1] in ['--help', '-h', 'help']:
+        if len(args) == 1 or args[1] in ["--help", "-h", "help"]:
             self._print_handler_help(handler_name)
             return
 
         method_name = args[1]
 
         # Check for --interactive flag
-        interactive = '--interactive' in args[2:] or '-i' in args[2:]
+        interactive = "--interactive" in args[2:] or "-i" in args[2:]
         if interactive:
             # Remove flag from args
-            method_args = [a for a in args[2:] if a not in ['--interactive', '-i']]
+            method_args = [a for a in args[2:] if a not in ["--interactive", "-i"]]
         else:
             method_args = args[2:]
 
@@ -165,14 +169,14 @@ class Publisher:
         handler = self._cli_handlers[handler_name]
 
         # Get handler's Switcher
-        if not hasattr(handler.__class__, 'api'):
+        if not hasattr(handler.__class__, "api"):
             print(f"Error: Handler '{handler_name}' has no API (missing 'api' class variable)")
             sys.exit(1)
 
         switcher = handler.__class__.api
 
         # Build full method name with prefix if needed
-        prefix = switcher.prefix if hasattr(switcher, 'prefix') else ''
+        prefix = switcher.prefix if hasattr(switcher, "prefix") else ""
         full_method_name = f"{prefix}{method_name}"
 
         # Check if method exists on handler
@@ -192,7 +196,7 @@ class Publisher:
         try:
             validated_params = validate_args(method, method_args)
         except ValidationError as e:
-            print(f"Error: Invalid arguments")
+            print("Error: Invalid arguments")
             print(format_validation_error(e))
             print(f"\nUse 'smpub {sys.argv[0]} {handler_name} --help' to see method signature")
             sys.exit(1)
@@ -219,7 +223,7 @@ class Publisher:
         for name in sorted(self._cli_handlers.keys()):
             handler = self._cli_handlers[name]
             doc = handler.__class__.__doc__ or "No description"
-            doc = doc.strip().split('\n')[0]  # First line only
+            doc = doc.strip().split("\n")[0]  # First line only
             print(f"  {name:15} {doc}")
         print(f"\nUse '{sys.argv[0]} <handler> --help' for handler-specific help")
 
@@ -233,32 +237,32 @@ class Publisher:
             print(f"Description: {handler_class.__doc__.strip()}\n")
 
         # Get API schema from handler
-        if not hasattr(handler, 'publisher'):
+        if not hasattr(handler, "publisher"):
             print("No API methods available (handler not properly published)")
             return
 
         schema = handler.publisher.get_api_json()
 
-        if not schema['methods']:
+        if not schema["methods"]:
             print("No API methods available")
             return
 
         print("Available methods:")
 
-        for method_name in sorted(schema['methods'].keys()):
-            method_info = schema['methods'][method_name]
+        for method_name in sorted(schema["methods"].keys()):
+            method_info = schema["methods"][method_name]
 
             # Build parameter string
             params = []
-            for param in method_info['parameters']:
-                if param['required']:
+            for param in method_info["parameters"]:
+                if param["required"]:
                     params.append(f"<{param['name']}:{param['type']}>")
                 else:
-                    default_str = repr(param['default']) if param['default'] is not None else 'None'
+                    default_str = repr(param["default"]) if param["default"] is not None else "None"
                     params.append(f"[{param['name']}:{param['type']}={default_str}]")
 
-            param_str = ' '.join(params)
-            description = method_info['description'] or "No description"
+            param_str = " ".join(params)
+            description = method_info["description"] or "No description"
 
             print(f"  {method_name:20} {param_str:30} {description}")
 
@@ -290,7 +294,7 @@ class Publisher:
             self,
             title=f"{self.__class__.__name__} API",
             description=self.__class__.__doc__ or f"{self.__class__.__name__} API",
-            version="0.1.0"
+            version="0.1.0",
         )
 
         # Print startup info
@@ -300,7 +304,7 @@ class Publisher:
         print(f"OpenAPI schema at http://localhost:{port}/openapi.json")
         print("\nPublished handlers:")
         for path, handler_info in self._openapi_handlers.items():
-            handler_name = handler_info['name']
+            handler_name = handler_info["name"]
             print(f"  {handler_name:15} -> {path}")
         print("\nPress Ctrl+C to stop\n")
 

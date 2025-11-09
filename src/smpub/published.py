@@ -3,7 +3,6 @@ PublishedClass - Mixin and utilities for publishable handlers.
 """
 
 import inspect
-from typing import Any
 
 
 def discover_api_json(target, recursive=False) -> dict:
@@ -42,18 +41,18 @@ def discover_api_json(target, recursive=False) -> dict:
     result = {
         "class": target_class.__name__,
         "description": (target_class.__doc__ or "").strip(),
-        "methods": {}
+        "methods": {},
     }
 
     # Check if class has a Switcher API
-    if not hasattr(target_class, 'api'):
+    if not hasattr(target_class, "api"):
         return result
 
     switcher = target_class.api
-    prefix = switcher.prefix if hasattr(switcher, 'prefix') else ''
+    prefix = switcher.prefix if hasattr(switcher, "prefix") else ""
 
     # Get all registered methods
-    entries = switcher.entries() if hasattr(switcher, 'entries') else []
+    entries = switcher.entries() if hasattr(switcher, "entries") else []
 
     for method_key in entries:
         # method_key is the display name (without prefix)
@@ -69,34 +68,38 @@ def discover_api_json(target, recursive=False) -> dict:
 
         # Extract method info
         method_info = {
-            "description": (method.__doc__ or "").strip().split('\n')[0],
-            "parameters": []
+            "description": (method.__doc__ or "").strip().split("\n")[0],
+            "parameters": [],
         }
 
         # Get signature
         try:
             sig = inspect.signature(method)
             for param_name, param in sig.parameters.items():
-                if param_name == 'self':
+                if param_name == "self":
                     continue
 
                 # Extract type annotation
                 param_type = "Any"
                 if param.annotation != inspect.Parameter.empty:
-                    param_type = (param.annotation.__name__
-                                if hasattr(param.annotation, '__name__')
-                                else str(param.annotation))
+                    param_type = (
+                        param.annotation.__name__
+                        if hasattr(param.annotation, "__name__")
+                        else str(param.annotation)
+                    )
 
                 # Check if required
                 required = param.default == inspect.Parameter.empty
                 default = None if required else param.default
 
-                method_info["parameters"].append({
-                    "name": param_name,
-                    "type": param_type,
-                    "required": required,
-                    "default": default
-                })
+                method_info["parameters"].append(
+                    {
+                        "name": param_name,
+                        "type": param_type,
+                        "required": required,
+                        "default": default,
+                    }
+                )
         except Exception:
             # If signature extraction fails, just skip parameters
             pass
@@ -114,7 +117,8 @@ class PublisherContext:
     and provides access to publisher features without polluting the
     handler's namespace.
     """
-    __slots__ = ('parent_api', '_handler')
+
+    __slots__ = ("parent_api", "_handler")
 
     def __init__(self, handler):
         """
@@ -180,4 +184,5 @@ class PublishedClass:
             def my_add(self, key: str):
                 self.data[key] = None
     """
-    __slots__ = ('publisher',)
+
+    __slots__ = ("publisher",)

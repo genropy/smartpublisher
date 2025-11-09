@@ -33,7 +33,7 @@ def save_registry(registry, global_mode=False):
     # Create parent directory if needed
     registry_path.parent.mkdir(parents=True, exist_ok=True)
 
-    with open(registry_path, 'w') as f:
+    with open(registry_path, "w") as f:
         json.dump(registry, f, indent=2)
 
 
@@ -48,8 +48,7 @@ def discover_publisher_class(path):
         return None, None
 
     # Find all Python files (excluding __pycache__, etc.)
-    py_files = [f for f in path.glob("*.py")
-                if not f.name.startswith("_")]
+    py_files = [f for f in path.glob("*.py") if not f.name.startswith("_")]
 
     for py_file in py_files:
         # Read file and look for "class X(Publisher):"
@@ -57,7 +56,8 @@ def discover_publisher_class(path):
             content = py_file.read_text()
             # Simple pattern matching for class definition
             import re
-            pattern = r'class\s+(\w+)\s*\([^)]*Publisher[^)]*\)\s*:'
+
+            pattern = r"class\s+(\w+)\s*\([^)]*Publisher[^)]*\)\s*:"
             matches = re.findall(pattern, content)
             if matches:
                 # Found a Publisher subclass
@@ -91,11 +91,7 @@ def add_app(name, path=None, global_mode=False):
         print("Make sure your app has a class that inherits from Publisher")
         sys.exit(1)
 
-    registry["apps"][name] = {
-        "path": str(path),
-        "module": module_name,
-        "class": class_name
-    }
+    registry["apps"][name] = {"path": str(path), "module": module_name, "class": class_name}
 
     save_registry(registry, global_mode)
     mode_str = "globally" if global_mode else "locally"
@@ -110,7 +106,7 @@ def list_apps(global_mode=False):
     if not registry["apps"]:
         mode_str = "globally" if global_mode else "in this directory"
         print(f"No apps registered {mode_str}.")
-        print(f"Use 'smpub add <name> --path <path>' to add one.")
+        print("Use 'smpub add <name> --path <path>' to add one.")
         return
 
     mode_str = "Global" if global_mode else "Local"
@@ -165,7 +161,8 @@ def load_app(name, global_mode=False):
 
 def print_help():
     """Print CLI help."""
-    print("""
+    print(
+        """
 smpub - Smart Publisher CLI
 
 Management:
@@ -200,7 +197,8 @@ Options:
     --path <path>               Path to app directory (default: current directory)
     --global                    Use global registry (~/.smartlibs/publisher/)
                                 instead of local (./.published)
-    """)
+    """
+    )
 
 
 def main():
@@ -210,7 +208,7 @@ def main():
         return
 
     command = sys.argv[1]
-    global_mode = '--global' in sys.argv
+    global_mode = "--global" in sys.argv
 
     # Management commands
     if command == "add":
@@ -221,8 +219,8 @@ def main():
 
         # Check if --path is specified
         path = None
-        if '--path' in sys.argv:
-            path_idx = sys.argv.index('--path') + 1
+        if "--path" in sys.argv:
+            path_idx = sys.argv.index("--path") + 1
             if path_idx >= len(sys.argv):
                 print("Error: --path requires a value")
                 sys.exit(1)
@@ -254,12 +252,12 @@ def main():
     # Remove 'smpub', app_name, and --global from argv
     new_argv = [sys.argv[0]]
     for arg in sys.argv[2:]:
-        if arg != '--global':
+        if arg != "--global":
             new_argv.append(arg)
     sys.argv = new_argv
 
     # Run in CLI mode
-    app.run(mode='cli')
+    app.run(mode="cli")
 
 
 if __name__ == "__main__":

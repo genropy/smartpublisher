@@ -16,10 +16,9 @@ def is_gum_available() -> bool:
         True if gum is installed and in PATH
     """
     try:
-        subprocess.run(['gum', '--version'],
-                      stdout=subprocess.PIPE,
-                      stderr=subprocess.PIPE,
-                      check=True)
+        subprocess.run(
+            ["gum", "--version"], stdout=subprocess.PIPE, stderr=subprocess.PIPE, check=True
+        )
         return True
     except (FileNotFoundError, subprocess.CalledProcessError):
         return False
@@ -39,10 +38,10 @@ def prompt_for_parameter(param_info: dict[str, Any]) -> str:
         >>> param_info = {'name': 'age', 'type': 'int', 'required': False, 'default': 25}
         >>> value = prompt_for_parameter(param_info)
     """
-    name = param_info['name']
-    param_type = param_info['type']
-    required = param_info['required']
-    default = param_info['default']
+    name = param_info["name"]
+    param_type = param_info["type"]
+    required = param_info["required"]
+    default = param_info["default"]
 
     # Build prompt text
     prompt = f"{name} ({param_type})"
@@ -51,15 +50,12 @@ def prompt_for_parameter(param_info: dict[str, Any]) -> str:
     prompt += ": "
 
     # Use gum input
-    cmd = ['gum', 'input', '--placeholder', prompt]
+    cmd = ["gum", "input", "--placeholder", prompt]
     if not required and default is not None:
-        cmd.extend(['--value', str(default)])
+        cmd.extend(["--value", str(default)])
 
     try:
-        result = subprocess.run(cmd,
-                              capture_output=True,
-                              text=True,
-                              check=True)
+        result = subprocess.run(cmd, capture_output=True, text=True, check=True)
         value = result.stdout.strip()
 
         # If empty and not required, use default
@@ -87,19 +83,13 @@ def prompt_for_boolean(param_info: dict[str, Any]) -> str:
         >>> param_info = {'name': 'enabled', 'type': 'bool', 'required': False, 'default': True}
         >>> value = prompt_for_boolean(param_info)
     """
-    name = param_info['name']
-    default = param_info.get('default', True)
-
-    prompt = f"{name} (bool):"
+    default = param_info.get("default", True)
 
     # Use gum choose for boolean
-    cmd = ['gum', 'choose', 'True', 'False']
+    cmd = ["gum", "choose", "True", "False"]
 
     try:
-        result = subprocess.run(cmd,
-                              capture_output=True,
-                              text=True,
-                              check=True)
+        result = subprocess.run(cmd, capture_output=True, text=True, check=True)
         value = result.stdout.strip()
         return value
     except subprocess.CalledProcessError:
@@ -144,7 +134,7 @@ def prompt_for_parameters(method) -> list[str]:
     values = []
     for param_info in params:
         # Handle boolean parameters specially
-        if param_info['type'] == 'bool':
+        if param_info["type"] == "bool":
             value = prompt_for_boolean(param_info)
         else:
             value = prompt_for_parameter(param_info)
