@@ -5,6 +5,9 @@
 [![PyPI](https://img.shields.io/pypi/v/smpub)](https://pypi.org/project/smpub/)
 [![Python](https://img.shields.io/pypi/pyversions/smpub)](https://pypi.org/project/smpub/)
 [![License](https://img.shields.io/pypi/l/smpub)](https://github.com/genropy/smpub/blob/main/LICENSE)
+[![Tests](https://github.com/genropy/smpub/workflows/Tests/badge.svg)](https://github.com/genropy/smpub/actions)
+[![codecov](https://codecov.io/gh/genropy/smpub/branch/main/graph/badge.svg)](https://codecov.io/gh/genropy/smpub)
+[![Documentation](https://readthedocs.org/projects/smpub/badge/?version=latest)](https://smpub.readthedocs.io)
 [![Part of Genro-Libs](https://img.shields.io/badge/Genro--Libs-toolkit-blue)](https://github.com/softwell/genro-libs)
 
 Build CLI and API applications with automatic command dispatch using [SmartSwitch](https://github.com/genropy/smartswitch).

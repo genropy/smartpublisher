@@ -38,10 +38,28 @@ dev = [
     "ruff>=0.1.0",
     "mypy>=1.0",
 ]
+docs = [
+    "mkdocs>=1.5.0",
+    "mkdocs-material>=9.4.0",
+    "mkdocstrings[python]>=0.24.0",
+]
 gum = [
     "gum-python>=0.1.0",
 ]
 http = [
+    "fastapi>=0.104.0",
+    "uvicorn[standard]>=0.24.0",
+]
+all = [
+    "pytest>=7.0",
+    "pytest-cov>=4.0",
+    "black>=23.0",
+    "ruff>=0.1.0",
+    "mypy>=1.0",
+    "mkdocs>=1.5.0",
+    "mkdocs-material>=9.4.0",
+    "mkdocstrings[python]>=0.24.0",
+    "gum-python>=0.1.0",
     "fastapi>=0.104.0",
     "uvicorn[standard]>=0.24.0",
 ]
@@ -63,7 +81,7 @@ testpaths = ["tests"]
 python_files = "test_*.py"
 python_classes = "Test*"
 python_functions = "test_*"
-addopts = "-v --cov=smpub --cov-report=term-missing --cov-report=html"
+addopts = "-v --cov=smpub --cov-report=term-missing --cov-report=html --cov-report=xml"
 
 [tool.black]
 line-length = 100

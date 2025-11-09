@@ -1,0 +1,124 @@
+# smpub - Smart Publisher
+
+**CLI/API framework based on SmartSwitch**
+
+[![PyPI](https://img.shields.io/pypi/v/smpub)](https://pypi.org/project/smpub/)
+[![Python](https://img.shields.io/pypi/pyversions/smpub)](https://pypi.org/project/smpub/)
+[![License](https://img.shields.io/pypi/l/smpub)](https://github.com/genropy/smpub/blob/main/LICENSE)
+[![codecov](https://codecov.io/gh/genropy/smpub/branch/main/graph/badge.svg)](https://codecov.io/gh/genropy/smpub)
+[![Documentation](https://readthedocs.org/projects/smpub/badge/?version=latest)](https://smpub.readthedocs.io)
+[![Part of Genro-Libs](https://img.shields.io/badge/Genro--Libs-toolkit-blue)](https://github.com/softwell/genro-libs)
+
+Build CLI and API applications with automatic command dispatch using [SmartSwitch](https://github.com/genropy/smartswitch).
+
+## Features
+
+- 🎯 **Publisher Pattern** - Register handlers and expose them via CLI/API
+- 🔀 **SmartSwitch Integration** - Rule-based function dispatch
+- 💻 **CLI Generation** - Automatic command-line interface
+- ✅ **Pydantic Validation** - Automatic type validation and conversion
+- 🎨 **Interactive Mode** - Optional gum-based parameter prompting
+- 🌐 **HTTP/API Mode** - FastAPI integration with Swagger UI
+- 📝 **Registry System** - Local/global app registration
+- 🏗️ **Clean API** - Simple decorator-based handler definition
+
+## Quick Start
+
+### Installation
+
+```bash
+pip install smpub
+
+# With HTTP support
+pip install smpub[http]
+
+# With interactive mode (requires gum CLI tool)
+pip install smpub[gum]
+```
+
+### Basic Example
+
+```python
+from smpub import Publisher, PublishedClass
+from smartswitch import Switcher
+
+class UserHandler(PublishedClass):
+    __slots__ = ('users',)
+    api = Switcher(prefix='user_')
+
+    def __init__(self):
+        self.users = {}
+
+    @api
+    def user_add(self, name: str, email: str) -> str:
+        """Add a new user."""
+        self.users[name] = email
+        return f"User {name} added"
+
+    @api
+    def user_list(self) -> list:
+        """List all users."""
+        return list(self.users.keys())
+
+class MainClass(Publisher):
+    def initialize(self):
+        self.users = UserHandler()
+        self.publish('users', self.users, cli=True, openapi=True)
+
+if __name__ == "__main__":
+    app = MainClass()
+    app.run()  # Auto-detect CLI or HTTP mode
+```
+
+### CLI Mode
+
+```bash
+# Run commands
+python myapp.py users add john john@example.com
+python myapp.py users list
+
+# Interactive mode
+python myapp.py users add --interactive
+```
+
+### HTTP Mode
+
+```bash
+# Start HTTP server
+python myapp.py
+
+# Access Swagger UI
+open http://localhost:8000/docs
+```
+
+## Documentation
+
+- [Getting Started](user-guide/installation.md) - Installation and setup
+- [Publishing Guide](user-guide/publishing-guide.md) - How to expose your library
+- [User Guide](guide/publisher.md) - Complete usage guide
+- [Examples](examples/index.md) - Working examples
+- [API Reference](api/publisher.md) - API documentation
+
+## Part of Genro-Libs Family
+
+smpub is part of the [Genro-Libs toolkit](https://github.com/softwell/genro-libs), a collection of general-purpose Python developer tools.
+
+**Related Projects:**
+
+- [smartswitch](https://github.com/genropy/smartswitch) - Rule-based function dispatch (used by smpub)
+- [gtext](https://github.com/genropy/gtext) - Text transformation tool
+
+## License
+
+MIT License - see [LICENSE](https://github.com/genropy/smpub/blob/main/LICENSE) file for details.
+
+## Author
+
+**Genropy Team** - [info@genropy.org](mailto:info@genropy.org)
+
+## Links
+
+- [GitHub Repository](https://github.com/genropy/smpub)
+- [Documentation](https://smpub.readthedocs.io)
+- [PyPI Package](https://pypi.org/project/smpub/)
+- [Issue Tracker](https://github.com/genropy/smpub/issues)

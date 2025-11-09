@@ -1,0 +1,105 @@
+site_name: smpub
+site_description: Smart Publisher - CLI/API framework based on SmartSwitch
+site_url: https://smpub.readthedocs.io
+repo_url: https://github.com/genropy/smpub
+repo_name: genropy/smpub
+
+theme:
+  name: material
+  logo: assets/logo.png
+  favicon: assets/logo.png
+  palette:
+    - scheme: default
+      primary: deep-purple
+      accent: deep-purple
+      toggle:
+        icon: material/brightness-7
+        name: Switch to dark mode
+    - scheme: slate
+      primary: deep-purple
+      accent: deep-purple
+      toggle:
+        icon: material/brightness-4
+        name: Switch to light mode
+  features:
+    - navigation.instant
+    - navigation.tracking
+    - navigation.sections
+    - navigation.expand
+    - navigation.top
+    - toc.integrate
+    - search.suggest
+    - search.highlight
+    - content.code.copy
+
+markdown_extensions:
+  - pymdownx.highlight:
+      anchor_linenums: true
+  - pymdownx.inlinehilite
+  - pymdownx.snippets
+  - pymdownx.superfences:
+      custom_fences:
+        - name: mermaid
+          class: mermaid
+          format: !!python/name:pymdownx.superfences.fence_code_format
+  - admonition
+  - pymdownx.details
+  - pymdownx.tabbed:
+      alternate_style: true
+  - tables
+  - attr_list
+  - md_in_html
+
+nav:
+  - Home: index.md
+  - Getting Started:
+    - Installation: user-guide/installation.md
+    - Quick Start: user-guide/quickstart.md
+    - Publishing Guide: user-guide/publishing-guide.md
+  - User Guide:
+    - Publisher Class: guide/publisher.md
+    - Handler Classes: guide/handlers.md
+    - CLI Mode: guide/cli-mode.md
+    - HTTP Mode: guide/http-mode.md
+    - Validation: guide/validation.md
+    - Interactive Mode: guide/interactive.md
+    - Best Practices: guide/best-practices.md
+  - Examples:
+    - Overview: examples/index.md
+    - Calculator App: examples/calculator.md
+  - API Reference:
+    - Publisher: api/publisher.md
+    - PublishedClass: api/published.md
+    - Validation: api/validation.md
+    - Interactive: api/interactive.md
+    - HTTP: api/http.md
+  - Advanced:
+    - Architecture: appendix/architecture.md
+    - Integration with SmartSwitch: appendix/smartswitch.md
+
+plugins:
+  - search
+  - mkdocstrings:
+      handlers:
+        python:
+          options:
+            docstring_style: google
+            show_source: true
+            show_root_heading: true
+            show_root_full_path: false
+            show_signature_annotations: true
+            separate_signature: true
+            merge_init_into_class: true
+            docstring_section_style: spacy
+          inventories:
+            - https://docs.python.org/3/objects.inv
+      enable_inventory: true
+validation:
+  omitted_files: warn
+  absolute_links: warn
+  unrecognized_links: warn
+
+extra:
+  social:
+    - icon: fontawesome/brands/github
+      link: https://github.com/genropy/smpub
