@@ -6,41 +6,21 @@ smpub follows a clean layered architecture that separates concerns and provides 
 
 ## Layered Architecture
 
-```
-┌─────────────────────────────────────────┐
-│         Your Application                │
-│     (inherits from Publisher)           │
-└─────────────┬───────────────────────────┘
-              │
-              │ initialize() / publish()
-              ▼
-┌─────────────────────────────────────────┐
-│         Publisher Layer                 │
-│  • parent_api (root Switcher)           │
-│  • CLI/OpenAPI exposure control         │
-│  • Argument validation (Pydantic)       │
-│  • Interactive mode support (gum)       │
-│  • HTTP server (FastAPI)                │
-└─────────────┬───────────────────────────┘
-              │
-              │ publishes to
-              ▼
-┌─────────────────────────────────────────┐
-│      Handler Instances                  │
-│   (inherit from PublishedClass)         │
-│  • api = Switcher(prefix='...')         │
-│  • publisher: PublisherContext          │
-│  • Business logic methods               │
-└─────────────┬───────────────────────────┘
-              │
-              │ dispatches via
-              ▼
-┌─────────────────────────────────────────┐
-│        SmartSwitch Core                 │
-│  • Parent-child relationships           │
-│  • Method dispatch by name/rules        │
-│  • Hierarchical API navigation          │
-└─────────────────────────────────────────┘
+```mermaid
+graph TB
+    App["Your Application<br/>(inherits from Publisher)"]
+    Publisher["Publisher Layer<br/>• parent_api (root Switcher)<br/>• CLI/OpenAPI exposure control<br/>• Argument validation (Pydantic)<br/>• Interactive mode support (gum)<br/>• HTTP server (FastAPI)"]
+    Handlers["Handler Instances<br/>(inherit from PublishedClass)<br/>• api = Switcher(prefix='...')<br/>• publisher: PublisherContext<br/>• Business logic methods"]
+    SmartSwitch["SmartSwitch Core<br/>• Parent-child relationships<br/>• Method dispatch by name/rules<br/>• Hierarchical API navigation"]
+
+    App -->|"initialize() / publish()"| Publisher
+    Publisher -->|"publishes to"| Handlers
+    Handlers -->|"dispatches via"| SmartSwitch
+
+    style App fill:#e1f5ff
+    style Publisher fill:#fff4e1
+    style Handlers fill:#e8f5e9
+    style SmartSwitch fill:#f3e5f5
 ```
 
 ## Core Components
@@ -104,34 +84,36 @@ def my_method(self):
 
 ### CLI Mode Flow
 
-```
-Command Line
-    │
-    ├─ Parse: handler method args
-    │
-    ├─ Interactive? → gum prompts → string args
-    │
-    ├─ Pydantic validation → typed params
-    │
-    ├─ SmartSwitch dispatch → method
-    │
-    └─ Print result
+```mermaid
+graph LR
+    CLI[Command Line] --> Parse[Parse: handler method args]
+    Parse --> Interactive{Interactive?}
+    Interactive -->|Yes| Gum[gum prompts]
+    Interactive -->|No| Pydantic[Pydantic validation]
+    Gum --> Pydantic
+    Pydantic --> Dispatch[SmartSwitch dispatch]
+    Dispatch --> Method[Execute method]
+    Method --> Result[Print result]
+
+    style CLI fill:#e3f2fd
+    style Method fill:#c8e6c9
+    style Result fill:#fff9c4
 ```
 
 ### HTTP Mode Flow
 
-```
-HTTP Request
-    │
-    ├─ FastAPI routing → handler method
-    │
-    ├─ JSON body → string args
-    │
-    ├─ Pydantic validation → typed params
-    │
-    ├─ SmartSwitch dispatch → method
-    │
-    └─ JSON response: {"status": "success", "result": ...}
+```mermaid
+graph LR
+    HTTP[HTTP Request] --> FastAPI[FastAPI routing]
+    FastAPI --> JSON[Parse JSON body]
+    JSON --> Pydantic[Pydantic validation]
+    Pydantic --> Dispatch[SmartSwitch dispatch]
+    Dispatch --> Method[Execute method]
+    Method --> Response["JSON response<br/>{status: success, result: ...}"]
+
+    style HTTP fill:#e3f2fd
+    style Method fill:#c8e6c9
+    style Response fill:#fff9c4
 ```
 
 ## Validation Layer
@@ -173,16 +155,25 @@ Optional layer for user-friendly parameter input:
 4. **Validation**: Validate before execution
 
 **Flow**:
-```
---interactive flag
-    │
-    ├─ Check gum available
-    │
-    ├─ For each parameter:
-    │   ├─ bool? → gum choose True/False
-    │   └─ other → gum input with prompt
-    │
-    └─ Return string args → Pydantic validation
+
+```mermaid
+graph TB
+    Start[--interactive flag] --> Check{gum available?}
+    Check -->|No| Error[Error: gum not installed]
+    Check -->|Yes| Loop[For each parameter]
+    Loop --> ParamType{Parameter type?}
+    ParamType -->|bool| Choose[gum choose True/False]
+    ParamType -->|other| Input[gum input with prompt]
+    Choose --> Collect[Collect string args]
+    Input --> Collect
+    Collect --> More{More params?}
+    More -->|Yes| Loop
+    More -->|No| Validate[Pydantic validation]
+    Validate --> Execute[Execute method]
+
+    style Start fill:#e3f2fd
+    style Error fill:#ffcdd2
+    style Execute fill:#c8e6c9
 ```
 
 ## HTTP Layer
@@ -198,18 +189,22 @@ HTTP mode creates a FastAPI app dynamically:
 5. **Swagger UI**: Interactive documentation at `/docs`
 
 **Endpoint Pattern**:
-```
-POST /{handler_name}/{method_name}
 
-Body: {
-    "param1": value1,
-    "param2": value2
-}
+```mermaid
+sequenceDiagram
+    participant Client
+    participant FastAPI
+    participant Handler
+    participant Method
 
-Response: {
-    "status": "success",
-    "result": <method_return_value>
-}
+    Client->>FastAPI: POST /{handler}/{method}
+    Note over Client,FastAPI: Body: {"param1": value1, "param2": value2}
+    FastAPI->>FastAPI: Pydantic validation
+    FastAPI->>Handler: Dispatch to handler
+    Handler->>Method: Call method(param1, param2)
+    Method-->>Handler: Return result
+    Handler-->>FastAPI: result
+    FastAPI-->>Client: {"status": "success", "result": ...}
 ```
 
 ## Registry System

@@ -1,14 +1,21 @@
+<div align="center">
+
+<img src="docs/assets/logo.png" alt="smpub Logo" width="200"/>
+
 # smpub - Smart Publisher
 
 **CLI/API framework based on SmartSwitch**
 
-[![Python 3.10+](https://img.shields.io/badge/python-3.10+-blue.svg)](https://www.python.org/downloads/)
-[![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://github.com/genropy/smpub/blob/main/LICENSE)
+</div>
+
+[![PyPI version](https://img.shields.io/pypi/v/smpub.svg)](https://pypi.org/project/smpub/)
 [![Tests](https://github.com/genropy/smpub/actions/workflows/test.yml/badge.svg)](https://github.com/genropy/smpub/actions/workflows/test.yml)
-[![codecov](https://codecov.io/gh/genropy/smpub/branch/main/graph/badge.svg?token=CODECOV_TOKEN)](https://codecov.io/gh/genropy/smpub)
-[![Documentation Status](https://readthedocs.org/projects/smpub/badge/?version=latest)](https://smpub.readthedocs.io/en/latest/?badge=latest)
-[![Part of Genro-Libs](https://img.shields.io/badge/Genro--Libs-toolkit-blue)](https://github.com/softwell/meta-genro-libs)
-[![Development Status](https://img.shields.io/badge/status-alpha-orange.svg)](https://github.com/genropy/smpub)
+[![codecov](https://codecov.io/gh/genropy/smpub/branch/main/graph/badge.svg)](https://codecov.io/gh/genropy/smpub)
+[![Python 3.10+](https://img.shields.io/badge/python-3.10+-blue.svg)](https://www.python.org/downloads/)
+[![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
+[![Documentation](https://readthedocs.org/projects/smpub/badge/?version=latest)](https://smpub.readthedocs.io/)
+
+---
 
 Build CLI and API applications with automatic command dispatch using [SmartSwitch](https://github.com/genropy/smartswitch).
 
@@ -121,15 +128,26 @@ smpub remove myapp --global
 
 ## Architecture
 
-```
-Publisher (your app)
-  ├─ parent_api: Switcher      # Root API registry
-  └─ published_instances
-      └─ 'users' → UserHandler
-          └─ api: Switcher      # Handler API
-              ├─ user_add
-              ├─ user_list
-              └─ ...
+```mermaid
+graph TB
+    Publisher["Publisher (your app)<br/>parent_api: Switcher"]
+    Instances["published_instances"]
+    Handler["'users' → UserHandler<br/>api: Switcher"]
+    Add["user_add()"]
+    List["user_list()"]
+    More["..."]
+
+    Publisher --> Instances
+    Instances --> Handler
+    Handler --> Add
+    Handler --> List
+    Handler --> More
+
+    style Publisher fill:#e1f5ff
+    style Handler fill:#e8f5e9
+    style Add fill:#fff9c4
+    style List fill:#fff9c4
+    style More fill:#fff9c4
 ```
 
 ## Key Classes
@@ -350,40 +368,21 @@ smpub is part of the [Genro-Libs toolkit](https://github.com/softwell/genro-libs
 
 smpub follows a clean layered architecture:
 
-```
-┌─────────────────────────────────────────┐
-│         Your Application                │
-│     (inherits from Publisher)           │
-└─────────────┬───────────────────────────┘
-              │
-              │ initialize() / publish()
-              ▼
-┌─────────────────────────────────────────┐
-│         Publisher Layer                 │
-│  • parent_api (root Switcher)           │
-│  • CLI/OpenAPI exposure control         │
-│  • Argument validation (Pydantic)       │
-│  • Interactive mode support (gum)       │
-└─────────────┬───────────────────────────┘
-              │
-              │ publishes to
-              ▼
-┌─────────────────────────────────────────┐
-│      Handler Instances                  │
-│   (inherit from PublishedClass)         │
-│  • api = Switcher(prefix='...')         │
-│  • publisher: PublisherContext          │
-│  • Business logic methods               │
-└─────────────┬───────────────────────────┘
-              │
-              │ dispatches via
-              ▼
-┌─────────────────────────────────────────┐
-│        SmartSwitch Core                 │
-│  • Parent-child relationships           │
-│  • Method dispatch by name/rules        │
-│  • Hierarchical API navigation          │
-└─────────────────────────────────────────┘
+```mermaid
+graph TB
+    App["Your Application<br/>(inherits from Publisher)"]
+    Publisher["Publisher Layer<br/>• parent_api (root Switcher)<br/>• CLI/OpenAPI exposure control<br/>• Argument validation (Pydantic)<br/>• Interactive mode support (gum)"]
+    Handlers["Handler Instances<br/>(inherit from PublishedClass)<br/>• api = Switcher(prefix='...')<br/>• publisher: PublisherContext<br/>• Business logic methods"]
+    SmartSwitch["SmartSwitch Core<br/>• Parent-child relationships<br/>• Method dispatch by name/rules<br/>• Hierarchical API navigation"]
+
+    App -->|"initialize() / publish()"| Publisher
+    Publisher -->|"publishes to"| Handlers
+    Handlers -->|"dispatches via"| SmartSwitch
+
+    style App fill:#e1f5ff
+    style Publisher fill:#fff4e1
+    style Handlers fill:#e8f5e9
+    style SmartSwitch fill:#f3e5f5
 ```
 
 ### Key Components

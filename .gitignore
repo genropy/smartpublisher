@@ -46,4 +46,8 @@ Thumbs.db
 # Project specific
 .published
 *.log
+
+# MkDocs
+site/
+
 # Test

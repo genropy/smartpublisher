@@ -1,6 +1,12 @@
+<div align="center">
+
+<img src="assets/logo.png" alt="smpub Logo" width="200"/>
+
 # smpub - Smart Publisher
 
 **CLI/API framework based on SmartSwitch**
+
+</div>
 
 [![PyPI](https://img.shields.io/pypi/v/smpub)](https://pypi.org/project/smpub/)
 [![Python](https://img.shields.io/pypi/pyversions/smpub)](https://pypi.org/project/smpub/)
