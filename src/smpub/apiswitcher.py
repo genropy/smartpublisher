@@ -26,11 +26,11 @@ class ApiSwitcher(Switcher):
     This class extends smartswitch.Switcher to generate Pydantic models at
     decoration time, making them available for FastAPI OpenAPI schema generation.
 
-    Async Support:
-        ApiSwitcher automatically wraps async methods with @smartasync, enabling
-        transparent sync/async calling. The same method works in both contexts:
-        - CLI calls it synchronously (no await needed)
-        - HTTP/FastAPI calls it asynchronously (with await)
+    Bidirectional Async Support:
+        ApiSwitcher automatically wraps ALL methods with @smartasync, enabling
+        transparent sync/async calling in both directions:
+        - Async methods: Work in CLI (no await) and HTTP (with await)
+        - Sync methods: Don't block HTTP event loop (via asyncio.to_thread)
 
     Usage:
         class MyHandler(PublishedClass):
@@ -38,7 +38,7 @@ class ApiSwitcher(Switcher):
 
             @api
             def sync_method(self, name: str, age: int = 25):
-                '''Synchronous method with parameters.
+                '''Sync method - runs in thread when called from HTTP.
 
                 Args:
                     name: User's name
@@ -48,7 +48,7 @@ class ApiSwitcher(Switcher):
 
             @api
             async def async_method(self, url: str):
-                '''Async method - automatically wrapped with @smartasync.
+                '''Async method - works in both CLI and HTTP contexts.
 
                 Args:
                     url: URL to fetch
@@ -75,10 +75,10 @@ class ApiSwitcher(Switcher):
         """
         Decorate method and create Pydantic model.
 
-        Automatically wraps async methods with @smartasync for transparent
-        sync/async support. This allows the same method to be called:
-        - Without await in CLI context (sync mode)
-        - With await in HTTP/FastAPI context (async mode)
+        Automatically wraps ALL methods with @smartasync for transparent
+        sync/async support (bidirectional). This allows:
+        - Async methods: callable without await in CLI, with await in HTTP
+        - Sync methods: non-blocking in HTTP (via asyncio.to_thread)
 
         Args:
             func: Function to decorate
@@ -86,15 +86,13 @@ class ApiSwitcher(Switcher):
         Returns:
             Decorated function
         """
-        import asyncio
         from smartasync import smartasync
 
-        # Apply smartasync to async methods BEFORE parent registration
-        # This enables transparent sync/async calling
-        if asyncio.iscoroutinefunction(func):
-            wrapped_func = smartasync(func)
-        else:
-            wrapped_func = func
+        # Apply smartasync to ALL methods (sync and async) BEFORE parent registration
+        # This enables full bidirectional sync/async support:
+        # - Async methods work in sync contexts (asyncio.run)
+        # - Sync methods don't block async contexts (asyncio.to_thread)
+        wrapped_func = smartasync(func)
 
         # Call parent to register the wrapped function
         decorated = super().__call__(wrapped_func)

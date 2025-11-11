@@ -118,7 +118,7 @@ def test_pydantic_model_created_for_async_method():
     # Check model fields
     fields = model.model_fields
     assert "value" in fields
-    assert fields["value"].annotation == str
+    assert fields["value"].annotation is str
 
 
 def test_pydantic_model_created_for_async_with_defaults():
@@ -141,26 +141,67 @@ def test_pydantic_model_created_for_async_with_defaults():
 
 @pytest.mark.asyncio
 async def test_mixed_sync_async_calls():
-    """Test mixing sync and async method calls."""
+    """Test mixing sync and async method calls in async context.
+
+    With bidirectional smartasync support, both sync and async methods
+    must be awaited in async contexts.
+    """
     handler = AsyncHandler()
 
-    # Sync call
-    result1 = handler.sync_method("sync")
+    # Sync method in async context - must await (runs in thread)
+    result1 = await handler.sync_method("sync")
     assert result1 == "Sync: sync"
     assert handler.call_count == 1
 
-    # Async call with await
+    # Async method in async context - must await (native coroutine)
     result2 = await handler.async_method("async")
     assert result2 == "Async: async"
     assert handler.call_count == 2
+
+
+@pytest.mark.asyncio
+async def test_sync_method_non_blocking_in_async():
+    """Test that sync methods don't block event loop in async context."""
+    import time
+
+    class BlockingHandler(PublishedClass):
+        api = ApiSwitcher()
+
+        def __init__(self):
+            self.call_times = []
+
+        @api
+        def blocking_method(self, duration: float):
+            """Sync method that blocks for duration seconds."""
+            time.sleep(duration)
+            self.call_times.append(time.time())
+            return f"Slept for {duration}s"
+
+    handler = BlockingHandler()
+
+    # Call two blocking methods concurrently
+    # If they run in threads, they should complete in ~0.1s total
+    # If they block, they would take ~0.2s total
+    start = time.time()
+    results = await asyncio.gather(
+        handler.blocking_method(0.1),
+        handler.blocking_method(0.1)
+    )
+    elapsed = time.time() - start
+
+    assert len(results) == 2
+    assert all("Slept for 0.1s" in r for r in results)
+    # Should complete in ~0.1s (concurrent) not ~0.2s (sequential)
+    assert elapsed < 0.15, f"Expected < 0.15s, got {elapsed:.3f}s (blocking detected!)"
 
 
 def test_cache_reset_available():
     """Test that smartasync cache reset is available."""
     handler = AsyncHandler()
 
-    # async_method should have _smartasync_reset_cache attribute
+    # All methods should have _smartasync_reset_cache attribute
     assert hasattr(handler.async_method, "_smartasync_reset_cache")
+    assert hasattr(handler.sync_method, "_smartasync_reset_cache")
 
     # Test cache reset
     handler.async_method._smartasync_reset_cache()
