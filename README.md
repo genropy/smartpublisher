@@ -14,6 +14,8 @@
 [![Python 3.10+](https://img.shields.io/badge/python-3.10+-blue.svg)](https://www.python.org/downloads/)
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
 [![Documentation](https://readthedocs.org/projects/smpub/badge/?version=latest)](https://smpub.readthedocs.io/)
+[![Part of Genro-Libs](https://img.shields.io/badge/Part%20of-Genro--Libs-blue)](https://github.com/softwell/genro-libs)
+[![LLM Docs](https://img.shields.io/badge/LLM-Docs-purple)](llm-docs/)
 
 ---
 
@@ -44,11 +46,11 @@ pip install smpub[http]
 
 ```python
 from typing import Literal
-from smpub import PublishedClass
 from smartswitch import Switcher
 
-class AccountHandler(PublishedClass):
-    __slots__ = ('accounts',)
+class AccountHandler:
+    # If using __slots__, include 'smpublisher'
+    __slots__ = ('accounts', 'smpublisher')
     api = Switcher(prefix='account_')
 
     def __init__(self):
@@ -68,8 +70,9 @@ class AccountHandler(PublishedClass):
         """List all accounts."""
         return {"count": len(self.accounts), "accounts": list(self.accounts.values())}
 
-class MailHandler(PublishedClass):
-    __slots__ = ('account_handler', 'messages')
+class MailHandler:
+    # If using __slots__, include 'smpublisher'
+    __slots__ = ('account_handler', 'messages', 'smpublisher')
     api = Switcher(prefix='mail_')
 
     def __init__(self, account_handler):
