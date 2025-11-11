@@ -9,6 +9,7 @@ from smpub.http.fastapi_app import create_fastapi_app
 class TestHandler:
     """Test handler with various method types."""
 
+    __test__ = False  # Not a pytest test class
     api = Switcher(prefix="test_")
 
     def __init__(self):

@@ -69,6 +69,8 @@ class TypedHandler:
 class TestApp(Publisher):
     """Test application."""
 
+    __test__ = False  # Not a pytest test class
+
     def initialize(self):
         self.simple = SimpleHandler()
         self.typed = TypedHandler()
