@@ -154,7 +154,6 @@ class TestAutoUpgrade:
         result = app.users.user_fetch("Alice")
         assert result == 30
 
-    @pytest.mark.asyncio
     async def test_async_methods_work_after_upgrade(self):
         """Should be able to await async methods after auto-upgrade."""
 
