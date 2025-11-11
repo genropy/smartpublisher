@@ -53,6 +53,7 @@ interactive = [
 http = [
     "fastapi>=0.104.0",
     "uvicorn[standard]>=0.24.0",
+    "httpx>=0.25.0",
 ]
 all = [
     "pytest>=7.0",
@@ -68,6 +69,7 @@ all = [
     "textual>=0.41.0",
     "fastapi>=0.104.0",
     "uvicorn[standard]>=0.24.0",
+    "httpx>=0.25.0",
 ]
 
 [project.urls]
