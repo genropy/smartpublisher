@@ -2,11 +2,12 @@
 smpub - Smart Publisher: CLI/API framework based on SmartSwitch.
 
 Example:
-    from smpub import Publisher, PublishedClass
+    from smpub import Publisher
     from smartswitch import Switcher
 
-    class MyHandler(PublishedClass):
-        __slots__ = ('data',)
+    class MyHandler:
+        # If using __slots__, include 'smpublisher'
+        __slots__ = ('data', 'smpublisher')
         api = Switcher(prefix='handler_')
 
         def __init__(self):
@@ -27,8 +28,7 @@ Example:
 """
 
 from smpub.publisher import Publisher
-from smpub.published import PublishedClass, PublisherContext, discover_api_json
-from smpub.apiswitcher import ApiSwitcher
+from smpub.published import PublisherContext, discover_api_json
 
 __version__ = "0.2.0"
-__all__ = ["Publisher", "PublishedClass", "PublisherContext", "discover_api_json", "ApiSwitcher"]
+__all__ = ["Publisher", "PublisherContext", "discover_api_json"]

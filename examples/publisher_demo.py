@@ -8,7 +8,7 @@ import sys
 from pathlib import Path
 
 # Add refactored_classes to path
-sys.path.insert(0, str(Path(__file__).parent.parent / 'refactored_classes'))
+sys.path.insert(0, str(Path(__file__).parent.parent / "refactored_classes"))
 
 from storage_manager import StorageManager
 from publisher import Publisher
@@ -24,7 +24,7 @@ class PublisherApp(Publisher):
         Initialize PublisherApp with StorageManager.
         """
         self.storage = StorageManager()
-        self.publish('storage', self.storage)
+        self.publish("storage", self.storage)
 
 
 def main():
@@ -35,5 +35,5 @@ def main():
     app.run()
 
 
-if __name__ == '__main__':
+if __name__ == "__main__":
     main()

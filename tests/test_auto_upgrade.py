@@ -7,7 +7,8 @@ and smpub automatically upgrades it to ApiSwitcher when publishing.
 
 import pytest
 from smartswitch import Switcher
-from smpub import Publisher, ApiSwitcher
+from smpub import Publisher
+from smpub.apiswitcher import ApiSwitcher  # Internal - for testing only
 
 
 class PlainSwitcherHandler:

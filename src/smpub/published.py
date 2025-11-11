@@ -1,5 +1,5 @@
 """
-PublishedClass - Mixin and utilities for publishable handlers.
+Utilities for publishable handlers and API discovery.
 """
 
 import inspect
@@ -150,39 +150,3 @@ class PublisherContext:
         if target is None:
             target = self._handler
         return discover_api_json(target, recursive=recursive)
-
-
-class PublishedClass:
-    """
-    Optional mixin for handlers that use __slots__.
-
-    This class only adds a 'smpublisher' slot. If your handler doesn't use
-    __slots__, you don't need to inherit from this class - the Publisher
-    will inject the 'smpublisher' attribute dynamically.
-
-    Example with __slots__:
-        class MyHandler(PublishedClass):
-            __slots__ = ('data', 'registry')  # Your custom slots
-            api = Switcher(prefix='my_')
-
-            def __init__(self):
-                self.data = {}
-                self.registry = {}
-
-            @api
-            def my_add(self, key: str):
-                self.data[key] = None
-
-    Example without __slots__ (no inheritance needed):
-        class MyHandler:
-            api = Switcher(prefix='my_')
-
-            def __init__(self):
-                self.data = {}
-
-            @api
-            def my_add(self, key: str):
-                self.data[key] = None
-    """
-
-    __slots__ = ("smpublisher",)

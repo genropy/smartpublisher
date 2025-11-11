@@ -14,7 +14,7 @@ import sys
 from pathlib import Path
 
 # Add src to path for development
-sys.path.insert(0, str(Path(__file__).parent.parent / 'src'))
+sys.path.insert(0, str(Path(__file__).parent.parent / "src"))
 
 from smpub import Publisher, PublishedClass
 from smartswitch import Switcher
@@ -27,8 +27,8 @@ class CalculatorHandler(PublishedClass):
     Demonstrates Pydantic validation and HTTP API exposure.
     """
 
-    __slots__ = ('history',)
-    api = Switcher(prefix='calc_')
+    __slots__ = ("history",)
+    api = Switcher(prefix="calc_")
 
     def __init__(self):
         """Initialize calculator with empty history."""
@@ -117,7 +117,7 @@ class CalculatorHandler(PublishedClass):
         Returns:
             Result of base^exponent
         """
-        result = base ** exponent
+        result = base**exponent
         self.history.append(f"power({base}, {exponent}) = {result}")
         return result
 
@@ -162,12 +162,12 @@ class CalculatorApp(Publisher):
 
         # Publish with both CLI and OpenAPI support
         self.publish(
-            'calc',
+            "calc",
             self.calculator,
-            cli=True,           # Enable CLI access
-            openapi=True,       # Enable HTTP/API access
-            cli_name='calc',
-            http_path='/calc'
+            cli=True,  # Enable CLI access
+            openapi=True,  # Enable HTTP/API access
+            cli_name="calc",
+            http_path="/calc",
         )
 
 
@@ -180,13 +180,13 @@ def main():
         try:
             port = int(sys.argv[1])
             # Run HTTP mode with custom port
-            app.run(mode='http', port=port)
+            app.run(mode="http", port=port)
         except ValueError:
             # Not a port number, run CLI mode
-            app.run(mode='cli')
+            app.run(mode="cli")
     else:
         # No args: run HTTP mode on default port
-        app.run(mode='http', port=8000)
+        app.run(mode="http", port=8000)
 
 
 if __name__ == "__main__":

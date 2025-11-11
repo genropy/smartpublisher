@@ -1,14 +1,15 @@
 """Test http/fastapi_app.py module for comprehensive coverage."""
 
 from fastapi.testclient import TestClient
-from smpub import Publisher, ApiSwitcher
+from smpub import Publisher
+from smartswitch import Switcher
 from smpub.http.fastapi_app import create_fastapi_app
 
 
 class TestHandler:
     """Test handler with various method types."""
 
-    api = ApiSwitcher(prefix="test_")
+    api = Switcher(prefix="test_")
 
     def __init__(self):
         self.data = {}
@@ -61,7 +62,7 @@ class TestHandler:
 class ErrorHandler:
     """Handler that will cause route creation issues."""
 
-    api = ApiSwitcher(prefix="bad_")
+    api = Switcher(prefix="bad_")
 
     @api
     def bad_method(self, arg: str):
@@ -164,9 +165,7 @@ class TestFastAPIApp:
         assert result["optional"] == 42
 
         # Override default
-        response = client.post(
-            "/handler/optional", json={"required": "test", "optional": 100}
-        )
+        response = client.post("/handler/optional", json={"required": "test", "optional": 100})
         assert response.status_code == 200
         result = response.json()["result"]
         assert result["optional"] == 100
@@ -218,9 +217,7 @@ class TestFastAPIApp:
         client = TestClient(app)
 
         # Invalid type for 'value' (string instead of int)
-        response = client.post(
-            "/handler/add", json={"key": "test", "value": "not_an_int"}
-        )
+        response = client.post("/handler/add", json={"key": "test", "value": "not_an_int"})
         assert response.status_code == 422
 
     def test_method_raises_exception(self):
@@ -245,7 +242,7 @@ class TestFastAPIApp:
         """Should handle multiple published handlers."""
 
         class Handler1:
-            api = ApiSwitcher(prefix="h1_")
+            api = Switcher(prefix="h1_")
 
             @api
             def h1_method(self, value: str):
@@ -253,7 +250,7 @@ class TestFastAPIApp:
                 return f"H1: {value}"
 
         class Handler2:
-            api = ApiSwitcher(prefix="h2_")
+            api = Switcher(prefix="h2_")
 
             @api
             def h2_method(self, value: str):
@@ -317,7 +314,7 @@ class TestFastAPIApp:
         """Should handle empty request body for methods without params."""
 
         class SimpleHandler:
-            api = ApiSwitcher(prefix="simple_")
+            api = Switcher(prefix="simple_")
 
             @api
             def simple_no_params(self):

@@ -3,7 +3,8 @@ Test handler to verify parameter display in help.
 """
 
 import sys
-sys.path.insert(0, '../../src')
+
+sys.path.insert(0, "../../src")
 
 from smartswitch import Switcher
 from smpub import Publisher
@@ -12,7 +13,7 @@ from smpub import Publisher
 class TestHandler:
     """Handler for testing parameter display."""
 
-    api = Switcher(prefix='test_')
+    api = Switcher(prefix="test_")
 
     def __init__(self):
         self.data = {}
@@ -28,11 +29,9 @@ class TestHandler:
         return f"{name} is {age} years old, active={active}"
 
     @api
-    def test_complex(self,
-                     host: str,
-                     port: int = 8080,
-                     timeout: float = 30.0,
-                     enabled: bool = True):
+    def test_complex(
+        self, host: str, port: int = 8080, timeout: float = 30.0, enabled: bool = True
+    ):
         """Method with multiple types and defaults."""
         return f"Connecting to {host}:{port}"
 
@@ -42,7 +41,7 @@ class TestApp(Publisher):
 
     def initialize(self):
         self.handler = TestHandler()
-        self.publish('test', self.handler)
+        self.publish("test", self.handler)
 
 
 if __name__ == "__main__":

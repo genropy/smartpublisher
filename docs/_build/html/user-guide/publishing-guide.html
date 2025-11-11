@@ -1,0 +1,1150 @@
+
+
+<!DOCTYPE html>
+<html class="writer-html5" lang="en" data-content_root="../">
+<head>
+  <meta charset="utf-8" /><meta name="viewport" content="width=device-width, initial-scale=1" />
+
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Publishing Guide: How to Expose Your Library with smpub &mdash; smpub 0.2.0 documentation</title>
+      <link rel="stylesheet" type="text/css" href="../_static/pygments.css?v=b86133f3" />
+      <link rel="stylesheet" type="text/css" href="../_static/css/theme.css?v=e59714d7" />
+      <link rel="stylesheet" type="text/css" href="../_static/custom.css?v=957296ec" />
+
+  
+    <link rel="shortcut icon" href="../_static/logo.png"/>
+      <script src="../_static/jquery.js?v=5d32c60e"></script>
+      <script src="../_static/_sphinx_javascript_frameworks_compat.js?v=2cd50e6c"></script>
+      <script src="../_static/documentation_options.js?v=938c9ccc"></script>
+      <script src="../_static/doctools.js?v=9bcbadda"></script>
+      <script src="../_static/sphinx_highlight.js?v=dc90522c"></script>
+    <script src="../_static/js/theme.js"></script>
+    <link rel="index" title="Index" href="../genindex.html" />
+    <link rel="search" title="Search" href="../search.html" />
+    <link rel="next" title="Publisher Class" href="../guide/publisher.html" />
+    <link rel="prev" title="Quick Start" href="quickstart.html" /> 
+</head>
+
+<body class="wy-body-for-nav"> 
+  <div class="wy-grid-for-nav">
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search" >
+
+          
+          
+          <a href="../index.html" class="icon icon-home">
+            smpub
+              <img src="../_static/logo.png" class="logo" alt="Logo"/>
+          </a>
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="../search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" aria-label="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+        </div><div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="Navigation menu">
+              <p class="caption" role="heading"><span class="caption-text">User Guide</span></p>
+<ul class="current">
+<li class="toctree-l1"><a class="reference internal" href="installation.html">Installation</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="installation.html#requirements">Requirements</a></li>
+<li class="toctree-l2"><a class="reference internal" href="installation.html#basic-installation">Basic Installation</a></li>
+<li class="toctree-l2"><a class="reference internal" href="installation.html#optional-dependencies">Optional Dependencies</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="installation.html#http-api-support">HTTP/API Support</a></li>
+<li class="toctree-l3"><a class="reference internal" href="installation.html#interactive-mode">Interactive Mode</a></li>
+<li class="toctree-l3"><a class="reference internal" href="installation.html#development-tools">Development Tools</a></li>
+<li class="toctree-l3"><a class="reference internal" href="installation.html#documentation">Documentation</a></li>
+<li class="toctree-l3"><a class="reference internal" href="installation.html#all-dependencies">All Dependencies</a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="installation.html#verify-installation">Verify Installation</a></li>
+<li class="toctree-l2"><a class="reference internal" href="installation.html#next-steps">Next Steps</a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="quickstart.html">Quick Start</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="quickstart.html#create-a-simple-handler">Create a Simple Handler</a></li>
+<li class="toctree-l2"><a class="reference internal" href="quickstart.html#try-cli-mode">Try CLI Mode</a></li>
+<li class="toctree-l2"><a class="reference internal" href="quickstart.html#try-interactive-mode">Try Interactive Mode</a></li>
+<li class="toctree-l2"><a class="reference internal" href="quickstart.html#try-http-mode">Try HTTP Mode</a></li>
+<li class="toctree-l2"><a class="reference internal" href="quickstart.html#next-steps">Next Steps</a></li>
+</ul>
+</li>
+<li class="toctree-l1 current"><a class="current reference internal" href="#">Publishing Guide: How to Expose Your Library with smpub</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="#table-of-contents">Table of Contents</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#overview">Overview</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#prerequisites">Prerequisites</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#step-by-step-guide">Step-by-Step Guide</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="#step-1-install-smpub">Step 1: Install smpub</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#step-2-create-handler-classes">Step 2: Create Handler Classes</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#step-3-create-publisher-application">Step 3: Create Publisher Application</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#step-4-create-entry-point">Step 4: Create Entry Point</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#step-5-test-your-cli">Step 5: Test Your CLI</a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="#handler-requirements">Handler Requirements</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="#required-elements">Required Elements</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#optional-but-recommended">Optional but Recommended</a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="#best-practices">Best Practices</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="#separation-of-concerns">1. Separation of Concerns</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#type-hints-for-free-validation">2. Type Hints for Free Validation</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#clear-documentation">3. Clear Documentation</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#error-handling">4. Error Handling</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#handler-organization">5. Handler Organization</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#publisher-best-practices">6. Publisher Best Practices</a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="#common-patterns">Common Patterns</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="#pattern-1-database-operations">Pattern 1: Database Operations</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#pattern-2-file-operations">Pattern 2: File Operations</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#pattern-3-service-integration">Pattern 3: Service Integration</a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="#complete-example">Complete Example</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#summary">Summary</a></li>
+</ul>
+</li>
+</ul>
+<p class="caption" role="heading"><span class="caption-text">Guides</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../guide/publisher.html">Publisher Class</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="../guide/publisher.html#basic-usage">Basic Usage</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../guide/publisher.html#methods">Methods</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="../guide/publisher.html#publish">publish()</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../guide/publisher.html#run">run()</a></li>
+</ul>
+</li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="../guide/handlers.html">Handler Classes</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="../guide/handlers.html#basic-handler">Basic Handler</a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="../guide/cli-mode.html">CLI Mode</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="../guide/cli-mode.html#usage">Usage</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../guide/cli-mode.html#help">Help</a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="../guide/http-mode.html">HTTP Mode</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="../guide/http-mode.html#starting-server">Starting Server</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../guide/http-mode.html#endpoints">Endpoints</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../guide/http-mode.html#swagger-ui">Swagger UI</a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="../guide/validation.html">Validation</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="../guide/validation.html#automatic-validation">Automatic Validation</a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="../guide/interactive.html">Interactive Mode</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="../guide/interactive.html#installation">Installation</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../guide/interactive.html#complete-test-sequence">Complete Test Sequence</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="../guide/interactive.html#step-1-install-and-setup">Step 1: Install and Setup</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../guide/interactive.html#step-2-register-test-app">Step 2: Register Test App</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../guide/interactive.html#step-3-test-interactive-mode">Step 3: Test Interactive Mode</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../guide/interactive.html#step-4-verify-results">Step 4: Verify Results</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../guide/interactive.html#step-5-cleanup">Step 5: Cleanup</a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="../guide/interactive.html#what-happens">What Happens</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../guide/interactive.html#interactive-vs-normal-mode">Interactive vs Normal Mode</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../guide/interactive.html#questionary-advantages">Questionary Advantages</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../guide/interactive.html#parameter-types">Parameter Types</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="../guide/interactive.html#text-input-str-int-float">Text Input (str, int, float)</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../guide/interactive.html#boolean-confirmation">Boolean Confirmation</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../guide/interactive.html#literal-selection">Literal Selection</a></li>
+</ul>
+</li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="../guide/best-practices.html">Best Practices</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="../guide/best-practices.html#handler-design">Handler Design</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../guide/best-practices.html#type-hints">Type Hints</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../guide/best-practices.html#error-handling">Error Handling</a></li>
+</ul>
+</li>
+</ul>
+<p class="caption" role="heading"><span class="caption-text">Examples</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../examples/index.html">Examples</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="../examples/index.html#available-examples">Available Examples</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="../examples/index.html#calculator-app">Calculator App</a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="../examples/index.html#running-examples">Running Examples</a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="../examples/calculator.html">Calculator Example</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="../examples/calculator.html#source-code">Source Code</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../examples/calculator.html#features">Features</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../examples/calculator.html#cli-usage">CLI Usage</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../examples/calculator.html#http-usage">HTTP Usage</a></li>
+</ul>
+</li>
+</ul>
+<p class="caption" role="heading"><span class="caption-text">API Reference</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../api/publisher.html">Publisher API Reference</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../api/published.html">PublishedClass API Reference</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../api/http.html">HTTP API Reference</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="../api/http.html#fastapi-integration">FastAPI Integration</a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="../api/interactive.html">Interactive API Reference</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../api/validation.html">Validation API Reference</a></li>
+</ul>
+<p class="caption" role="heading"><span class="caption-text">Appendix</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../appendix/architecture.html">Architecture</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="../appendix/architecture.html#overview">Overview</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../appendix/architecture.html#layered-architecture">Layered Architecture</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../appendix/architecture.html#core-components">Core Components</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="../appendix/architecture.html#publisher">Publisher</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../appendix/architecture.html#publishedclass">PublishedClass</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../appendix/architecture.html#publishercontext">PublisherContext</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../appendix/architecture.html#apiswitcher">ApiSwitcher</a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="../appendix/architecture.html#data-flow">Data Flow</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="../appendix/architecture.html#cli-mode-flow">CLI Mode Flow</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../appendix/architecture.html#http-mode-flow">HTTP Mode Flow</a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="../appendix/architecture.html#validation-layer">Validation Layer</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="../appendix/architecture.html#pydantic-integration">Pydantic Integration</a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="../appendix/architecture.html#interactive-layer">Interactive Layer</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="../appendix/architecture.html#textual-integration">Textual Integration</a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="../appendix/architecture.html#http-layer">HTTP Layer</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="../appendix/architecture.html#fastapi-integration">FastAPI Integration</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../appendix/architecture.html#cli-command-smpub-app-serve">CLI Command: <code class="docutils literal notranslate"><span class="pre">smpub</span> <span class="pre">&lt;app&gt;</span> <span class="pre">serve</span></code></a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="../appendix/architecture.html#registry-system">Registry System</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="../appendix/architecture.html#local-registry-published">Local Registry (<code class="docutils literal notranslate"><span class="pre">.published</span></code>)</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../appendix/architecture.html#global-registry-smartlibs-publisher-registry-json">Global Registry (<code class="docutils literal notranslate"><span class="pre">~/.smartlibs/publisher/registry.json</span></code>)</a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="../appendix/architecture.html#design-principles">Design Principles</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="../appendix/architecture.html#separation-of-concerns">1. Separation of Concerns</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../appendix/architecture.html#convention-over-configuration">2. Convention over Configuration</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../appendix/architecture.html#progressive-enhancement">3. Progressive Enhancement</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../appendix/architecture.html#smartswitch-foundation">4. SmartSwitch Foundation</a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="../appendix/architecture.html#extension-points">Extension Points</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="../appendix/architecture.html#custom-validators">Custom Validators</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../appendix/architecture.html#custom-routes">Custom Routes</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../appendix/architecture.html#custom-interactive-forms">Custom Interactive Forms</a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="../appendix/architecture.html#performance-considerations">Performance Considerations</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="../appendix/architecture.html#memory">Memory</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../appendix/architecture.html#validation">Validation</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../appendix/architecture.html#http">HTTP</a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="../appendix/architecture.html#future-architecture">Future Architecture</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="../appendix/architecture.html#planned-enhancements">Planned Enhancements</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../appendix/architecture.html#compatibility">Compatibility</a></li>
+</ul>
+</li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="../appendix/smartswitch.html">Integration with SmartSwitch</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="../appendix/smartswitch.html#how-smpub-uses-smartswitch">How smpub Uses SmartSwitch</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="../appendix/smartswitch.html#parent-child-api-structure">Parent-Child API Structure</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../appendix/smartswitch.html#method-dispatch">Method Dispatch</a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="../appendix/smartswitch.html#switcher-configuration">Switcher Configuration</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="../appendix/smartswitch.html#handler-api-definition">Handler API Definition</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../appendix/smartswitch.html#method-decoration">Method Decoration</a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="../appendix/smartswitch.html#api-discovery">API Discovery</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="../appendix/smartswitch.html#get-api-json">get_api_json()</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../appendix/smartswitch.html#use-cases">Use Cases</a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="../appendix/smartswitch.html#smartswitch-features-not-used">SmartSwitch Features Not Used</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../appendix/smartswitch.html#benefits-of-smartswitch-foundation">Benefits of SmartSwitch Foundation</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="../appendix/smartswitch.html#clean-method-registration">1. Clean Method Registration</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../appendix/smartswitch.html#automatic-discovery">2. Automatic Discovery</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../appendix/smartswitch.html#hierarchical-apis">3. Hierarchical APIs</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../appendix/smartswitch.html#type-safety">4. Type Safety</a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="../appendix/smartswitch.html#comparison-with-direct-use">Comparison with Direct Use</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="../appendix/smartswitch.html#using-smartswitch-directly">Using SmartSwitch Directly</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../appendix/smartswitch.html#using-smpub-smartswitch-more">Using smpub (SmartSwitch + More)</a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="../appendix/smartswitch.html#further-reading">Further Reading</a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="../philosophy/why-smpub.html">Why smpub? The Missing Link Between CLI and API</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="../philosophy/why-smpub.html#previously-on-smartswitch">Previously, on SmartSwitch…</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../philosophy/why-smpub.html#the-write-once-problem">The Write-Once Problem</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../philosophy/why-smpub.html#the-smpub-pattern-smartswitch-publishing">The smpub Pattern: SmartSwitch + Publishing</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="../philosophy/why-smpub.html#step-1-define-handlers-with-smartswitch">Step 1: Define Handlers with SmartSwitch</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../philosophy/why-smpub.html#step-2-publish-with-smpub">Step 2: Publish with smpub</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../philosophy/why-smpub.html#step-3-register-and-use">Step 3: Register and Use</a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="../philosophy/why-smpub.html#what-you-actually-get">What You Actually Get</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="../philosophy/why-smpub.html#zero-boilerplate-interfaces">1. <strong>Zero Boilerplate Interfaces</strong></a></li>
+<li class="toctree-l3"><a class="reference internal" href="../philosophy/why-smpub.html#registry-management">2. <strong>Registry Management</strong></a></li>
+<li class="toctree-l3"><a class="reference internal" href="../philosophy/why-smpub.html#interactive-mode">3. <strong>Interactive Mode</strong></a></li>
+<li class="toctree-l3"><a class="reference internal" href="../philosophy/why-smpub.html#hierarchical-commands">4. <strong>Hierarchical Commands</strong></a></li>
+<li class="toctree-l3"><a class="reference internal" href="../philosophy/why-smpub.html#type-validation-everywhere">5. <strong>Type Validation Everywhere</strong></a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="../philosophy/why-smpub.html#the-registry-pattern">The Registry Pattern</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../philosophy/why-smpub.html#what-smpub-is-not">What smpub Is NOT</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="../philosophy/why-smpub.html#not-a-web-framework">❌ Not a Web Framework</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../philosophy/why-smpub.html#not-a-cli-customization-framework">❌ Not a CLI Customization Framework</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../philosophy/why-smpub.html#not-for-public-apis">❌ Not for Public APIs</a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="../philosophy/why-smpub.html#when-to-use-smpub">When to Use smpub</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="../philosophy/why-smpub.html#perfect-fit">✅ Perfect Fit</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../philosophy/why-smpub.html#wrong-fit">❌ Wrong Fit</a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="../philosophy/why-smpub.html#the-architectural-win-apiswitcher">The Architectural Win: ApiSwitcher</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../philosophy/why-smpub.html#real-world-workflow">Real-World Workflow</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="../philosophy/why-smpub.html#development">Development</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../philosophy/why-smpub.html#local-testing">Local Testing</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../philosophy/why-smpub.html#production-deployment">Production Deployment</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../philosophy/why-smpub.html#team-sharing">Team Sharing</a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="../philosophy/why-smpub.html#comparison-the-full-picture">Comparison: The Full Picture</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../philosophy/why-smpub.html#key-takeaways">Key Takeaways</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../philosophy/why-smpub.html#what-s-next">What’s Next?</a></li>
+</ul>
+</li>
+</ul>
+<p class="caption" role="heading"><span class="caption-text">Publishing</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../publishing-guide.html">Publishing Guide: How to Expose Your Library with smpub</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="../publishing-guide.html#table-of-contents">Table of Contents</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../publishing-guide.html#overview">Overview</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../publishing-guide.html#prerequisites">Prerequisites</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../publishing-guide.html#step-by-step-guide">Step-by-Step Guide</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="../publishing-guide.html#step-1-install-smpub">Step 1: Install smpub</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../publishing-guide.html#step-2-create-handler-classes">Step 2: Create Handler Classes</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../publishing-guide.html#step-3-create-publisher-application">Step 3: Create Publisher Application</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../publishing-guide.html#step-4-create-entry-point">Step 4: Create Entry Point</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../publishing-guide.html#step-5-test-your-cli">Step 5: Test Your CLI</a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="../publishing-guide.html#handler-requirements">Handler Requirements</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="../publishing-guide.html#required-elements">Required Elements</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../publishing-guide.html#optional-but-recommended">Optional but Recommended</a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="../publishing-guide.html#best-practices">Best Practices</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="../publishing-guide.html#separation-of-concerns">1. Separation of Concerns</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../publishing-guide.html#type-hints-for-free-validation">2. Type Hints for Free Validation</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../publishing-guide.html#clear-documentation">3. Clear Documentation</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../publishing-guide.html#error-handling">4. Error Handling</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../publishing-guide.html#handler-organization">5. Handler Organization</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../publishing-guide.html#publisher-best-practices">6. Publisher Best Practices</a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="../publishing-guide.html#common-patterns">Common Patterns</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="../publishing-guide.html#pattern-1-database-operations">Pattern 1: Database Operations</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../publishing-guide.html#pattern-2-file-operations">Pattern 2: File Operations</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../publishing-guide.html#pattern-3-service-integration">Pattern 3: Service Integration</a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="../publishing-guide.html#complete-example">Complete Example</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../publishing-guide.html#summary">Summary</a></li>
+</ul>
+</li>
+</ul>
+
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap"><nav class="wy-nav-top" aria-label="Mobile navigation menu" >
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="../index.html">smpub</a>
+      </nav>
+
+      <div class="wy-nav-content">
+        <div class="rst-content style-external-links">
+          <div role="navigation" aria-label="Page navigation">
+  <ul class="wy-breadcrumbs">
+      <li><a href="../index.html" class="icon icon-home" aria-label="Home"></a></li>
+      <li class="breadcrumb-item active">Publishing Guide: How to Expose Your Library with smpub</li>
+      <li class="wy-breadcrumbs-aside">
+              <a href="https://github.com/genropy/smpub/blob/main/docs/user-guide/publishing-guide.md" class="fa fa-github"> Edit on GitHub</a>
+      </li>
+  </ul>
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+             
+  <section id="publishing-guide-how-to-expose-your-library-with-smpub">
+<h1>Publishing Guide: How to Expose Your Library with smpub<a class="headerlink" href="#publishing-guide-how-to-expose-your-library-with-smpub" title="Link to this heading"></a></h1>
+<p>This guide shows you how to take an existing Python library and expose it via CLI and API using smpub.</p>
+<section id="table-of-contents">
+<h2>Table of Contents<a class="headerlink" href="#table-of-contents" title="Link to this heading"></a></h2>
+<ul class="simple">
+<li><p><a class="reference internal" href="#overview">Overview</a></p></li>
+<li><p><a class="reference internal" href="#prerequisites">Prerequisites</a></p></li>
+<li><p><a class="reference internal" href="#step-by-step-guide">Step-by-Step Guide</a></p></li>
+<li><p><a class="reference internal" href="#handler-requirements">Handler Requirements</a></p></li>
+<li><p><a class="reference internal" href="#best-practices">Best Practices</a></p></li>
+<li><p><a class="reference internal" href="#common-patterns">Common Patterns</a></p></li>
+<li><p><a class="reference internal" href="#complete-example">Complete Example</a></p></li>
+</ul>
+</section>
+<section id="overview">
+<h2>Overview<a class="headerlink" href="#overview" title="Link to this heading"></a></h2>
+<p><strong>Goal</strong>: Take an existing library and make it accessible via:</p>
+<ul class="simple">
+<li><p>Command-line interface (CLI)</p></li>
+<li><p>HTTP API with OpenAPI documentation (planned)</p></li>
+<li><p>Interactive parameter prompting</p></li>
+</ul>
+<p><strong>The smpub Pattern</strong>:</p>
+<ol class="arabic simple">
+<li><p>Wrap your library in <strong>Handler classes</strong></p></li>
+<li><p>Create a <strong>Publisher application</strong> that registers handlers</p></li>
+<li><p>Choose exposure modes (CLI, API, or both)</p></li>
+</ol>
+</section>
+<section id="prerequisites">
+<h2>Prerequisites<a class="headerlink" href="#prerequisites" title="Link to this heading"></a></h2>
+<p>Your existing library should have:</p>
+<ul class="simple">
+<li><p>Well-defined functions/methods with clear responsibilities</p></li>
+<li><p>Type hints on parameters (for automatic validation)</p></li>
+<li><p>Docstrings (for auto-generated help)</p></li>
+</ul>
+<p><strong>Example library to publish</strong> (<code class="docutils literal notranslate"><span class="pre">mylib/calculator.py</span></code>):</p>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="sd">&quot;&quot;&quot;Calculator library - business logic.&quot;&quot;&quot;</span>
+
+<span class="k">def</span><span class="w"> </span><span class="nf">add</span><span class="p">(</span><span class="n">a</span><span class="p">:</span> <span class="nb">int</span><span class="p">,</span> <span class="n">b</span><span class="p">:</span> <span class="nb">int</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">int</span><span class="p">:</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;Add two numbers.&quot;&quot;&quot;</span>
+    <span class="k">return</span> <span class="n">a</span> <span class="o">+</span> <span class="n">b</span>
+
+<span class="k">def</span><span class="w"> </span><span class="nf">multiply</span><span class="p">(</span><span class="n">x</span><span class="p">:</span> <span class="nb">float</span><span class="p">,</span> <span class="n">y</span><span class="p">:</span> <span class="nb">float</span><span class="p">,</span> <span class="n">precision</span><span class="p">:</span> <span class="nb">int</span> <span class="o">=</span> <span class="mi">2</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">float</span><span class="p">:</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;Multiply two numbers with optional precision.&quot;&quot;&quot;</span>
+    <span class="n">result</span> <span class="o">=</span> <span class="n">x</span> <span class="o">*</span> <span class="n">y</span>
+    <span class="k">return</span> <span class="nb">round</span><span class="p">(</span><span class="n">result</span><span class="p">,</span> <span class="n">precision</span><span class="p">)</span>
+
+<span class="k">def</span><span class="w"> </span><span class="nf">divide</span><span class="p">(</span><span class="n">numerator</span><span class="p">:</span> <span class="nb">float</span><span class="p">,</span> <span class="n">denominator</span><span class="p">:</span> <span class="nb">float</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">float</span><span class="p">:</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;Divide two numbers.&quot;&quot;&quot;</span>
+    <span class="k">if</span> <span class="n">denominator</span> <span class="o">==</span> <span class="mi">0</span><span class="p">:</span>
+        <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s2">&quot;Cannot divide by zero&quot;</span><span class="p">)</span>
+    <span class="k">return</span> <span class="n">numerator</span> <span class="o">/</span> <span class="n">denominator</span>
+</pre></div>
+</div>
+</section>
+<section id="step-by-step-guide">
+<h2>Step-by-Step Guide<a class="headerlink" href="#step-by-step-guide" title="Link to this heading"></a></h2>
+<section id="step-1-install-smpub">
+<h3>Step 1: Install smpub<a class="headerlink" href="#step-1-install-smpub" title="Link to this heading"></a></h3>
+<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span>pip<span class="w"> </span>install<span class="w"> </span>smpub
+
+<span class="c1"># Optional: for interactive mode</span>
+brew<span class="w"> </span>install<span class="w"> </span>dialog<span class="w">  </span><span class="c1"># macOS</span>
+</pre></div>
+</div>
+</section>
+<section id="step-2-create-handler-classes">
+<h3>Step 2: Create Handler Classes<a class="headerlink" href="#step-2-create-handler-classes" title="Link to this heading"></a></h3>
+<p>Create handlers that wrap your library’s functionality. Place them in a <code class="docutils literal notranslate"><span class="pre">handlers/</span></code> directory.</p>
+<p><strong>File</strong>: <code class="docutils literal notranslate"><span class="pre">myapp/handlers/calculator_handler.py</span></code></p>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="sd">&quot;&quot;&quot;Handler that exposes calculator functions via smpub.&quot;&quot;&quot;</span>
+
+<span class="kn">from</span><span class="w"> </span><span class="nn">smartswitch</span><span class="w"> </span><span class="kn">import</span> <span class="n">Switcher</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">smpub</span><span class="w"> </span><span class="kn">import</span> <span class="n">PublishedClass</span>
+
+<span class="c1"># Import your existing library</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">mylib</span><span class="w"> </span><span class="kn">import</span> <span class="n">calculator</span>
+
+
+<span class="k">class</span><span class="w"> </span><span class="nc">CalculatorHandler</span><span class="p">(</span><span class="n">PublishedClass</span><span class="p">):</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Handler for calculator operations.</span>
+
+<span class="sd">    Wraps the calculator library and exposes it via CLI/API.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+
+    <span class="c1"># Define slots (optional, but recommended for memory efficiency)</span>
+    <span class="vm">__slots__</span> <span class="o">=</span> <span class="p">(</span><span class="s1">&#39;history&#39;</span><span class="p">,)</span>
+
+    <span class="c1"># Create API with prefix to avoid naming conflicts</span>
+    <span class="n">api</span> <span class="o">=</span> <span class="n">Switcher</span><span class="p">(</span><span class="n">prefix</span><span class="o">=</span><span class="s1">&#39;calc_&#39;</span><span class="p">)</span>
+
+    <span class="k">def</span><span class="w"> </span><span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Initialize handler with empty history.&quot;&quot;&quot;</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">history</span> <span class="o">=</span> <span class="p">[]</span>
+
+    <span class="nd">@api</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">calc_add</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">a</span><span class="p">:</span> <span class="nb">int</span><span class="p">,</span> <span class="n">b</span><span class="p">:</span> <span class="nb">int</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">int</span><span class="p">:</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Add two integers.</span>
+
+<span class="sd">        Args:</span>
+<span class="sd">            a: First number</span>
+<span class="sd">            b: Second number</span>
+
+<span class="sd">        Returns:</span>
+<span class="sd">            Sum of a and b</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="n">result</span> <span class="o">=</span> <span class="n">calculator</span><span class="o">.</span><span class="n">add</span><span class="p">(</span><span class="n">a</span><span class="p">,</span> <span class="n">b</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">history</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;add(</span><span class="si">{</span><span class="n">a</span><span class="si">}</span><span class="s2">, </span><span class="si">{</span><span class="n">b</span><span class="si">}</span><span class="s2">) = </span><span class="si">{</span><span class="n">result</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
+        <span class="k">return</span> <span class="n">result</span>
+
+    <span class="nd">@api</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">calc_multiply</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">x</span><span class="p">:</span> <span class="nb">float</span><span class="p">,</span> <span class="n">y</span><span class="p">:</span> <span class="nb">float</span><span class="p">,</span> <span class="n">precision</span><span class="p">:</span> <span class="nb">int</span> <span class="o">=</span> <span class="mi">2</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">float</span><span class="p">:</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Multiply two numbers with optional precision.</span>
+
+<span class="sd">        Args:</span>
+<span class="sd">            x: First number</span>
+<span class="sd">            y: Second number</span>
+<span class="sd">            precision: Decimal places (default: 2)</span>
+
+<span class="sd">        Returns:</span>
+<span class="sd">            Product rounded to precision</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="n">result</span> <span class="o">=</span> <span class="n">calculator</span><span class="o">.</span><span class="n">multiply</span><span class="p">(</span><span class="n">x</span><span class="p">,</span> <span class="n">y</span><span class="p">,</span> <span class="n">precision</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">history</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;multiply(</span><span class="si">{</span><span class="n">x</span><span class="si">}</span><span class="s2">, </span><span class="si">{</span><span class="n">y</span><span class="si">}</span><span class="s2">) = </span><span class="si">{</span><span class="n">result</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
+        <span class="k">return</span> <span class="n">result</span>
+
+    <span class="nd">@api</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">calc_divide</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">numerator</span><span class="p">:</span> <span class="nb">float</span><span class="p">,</span> <span class="n">denominator</span><span class="p">:</span> <span class="nb">float</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">float</span><span class="p">:</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Divide two numbers.</span>
+
+<span class="sd">        Args:</span>
+<span class="sd">            numerator: Number to divide</span>
+<span class="sd">            denominator: Number to divide by</span>
+
+<span class="sd">        Returns:</span>
+<span class="sd">            Result of division</span>
+
+<span class="sd">        Raises:</span>
+<span class="sd">            ValueError: If denominator is zero</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="n">result</span> <span class="o">=</span> <span class="n">calculator</span><span class="o">.</span><span class="n">divide</span><span class="p">(</span><span class="n">numerator</span><span class="p">,</span> <span class="n">denominator</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">history</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;divide(</span><span class="si">{</span><span class="n">numerator</span><span class="si">}</span><span class="s2">, </span><span class="si">{</span><span class="n">denominator</span><span class="si">}</span><span class="s2">) = </span><span class="si">{</span><span class="n">result</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
+        <span class="k">return</span> <span class="n">result</span>
+
+    <span class="nd">@api</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">calc_history</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">list</span><span class="p">:</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Get calculation history.</span>
+
+<span class="sd">        Returns:</span>
+<span class="sd">            List of previous calculations</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">history</span>
+
+    <span class="nd">@api</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">calc_clear</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">str</span><span class="p">:</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Clear calculation history.</span>
+
+<span class="sd">        Returns:</span>
+<span class="sd">            Confirmation message</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">history</span><span class="o">.</span><span class="n">clear</span><span class="p">()</span>
+        <span class="k">return</span> <span class="s2">&quot;History cleared&quot;</span>
+</pre></div>
+</div>
+</section>
+<section id="step-3-create-publisher-application">
+<h3>Step 3: Create Publisher Application<a class="headerlink" href="#step-3-create-publisher-application" title="Link to this heading"></a></h3>
+<p><strong>File</strong>: <code class="docutils literal notranslate"><span class="pre">myapp/main.py</span></code></p>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="sd">&quot;&quot;&quot;Main application that publishes handlers.&quot;&quot;&quot;</span>
+
+<span class="kn">from</span><span class="w"> </span><span class="nn">smpub</span><span class="w"> </span><span class="kn">import</span> <span class="n">Publisher</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">myapp.handlers.calculator_handler</span><span class="w"> </span><span class="kn">import</span> <span class="n">CalculatorHandler</span>
+
+
+<span class="k">class</span><span class="w"> </span><span class="nc">CalculatorApp</span><span class="p">(</span><span class="n">Publisher</span><span class="p">):</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Calculator application.</span>
+
+<span class="sd">    Exposes calculator functionality via CLI and API.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+
+    <span class="k">def</span><span class="w"> </span><span class="nf">initialize</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Initialize and register handlers.</span>
+
+<span class="sd">        This method is called automatically by Publisher.__init__()</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="c1"># Create handler instances</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">calculator</span> <span class="o">=</span> <span class="n">CalculatorHandler</span><span class="p">()</span>
+
+        <span class="c1"># Publish handlers with exposure control</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">publish</span><span class="p">(</span>
+            <span class="s1">&#39;calc&#39;</span><span class="p">,</span>                    <span class="c1"># Handler name (used in CLI)</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">calculator</span><span class="p">,</span>           <span class="c1"># Handler instance</span>
+            <span class="n">cli</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span>                  <span class="c1"># Enable CLI access</span>
+            <span class="n">openapi</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span>              <span class="c1"># Enable API access (future)</span>
+            <span class="n">cli_name</span><span class="o">=</span><span class="s1">&#39;calc&#39;</span><span class="p">,</span>           <span class="c1"># Optional: override CLI name</span>
+            <span class="n">http_path</span><span class="o">=</span><span class="s1">&#39;/api/calc&#39;</span>      <span class="c1"># Optional: API path</span>
+        <span class="p">)</span>
+
+
+<span class="k">def</span><span class="w"> </span><span class="nf">main</span><span class="p">():</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;Entry point for the application.&quot;&quot;&quot;</span>
+    <span class="n">app</span> <span class="o">=</span> <span class="n">CalculatorApp</span><span class="p">()</span>
+    <span class="n">app</span><span class="o">.</span><span class="n">run</span><span class="p">()</span>  <span class="c1"># Auto-detects CLI or HTTP mode</span>
+
+
+<span class="k">if</span> <span class="vm">__name__</span> <span class="o">==</span> <span class="s2">&quot;__main__&quot;</span><span class="p">:</span>
+    <span class="n">main</span><span class="p">()</span>
+</pre></div>
+</div>
+</section>
+<section id="step-4-create-entry-point">
+<h3>Step 4: Create Entry Point<a class="headerlink" href="#step-4-create-entry-point" title="Link to this heading"></a></h3>
+<p><strong>File</strong>: <code class="docutils literal notranslate"><span class="pre">pyproject.toml</span></code> (add to your project)</p>
+<div class="highlight-toml notranslate"><div class="highlight"><pre><span></span><span class="k">[project.scripts]</span>
+<span class="n">mycalc</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="s2">&quot;myapp.main:main&quot;</span>
+</pre></div>
+</div>
+<p>Or create a simple script:</p>
+<p><strong>File</strong>: <code class="docutils literal notranslate"><span class="pre">mycalc</span></code> (make executable with <code class="docutils literal notranslate"><span class="pre">chmod</span> <span class="pre">+x</span> <span class="pre">mycalc</span></code>)</p>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="ch">#!/usr/bin/env python</span>
+<span class="sd">&quot;&quot;&quot;Calculator CLI entry point.&quot;&quot;&quot;</span>
+
+<span class="kn">from</span><span class="w"> </span><span class="nn">myapp.main</span><span class="w"> </span><span class="kn">import</span> <span class="n">main</span>
+
+<span class="k">if</span> <span class="vm">__name__</span> <span class="o">==</span> <span class="s2">&quot;__main__&quot;</span><span class="p">:</span>
+    <span class="n">main</span><span class="p">()</span>
+</pre></div>
+</div>
+</section>
+<section id="step-5-test-your-cli">
+<h3>Step 5: Test Your CLI<a class="headerlink" href="#step-5-test-your-cli" title="Link to this heading"></a></h3>
+<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span><span class="c1"># Install in development mode</span>
+pip<span class="w"> </span>install<span class="w"> </span>-e<span class="w"> </span>.
+
+<span class="c1"># Test the CLI</span>
+mycalc<span class="w"> </span>--help
+<span class="c1"># Shows: CalculatorApp with &#39;calc&#39; handler</span>
+
+mycalc<span class="w"> </span>calc<span class="w"> </span>--help
+<span class="c1"># Shows: All calculator methods with parameters</span>
+
+mycalc<span class="w"> </span>calc<span class="w"> </span>add<span class="w"> </span><span class="m">10</span><span class="w"> </span><span class="m">20</span>
+<span class="c1"># Output: 30</span>
+
+mycalc<span class="w"> </span>calc<span class="w"> </span>multiply<span class="w"> </span><span class="m">3</span>.5<span class="w"> </span><span class="m">2</span>.0
+<span class="c1"># Output: 7.0</span>
+
+mycalc<span class="w"> </span>calc<span class="w"> </span>multiply<span class="w"> </span><span class="m">3</span>.5<span class="w"> </span><span class="m">2</span>.0<span class="w"> </span><span class="m">3</span>
+<span class="c1"># Output: 7.000 (3 decimal places)</span>
+
+<span class="c1"># Interactive mode</span>
+mycalc<span class="w"> </span>calc<span class="w"> </span>divide<span class="w"> </span>--interactive
+<span class="c1"># Prompts for numerator and denominator</span>
+
+<span class="c1"># Check history</span>
+mycalc<span class="w"> </span>calc<span class="w"> </span><span class="nb">history</span>
+<span class="c1"># Output: List of calculations</span>
+</pre></div>
+</div>
+</section>
+</section>
+<section id="handler-requirements">
+<h2>Handler Requirements<a class="headerlink" href="#handler-requirements" title="Link to this heading"></a></h2>
+<section id="required-elements">
+<h3>Required Elements<a class="headerlink" href="#required-elements" title="Link to this heading"></a></h3>
+<ol class="arabic">
+<li><p><strong>Switcher API definition</strong>:</p>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="n">api</span> <span class="o">=</span> <span class="n">Switcher</span><span class="p">(</span><span class="n">prefix</span><span class="o">=</span><span class="s1">&#39;handler_&#39;</span><span class="p">)</span>
+</pre></div>
+</div>
+</li>
+<li><p><strong>Type-hinted methods</strong>:</p>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="nd">@api</span>
+<span class="k">def</span><span class="w"> </span><span class="nf">handler_method</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">param</span><span class="p">:</span> <span class="nb">int</span><span class="p">,</span> <span class="n">optional</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="s2">&quot;default&quot;</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">str</span><span class="p">:</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;Docstring for help text.&quot;&quot;&quot;</span>
+    <span class="k">pass</span>
+</pre></div>
+</div>
+</li>
+<li><p><strong>Clear docstrings</strong> (for auto-generated help):</p>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">One-line summary.</span>
+
+<span class="sd">Longer description (optional).</span>
+
+<span class="sd">Args:</span>
+<span class="sd">    param: Description</span>
+
+<span class="sd">Returns:</span>
+<span class="sd">    Description</span>
+<span class="sd">&quot;&quot;&quot;</span>
+</pre></div>
+</div>
+</li>
+</ol>
+</section>
+<section id="optional-but-recommended">
+<h3>Optional but Recommended<a class="headerlink" href="#optional-but-recommended" title="Link to this heading"></a></h3>
+<ol class="arabic">
+<li><p><strong>Use PublishedClass</strong> when using <code class="docutils literal notranslate"><span class="pre">__slots__</span></code>:</p>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="kn">from</span><span class="w"> </span><span class="nn">smpub</span><span class="w"> </span><span class="kn">import</span> <span class="n">PublishedClass</span>
+
+<span class="k">class</span><span class="w"> </span><span class="nc">MyHandler</span><span class="p">(</span><span class="n">PublishedClass</span><span class="p">):</span>
+    <span class="vm">__slots__</span> <span class="o">=</span> <span class="p">(</span><span class="s1">&#39;data&#39;</span><span class="p">,</span> <span class="s1">&#39;config&#39;</span><span class="p">)</span>  <span class="c1"># Your slots</span>
+    <span class="c1"># &#39;publisher&#39; slot provided by PublishedClass</span>
+</pre></div>
+</div>
+</li>
+<li><p><strong>Prefix convention</strong>: Use prefix that matches handler purpose:</p>
+<ul class="simple">
+<li><p><code class="docutils literal notranslate"><span class="pre">user_</span></code> for user operations</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">file_</span></code> for file operations</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">db_</span></code> for database operations</p></li>
+</ul>
+</li>
+<li><p><strong>State management</strong>: Store handler state in instance variables:</p>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="k">def</span><span class="w"> </span><span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+    <span class="bp">self</span><span class="o">.</span><span class="n">cache</span> <span class="o">=</span> <span class="p">{}</span>
+    <span class="bp">self</span><span class="o">.</span><span class="n">connections</span> <span class="o">=</span> <span class="p">[]</span>
+</pre></div>
+</div>
+</li>
+</ol>
+</section>
+</section>
+<section id="best-practices">
+<h2>Best Practices<a class="headerlink" href="#best-practices" title="Link to this heading"></a></h2>
+<section id="separation-of-concerns">
+<h3>1. Separation of Concerns<a class="headerlink" href="#separation-of-concerns" title="Link to this heading"></a></h3>
+<p><strong>✅ Good</strong>: Thin handlers that delegate to business logic</p>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="k">class</span><span class="w"> </span><span class="nc">DataHandler</span><span class="p">(</span><span class="n">PublishedClass</span><span class="p">):</span>
+    <span class="n">api</span> <span class="o">=</span> <span class="n">Switcher</span><span class="p">(</span><span class="n">prefix</span><span class="o">=</span><span class="s1">&#39;data_&#39;</span><span class="p">)</span>
+
+    <span class="k">def</span><span class="w"> </span><span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">processor</span> <span class="o">=</span> <span class="n">DataProcessor</span><span class="p">()</span>  <span class="c1"># Your library</span>
+
+    <span class="nd">@api</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">data_process</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">input_file</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span> <span class="nb">format</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="s1">&#39;json&#39;</span><span class="p">):</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Process data file.&quot;&quot;&quot;</span>
+        <span class="c1"># Validate with Pydantic (automatic)</span>
+        <span class="c1"># Delegate to business logic</span>
+        <span class="n">result</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">processor</span><span class="o">.</span><span class="n">process</span><span class="p">(</span><span class="n">input_file</span><span class="p">,</span> <span class="nb">format</span><span class="p">)</span>
+        <span class="k">return</span> <span class="n">result</span>
+</pre></div>
+</div>
+<p><strong>❌ Bad</strong>: Business logic mixed in handler</p>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="k">class</span><span class="w"> </span><span class="nc">DataHandler</span><span class="p">(</span><span class="n">PublishedClass</span><span class="p">):</span>
+    <span class="n">api</span> <span class="o">=</span> <span class="n">Switcher</span><span class="p">(</span><span class="n">prefix</span><span class="o">=</span><span class="s1">&#39;data_&#39;</span><span class="p">)</span>
+
+    <span class="nd">@api</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">data_process</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">input_file</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span> <span class="nb">format</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="s1">&#39;json&#39;</span><span class="p">):</span>
+        <span class="c1"># Avoid putting complex logic here</span>
+        <span class="k">with</span> <span class="nb">open</span><span class="p">(</span><span class="n">input_file</span><span class="p">)</span> <span class="k">as</span> <span class="n">f</span><span class="p">:</span>
+            <span class="n">data</span> <span class="o">=</span> <span class="n">json</span><span class="o">.</span><span class="n">load</span><span class="p">(</span><span class="n">f</span><span class="p">)</span>
+        <span class="c1"># ... complex processing ...</span>
+        <span class="k">return</span> <span class="n">processed_data</span>
+</pre></div>
+</div>
+</section>
+<section id="type-hints-for-free-validation">
+<h3>2. Type Hints for Free Validation<a class="headerlink" href="#type-hints-for-free-validation" title="Link to this heading"></a></h3>
+<p><strong>✅ Good</strong>: Use specific types</p>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="nd">@api</span>
+<span class="k">def</span><span class="w"> </span><span class="nf">calc_power</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">base</span><span class="p">:</span> <span class="nb">float</span><span class="p">,</span> <span class="n">exponent</span><span class="p">:</span> <span class="nb">int</span><span class="p">,</span> <span class="n">modulo</span><span class="p">:</span> <span class="nb">int</span> <span class="o">=</span> <span class="kc">None</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">float</span><span class="p">:</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;Calculate power with optional modulo.&quot;&quot;&quot;</span>
+    <span class="n">result</span> <span class="o">=</span> <span class="nb">pow</span><span class="p">(</span><span class="n">base</span><span class="p">,</span> <span class="n">exponent</span><span class="p">,</span> <span class="n">modulo</span><span class="p">)</span>
+    <span class="k">return</span> <span class="n">result</span>
+</pre></div>
+</div>
+<p><strong>Benefits</strong>:</p>
+<ul class="simple">
+<li><p>Automatic validation: <code class="docutils literal notranslate"><span class="pre">&quot;10&quot;</span></code> → <code class="docutils literal notranslate"><span class="pre">10</span></code> (int)</p></li>
+<li><p>Clear error messages on invalid input</p></li>
+<li><p>Type information in help text</p></li>
+</ul>
+</section>
+<section id="clear-documentation">
+<h3>3. Clear Documentation<a class="headerlink" href="#clear-documentation" title="Link to this heading"></a></h3>
+<p><strong>✅ Good</strong>: Comprehensive docstrings</p>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="nd">@api</span>
+<span class="k">def</span><span class="w"> </span><span class="nf">user_create</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">username</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span> <span class="n">email</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span> <span class="n">role</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="s1">&#39;user&#39;</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">dict</span><span class="p">:</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Create a new user account.</span>
+
+<span class="sd">    Creates a user with the specified credentials and assigns</span>
+<span class="sd">    the given role. Email must be unique.</span>
+
+<span class="sd">    Args:</span>
+<span class="sd">        username: Unique username (3-20 chars)</span>
+<span class="sd">        email: Valid email address</span>
+<span class="sd">        role: User role (default: &#39;user&#39;, options: &#39;user&#39;, &#39;admin&#39;)</span>
+
+<span class="sd">    Returns:</span>
+<span class="sd">        Dictionary with user details and ID</span>
+
+<span class="sd">    Raises:</span>
+<span class="sd">        ValueError: If email already exists</span>
+
+<span class="sd">    Example:</span>
+<span class="sd">        &gt;&gt;&gt; user_create(&quot;alice&quot;, &quot;alice@example.com&quot;, &quot;admin&quot;)</span>
+<span class="sd">        {&quot;id&quot;: 1, &quot;username&quot;: &quot;alice&quot;, &quot;role&quot;: &quot;admin&quot;}</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">user_service</span><span class="o">.</span><span class="n">create</span><span class="p">(</span><span class="n">username</span><span class="p">,</span> <span class="n">email</span><span class="p">,</span> <span class="n">role</span><span class="p">)</span>
+</pre></div>
+</div>
+</section>
+<section id="error-handling">
+<h3>4. Error Handling<a class="headerlink" href="#error-handling" title="Link to this heading"></a></h3>
+<p><strong>✅ Good</strong>: Let exceptions bubble up with clear messages</p>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="nd">@api</span>
+<span class="k">def</span><span class="w"> </span><span class="nf">file_read</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">path</span><span class="p">:</span> <span class="nb">str</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">str</span><span class="p">:</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;Read file contents.&quot;&quot;&quot;</span>
+    <span class="k">if</span> <span class="ow">not</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">exists</span><span class="p">(</span><span class="n">path</span><span class="p">):</span>
+        <span class="k">raise</span> <span class="ne">FileNotFoundError</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;File not found: </span><span class="si">{</span><span class="n">path</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
+
+    <span class="k">try</span><span class="p">:</span>
+        <span class="k">with</span> <span class="nb">open</span><span class="p">(</span><span class="n">path</span><span class="p">)</span> <span class="k">as</span> <span class="n">f</span><span class="p">:</span>
+            <span class="k">return</span> <span class="n">f</span><span class="o">.</span><span class="n">read</span><span class="p">()</span>
+    <span class="k">except</span> <span class="ne">PermissionError</span><span class="p">:</span>
+        <span class="k">raise</span> <span class="ne">PermissionError</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Cannot read file: </span><span class="si">{</span><span class="n">path</span><span class="si">}</span><span class="s2"> (permission denied)&quot;</span><span class="p">)</span>
+</pre></div>
+</div>
+<p>smpub will catch and display exceptions properly in CLI.</p>
+</section>
+<section id="handler-organization">
+<h3>5. Handler Organization<a class="headerlink" href="#handler-organization" title="Link to this heading"></a></h3>
+<p><strong>For simple apps</strong>: Single handler file</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span>myapp/
+├── main.py
+└── handler.py
+</pre></div>
+</div>
+<p><strong>For complex apps</strong>: Multiple handlers by domain</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span>myapp/
+├── main.py
+└── handlers/
+    ├── __init__.py
+    ├── user_handler.py
+    ├── file_handler.py
+    └── database_handler.py
+</pre></div>
+</div>
+</section>
+<section id="publisher-best-practices">
+<h3>6. Publisher Best Practices<a class="headerlink" href="#publisher-best-practices" title="Link to this heading"></a></h3>
+<p><strong>✅ Good</strong>: Descriptive names and exposure control</p>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="k">def</span><span class="w"> </span><span class="nf">initialize</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+    <span class="c1"># Public handlers (CLI + API)</span>
+    <span class="bp">self</span><span class="o">.</span><span class="n">users</span> <span class="o">=</span> <span class="n">UserHandler</span><span class="p">()</span>
+    <span class="bp">self</span><span class="o">.</span><span class="n">publish</span><span class="p">(</span><span class="s1">&#39;users&#39;</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">users</span><span class="p">,</span> <span class="n">cli</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">openapi</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+
+    <span class="c1"># Internal handlers (CLI only)</span>
+    <span class="bp">self</span><span class="o">.</span><span class="n">admin</span> <span class="o">=</span> <span class="n">AdminHandler</span><span class="p">()</span>
+    <span class="bp">self</span><span class="o">.</span><span class="n">publish</span><span class="p">(</span><span class="s1">&#39;admin&#39;</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">admin</span><span class="p">,</span> <span class="n">cli</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">openapi</span><span class="o">=</span><span class="kc">False</span><span class="p">)</span>
+
+    <span class="c1"># Monitoring (neither CLI nor API)</span>
+    <span class="bp">self</span><span class="o">.</span><span class="n">metrics</span> <span class="o">=</span> <span class="n">MetricsHandler</span><span class="p">()</span>
+    <span class="bp">self</span><span class="o">.</span><span class="n">publish</span><span class="p">(</span><span class="s1">&#39;metrics&#39;</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">metrics</span><span class="p">,</span> <span class="n">cli</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span> <span class="n">openapi</span><span class="o">=</span><span class="kc">False</span><span class="p">)</span>
+</pre></div>
+</div>
+</section>
+</section>
+<section id="common-patterns">
+<h2>Common Patterns<a class="headerlink" href="#common-patterns" title="Link to this heading"></a></h2>
+<section id="pattern-1-database-operations">
+<h3>Pattern 1: Database Operations<a class="headerlink" href="#pattern-1-database-operations" title="Link to this heading"></a></h3>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="k">class</span><span class="w"> </span><span class="nc">DatabaseHandler</span><span class="p">(</span><span class="n">PublishedClass</span><span class="p">):</span>
+    <span class="vm">__slots__</span> <span class="o">=</span> <span class="p">(</span><span class="s1">&#39;db&#39;</span><span class="p">,</span> <span class="s1">&#39;connection&#39;</span><span class="p">)</span>
+    <span class="n">api</span> <span class="o">=</span> <span class="n">Switcher</span><span class="p">(</span><span class="n">prefix</span><span class="o">=</span><span class="s1">&#39;db_&#39;</span><span class="p">)</span>
+
+    <span class="k">def</span><span class="w"> </span><span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">connection_string</span><span class="p">:</span> <span class="nb">str</span><span class="p">):</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">connection_string</span> <span class="o">=</span> <span class="n">connection_string</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">connection</span> <span class="o">=</span> <span class="kc">None</span>
+
+    <span class="nd">@api</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">db_connect</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">str</span><span class="p">:</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Connect to database.&quot;&quot;&quot;</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">connection</span> <span class="o">=</span> <span class="n">create_connection</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">connection_string</span><span class="p">)</span>
+        <span class="k">return</span> <span class="s2">&quot;Connected&quot;</span>
+
+    <span class="nd">@api</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">db_query</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">sql</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span> <span class="n">params</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="kc">None</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">list</span><span class="p">:</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Execute SQL query.&quot;&quot;&quot;</span>
+        <span class="k">if</span> <span class="ow">not</span> <span class="bp">self</span><span class="o">.</span><span class="n">connection</span><span class="p">:</span>
+            <span class="k">raise</span> <span class="ne">RuntimeError</span><span class="p">(</span><span class="s2">&quot;Not connected. Run &#39;db connect&#39; first&quot;</span><span class="p">)</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">connection</span><span class="o">.</span><span class="n">execute</span><span class="p">(</span><span class="n">sql</span><span class="p">,</span> <span class="n">params</span><span class="p">)</span>
+</pre></div>
+</div>
+</section>
+<section id="pattern-2-file-operations">
+<h3>Pattern 2: File Operations<a class="headerlink" href="#pattern-2-file-operations" title="Link to this heading"></a></h3>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="k">class</span><span class="w"> </span><span class="nc">FileHandler</span><span class="p">(</span><span class="n">PublishedClass</span><span class="p">):</span>
+    <span class="vm">__slots__</span> <span class="o">=</span> <span class="p">(</span><span class="s1">&#39;current_dir&#39;</span><span class="p">,)</span>
+    <span class="n">api</span> <span class="o">=</span> <span class="n">Switcher</span><span class="p">(</span><span class="n">prefix</span><span class="o">=</span><span class="s1">&#39;file_&#39;</span><span class="p">)</span>
+
+    <span class="k">def</span><span class="w"> </span><span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">current_dir</span> <span class="o">=</span> <span class="n">os</span><span class="o">.</span><span class="n">getcwd</span><span class="p">()</span>
+
+    <span class="nd">@api</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">file_list</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">pattern</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="s1">&#39;*&#39;</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">list</span><span class="p">:</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;List files matching pattern.&quot;&quot;&quot;</span>
+        <span class="k">return</span> <span class="n">glob</span><span class="o">.</span><span class="n">glob</span><span class="p">(</span><span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">current_dir</span><span class="p">,</span> <span class="n">pattern</span><span class="p">))</span>
+
+    <span class="nd">@api</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">file_read</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">filename</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span> <span class="n">encoding</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="s1">&#39;utf-8&#39;</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">str</span><span class="p">:</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Read file contents.&quot;&quot;&quot;</span>
+        <span class="n">path</span> <span class="o">=</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">current_dir</span><span class="p">,</span> <span class="n">filename</span><span class="p">)</span>
+        <span class="k">with</span> <span class="nb">open</span><span class="p">(</span><span class="n">path</span><span class="p">,</span> <span class="n">encoding</span><span class="o">=</span><span class="n">encoding</span><span class="p">)</span> <span class="k">as</span> <span class="n">f</span><span class="p">:</span>
+            <span class="k">return</span> <span class="n">f</span><span class="o">.</span><span class="n">read</span><span class="p">()</span>
+</pre></div>
+</div>
+</section>
+<section id="pattern-3-service-integration">
+<h3>Pattern 3: Service Integration<a class="headerlink" href="#pattern-3-service-integration" title="Link to this heading"></a></h3>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="k">class</span><span class="w"> </span><span class="nc">APIHandler</span><span class="p">(</span><span class="n">PublishedClass</span><span class="p">):</span>
+    <span class="vm">__slots__</span> <span class="o">=</span> <span class="p">(</span><span class="s1">&#39;client&#39;</span><span class="p">,</span> <span class="s1">&#39;api_key&#39;</span><span class="p">)</span>
+    <span class="n">api</span> <span class="o">=</span> <span class="n">Switcher</span><span class="p">(</span><span class="n">prefix</span><span class="o">=</span><span class="s1">&#39;api_&#39;</span><span class="p">)</span>
+
+    <span class="k">def</span><span class="w"> </span><span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">api_key</span><span class="p">:</span> <span class="nb">str</span><span class="p">):</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">api_key</span> <span class="o">=</span> <span class="n">api_key</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">client</span> <span class="o">=</span> <span class="n">APIClient</span><span class="p">(</span><span class="n">api_key</span><span class="p">)</span>
+
+    <span class="nd">@api</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">api_get</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">endpoint</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span> <span class="n">params</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="kc">None</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">dict</span><span class="p">:</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Make GET request to API.&quot;&quot;&quot;</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">client</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="n">endpoint</span><span class="p">,</span> <span class="n">params</span><span class="p">)</span>
+
+    <span class="nd">@api</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">api_post</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">endpoint</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span> <span class="n">data</span><span class="p">:</span> <span class="nb">str</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">dict</span><span class="p">:</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Make POST request to API.&quot;&quot;&quot;</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">client</span><span class="o">.</span><span class="n">post</span><span class="p">(</span><span class="n">endpoint</span><span class="p">,</span> <span class="n">json</span><span class="o">.</span><span class="n">loads</span><span class="p">(</span><span class="n">data</span><span class="p">))</span>
+</pre></div>
+</div>
+</section>
+</section>
+<section id="complete-example">
+<h2>Complete Example<a class="headerlink" href="#complete-example" title="Link to this heading"></a></h2>
+<p>Here’s a complete working example that wraps a hypothetical data processing library:</p>
+<p><strong>File</strong>: <code class="docutils literal notranslate"><span class="pre">myapp/handlers/data_handler.py</span></code></p>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="sd">&quot;&quot;&quot;Handler for data processing operations.&quot;&quot;&quot;</span>
+
+<span class="kn">from</span><span class="w"> </span><span class="nn">smartswitch</span><span class="w"> </span><span class="kn">import</span> <span class="n">Switcher</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">smpub</span><span class="w"> </span><span class="kn">import</span> <span class="n">PublishedClass</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">mylib.processor</span><span class="w"> </span><span class="kn">import</span> <span class="n">DataProcessor</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">mylib.validators</span><span class="w"> </span><span class="kn">import</span> <span class="n">SchemaValidator</span>
+
+
+<span class="k">class</span><span class="w"> </span><span class="nc">DataHandler</span><span class="p">(</span><span class="n">PublishedClass</span><span class="p">):</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Data processing handler.</span>
+
+<span class="sd">    Provides CLI/API access to data processing operations.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+
+    <span class="vm">__slots__</span> <span class="o">=</span> <span class="p">(</span><span class="s1">&#39;processor&#39;</span><span class="p">,</span> <span class="s1">&#39;validator&#39;</span><span class="p">,</span> <span class="s1">&#39;cache&#39;</span><span class="p">)</span>
+    <span class="n">api</span> <span class="o">=</span> <span class="n">Switcher</span><span class="p">(</span><span class="n">prefix</span><span class="o">=</span><span class="s1">&#39;data_&#39;</span><span class="p">)</span>
+
+    <span class="k">def</span><span class="w"> </span><span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">cache_size</span><span class="p">:</span> <span class="nb">int</span> <span class="o">=</span> <span class="mi">100</span><span class="p">):</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Initialize data handler.</span>
+
+<span class="sd">        Args:</span>
+<span class="sd">            cache_size: Maximum number of cached results</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">processor</span> <span class="o">=</span> <span class="n">DataProcessor</span><span class="p">()</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">validator</span> <span class="o">=</span> <span class="n">SchemaValidator</span><span class="p">()</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">cache</span> <span class="o">=</span> <span class="p">{}</span>
+
+    <span class="nd">@api</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">data_load</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">filename</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span> <span class="nb">format</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="s1">&#39;json&#39;</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">dict</span><span class="p">:</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Load data file.</span>
+
+<span class="sd">        Args:</span>
+<span class="sd">            filename: Path to data file</span>
+<span class="sd">            format: File format (json, csv, xml)</span>
+
+<span class="sd">        Returns:</span>
+<span class="sd">            Parsed data as dictionary</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">if</span> <span class="n">filename</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">cache</span><span class="p">:</span>
+            <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">cache</span><span class="p">[</span><span class="n">filename</span><span class="p">]</span>
+
+        <span class="n">data</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">processor</span><span class="o">.</span><span class="n">load</span><span class="p">(</span><span class="n">filename</span><span class="p">,</span> <span class="nb">format</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">cache</span><span class="p">[</span><span class="n">filename</span><span class="p">]</span> <span class="o">=</span> <span class="n">data</span>
+        <span class="k">return</span> <span class="n">data</span>
+
+    <span class="nd">@api</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">data_transform</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">input_file</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span> <span class="n">output_file</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span>
+                      <span class="n">operations</span><span class="p">:</span> <span class="nb">str</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">str</span><span class="p">:</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Transform data file.</span>
+
+<span class="sd">        Args:</span>
+<span class="sd">            input_file: Source file</span>
+<span class="sd">            output_file: Destination file</span>
+<span class="sd">            operations: Comma-separated operations (e.g., &quot;sort,dedupe,validate&quot;)</span>
+
+<span class="sd">        Returns:</span>
+<span class="sd">            Success message with statistics</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="n">data</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">data_load</span><span class="p">(</span><span class="n">input_file</span><span class="p">)</span>
+
+        <span class="n">ops</span> <span class="o">=</span> <span class="p">[</span><span class="n">op</span><span class="o">.</span><span class="n">strip</span><span class="p">()</span> <span class="k">for</span> <span class="n">op</span> <span class="ow">in</span> <span class="n">operations</span><span class="o">.</span><span class="n">split</span><span class="p">(</span><span class="s1">&#39;,&#39;</span><span class="p">)]</span>
+        <span class="k">for</span> <span class="n">op</span> <span class="ow">in</span> <span class="n">ops</span><span class="p">:</span>
+            <span class="n">data</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">processor</span><span class="o">.</span><span class="n">apply_operation</span><span class="p">(</span><span class="n">data</span><span class="p">,</span> <span class="n">op</span><span class="p">)</span>
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">processor</span><span class="o">.</span><span class="n">save</span><span class="p">(</span><span class="n">data</span><span class="p">,</span> <span class="n">output_file</span><span class="p">)</span>
+        <span class="k">return</span> <span class="sa">f</span><span class="s2">&quot;Processed </span><span class="si">{</span><span class="nb">len</span><span class="p">(</span><span class="n">data</span><span class="p">)</span><span class="si">}</span><span class="s2"> records with </span><span class="si">{</span><span class="nb">len</span><span class="p">(</span><span class="n">ops</span><span class="p">)</span><span class="si">}</span><span class="s2"> operations&quot;</span>
+
+    <span class="nd">@api</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">data_validate</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">filename</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span> <span class="n">schema</span><span class="p">:</span> <span class="nb">str</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">dict</span><span class="p">:</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Validate data against schema.</span>
+
+<span class="sd">        Args:</span>
+<span class="sd">            filename: Data file to validate</span>
+<span class="sd">            schema: Path to schema file</span>
+
+<span class="sd">        Returns:</span>
+<span class="sd">            Validation results with errors and warnings</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="n">data</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">data_load</span><span class="p">(</span><span class="n">filename</span><span class="p">)</span>
+        <span class="n">results</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">validator</span><span class="o">.</span><span class="n">validate</span><span class="p">(</span><span class="n">data</span><span class="p">,</span> <span class="n">schema</span><span class="p">)</span>
+
+        <span class="k">return</span> <span class="p">{</span>
+            <span class="s1">&#39;valid&#39;</span><span class="p">:</span> <span class="n">results</span><span class="o">.</span><span class="n">is_valid</span><span class="p">,</span>
+            <span class="s1">&#39;errors&#39;</span><span class="p">:</span> <span class="n">results</span><span class="o">.</span><span class="n">errors</span><span class="p">,</span>
+            <span class="s1">&#39;warnings&#39;</span><span class="p">:</span> <span class="n">results</span><span class="o">.</span><span class="n">warnings</span>
+        <span class="p">}</span>
+
+    <span class="nd">@api</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">data_stats</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">filename</span><span class="p">:</span> <span class="nb">str</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">dict</span><span class="p">:</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Get statistics about data file.</span>
+
+<span class="sd">        Args:</span>
+<span class="sd">            filename: Data file to analyze</span>
+
+<span class="sd">        Returns:</span>
+<span class="sd">            Statistics dictionary</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="n">data</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">data_load</span><span class="p">(</span><span class="n">filename</span><span class="p">)</span>
+
+        <span class="k">return</span> <span class="p">{</span>
+            <span class="s1">&#39;records&#39;</span><span class="p">:</span> <span class="nb">len</span><span class="p">(</span><span class="n">data</span><span class="p">),</span>
+            <span class="s1">&#39;fields&#39;</span><span class="p">:</span> <span class="nb">list</span><span class="p">(</span><span class="n">data</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span><span class="o">.</span><span class="n">keys</span><span class="p">())</span> <span class="k">if</span> <span class="n">data</span> <span class="k">else</span> <span class="p">[],</span>
+            <span class="s1">&#39;size_mb&#39;</span><span class="p">:</span> <span class="bp">self</span><span class="o">.</span><span class="n">processor</span><span class="o">.</span><span class="n">get_size</span><span class="p">(</span><span class="n">filename</span><span class="p">)</span> <span class="o">/</span> <span class="p">(</span><span class="mi">1024</span> <span class="o">*</span> <span class="mi">1024</span><span class="p">)</span>
+        <span class="p">}</span>
+</pre></div>
+</div>
+<p><strong>File</strong>: <code class="docutils literal notranslate"><span class="pre">myapp/main.py</span></code></p>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="sd">&quot;&quot;&quot;Main application.&quot;&quot;&quot;</span>
+
+<span class="kn">from</span><span class="w"> </span><span class="nn">smpub</span><span class="w"> </span><span class="kn">import</span> <span class="n">Publisher</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">myapp.handlers.data_handler</span><span class="w"> </span><span class="kn">import</span> <span class="n">DataHandler</span>
+
+
+<span class="k">class</span><span class="w"> </span><span class="nc">DataApp</span><span class="p">(</span><span class="n">Publisher</span><span class="p">):</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;Data processing application.&quot;&quot;&quot;</span>
+
+    <span class="k">def</span><span class="w"> </span><span class="nf">initialize</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Register handlers.&quot;&quot;&quot;</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">data</span> <span class="o">=</span> <span class="n">DataHandler</span><span class="p">(</span><span class="n">cache_size</span><span class="o">=</span><span class="mi">50</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">publish</span><span class="p">(</span><span class="s1">&#39;data&#39;</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">data</span><span class="p">,</span> <span class="n">cli</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">openapi</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+
+
+<span class="k">def</span><span class="w"> </span><span class="nf">main</span><span class="p">():</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;Entry point.&quot;&quot;&quot;</span>
+    <span class="n">app</span> <span class="o">=</span> <span class="n">DataApp</span><span class="p">()</span>
+    <span class="n">app</span><span class="o">.</span><span class="n">run</span><span class="p">()</span>
+
+
+<span class="k">if</span> <span class="vm">__name__</span> <span class="o">==</span> <span class="s2">&quot;__main__&quot;</span><span class="p">:</span>
+    <span class="n">main</span><span class="p">()</span>
+</pre></div>
+</div>
+<p><strong>Usage</strong>:</p>
+<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span><span class="c1"># Load and process data</span>
+dataapp<span class="w"> </span>data<span class="w"> </span>load<span class="w"> </span>input.json
+dataapp<span class="w"> </span>data<span class="w"> </span>transform<span class="w"> </span>input.json<span class="w"> </span>output.json<span class="w"> </span><span class="s2">&quot;sort,dedupe,validate&quot;</span>
+dataapp<span class="w"> </span>data<span class="w"> </span>validate<span class="w"> </span>output.json<span class="w"> </span>schema.json
+dataapp<span class="w"> </span>data<span class="w"> </span>stats<span class="w"> </span>output.json
+
+<span class="c1"># Interactive mode</span>
+dataapp<span class="w"> </span>data<span class="w"> </span>transform<span class="w"> </span>--interactive
+<span class="c1"># Prompts for: input_file, output_file, operations</span>
+</pre></div>
+</div>
+</section>
+<section id="summary">
+<h2>Summary<a class="headerlink" href="#summary" title="Link to this heading"></a></h2>
+<p><strong>Key Takeaways</strong>:</p>
+<ol class="arabic simple">
+<li><p><strong>Handlers wrap business logic</strong> - Keep them thin</p></li>
+<li><p><strong>Use type hints</strong> - Get free validation</p></li>
+<li><p><strong>Write clear docstrings</strong> - Auto-generated help</p></li>
+<li><p><strong>Choose exposure carefully</strong> - CLI, API, or both</p></li>
+<li><p><strong>Let smpub handle</strong> - Validation, errors, help generation</p></li>
+</ol>
+<p><strong>Next Steps</strong>:</p>
+<ul class="simple">
+<li><p>Read the <a class="reference internal" href="../appendix/architecture.html"><span class="std std-doc">Architecture documentation</span></a></p></li>
+<li><p>Check the test files for implementation examples</p></li>
+<li><p>See <a class="reference internal" href="../examples/index.html"><span class="std std-doc">examples</span></a> for working code</p></li>
+</ul>
+<hr class="docutils" />
+<p><strong>Questions?</strong> Open an issue at https://github.com/genropy/smpub/issues</p>
+</section>
+</section>
+
+
+           </div>
+          </div>
+          <footer><div class="rst-footer-buttons" role="navigation" aria-label="Footer">
+        <a href="quickstart.html" class="btn btn-neutral float-left" title="Quick Start" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left" aria-hidden="true"></span> Previous</a>
+        <a href="../guide/publisher.html" class="btn btn-neutral float-right" title="Publisher Class" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right" aria-hidden="true"></span></a>
+    </div>
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>&#169; Copyright 2025, Genropy Team.</p>
+  </div>
+
+  Built with <a href="https://www.sphinx-doc.org/">Sphinx</a> using a
+    <a href="https://github.com/readthedocs/sphinx_rtd_theme">theme</a>
+    provided by <a href="https://readthedocs.org">Read the Docs</a>.
+   
+
+</footer>
+        </div>
+      </div>
+    </section>
+  </div>
+  <script>
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script> 
+
+</body>
+</html>

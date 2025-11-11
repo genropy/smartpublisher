@@ -9,6 +9,7 @@ from smartswitch import Switcher
 
 class Priority(str, Enum):
     """Priority levels."""
+
     LOW = "low"
     MEDIUM = "medium"
     HIGH = "high"
@@ -17,8 +18,8 @@ class Priority(str, Enum):
 class TaskHandler(PublishedClass):
     """Handler for task operations with complex signatures."""
 
-    __slots__ = ('tasks',)
-    api = Switcher(prefix='task_')
+    __slots__ = ("tasks",)
+    api = Switcher(prefix="task_")
 
     def __init__(self):
         self.tasks = []
@@ -29,7 +30,7 @@ class TaskHandler(PublishedClass):
         title: str,
         priority: Literal["low", "medium", "high"],
         max_retries: int = 3,
-        notify: bool = False
+        notify: bool = False,
     ):
         """Create a new task with complex parameters.
 
@@ -45,7 +46,7 @@ class TaskHandler(PublishedClass):
             "priority": priority,
             "max_retries": max_retries,
             "notify": notify,
-            "status": "created"
+            "status": "created",
         }
         self.tasks.append(task)
 
@@ -53,16 +54,13 @@ class TaskHandler(PublishedClass):
             "success": True,
             "task": task,
             "message": f"Task '{title}' created with priority={priority}, "
-                      f"max_retries={max_retries}, notify={notify}"
+            f"max_retries={max_retries}, notify={notify}",
         }
 
     @api
     def task_list(self):
         """List all tasks."""
-        return {
-            "count": len(self.tasks),
-            "tasks": self.tasks
-        }
+        return {"count": len(self.tasks), "tasks": self.tasks}
 
     @api
     def task_clear(self):
@@ -77,7 +75,7 @@ class TestApp(Publisher):
 
     def initialize(self):
         self.tasks = TaskHandler()
-        self.publish('tasks', self.tasks, cli=True, openapi=True)
+        self.publish("tasks", self.tasks, cli=True, openapi=True)
 
 
 if __name__ == "__main__":

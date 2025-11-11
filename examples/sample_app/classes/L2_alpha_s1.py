@@ -18,7 +18,7 @@ class L2_alpha_s1:
         tags: List[str] = None,
         enabled: bool = True,
         max_connections: int = 100,
-        retry_count: Optional[int] = None
+        retry_count: Optional[int] = None,
     ):
         self.name = name
         self.port = port

@@ -1,0 +1,1027 @@
+
+
+<!DOCTYPE html>
+<html class="writer-html5" lang="en" data-content_root="../">
+<head>
+  <meta charset="utf-8" /><meta name="viewport" content="width=device-width, initial-scale=1" />
+
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Why smpub? The Missing Link Between CLI and API &mdash; smpub 0.2.0 documentation</title>
+      <link rel="stylesheet" type="text/css" href="../_static/pygments.css?v=b86133f3" />
+      <link rel="stylesheet" type="text/css" href="../_static/css/theme.css?v=e59714d7" />
+      <link rel="stylesheet" type="text/css" href="../_static/custom.css?v=957296ec" />
+
+  
+    <link rel="shortcut icon" href="../_static/logo.png"/>
+      <script src="../_static/jquery.js?v=5d32c60e"></script>
+      <script src="../_static/_sphinx_javascript_frameworks_compat.js?v=2cd50e6c"></script>
+      <script src="../_static/documentation_options.js?v=938c9ccc"></script>
+      <script src="../_static/doctools.js?v=9bcbadda"></script>
+      <script src="../_static/sphinx_highlight.js?v=dc90522c"></script>
+    <script src="../_static/js/theme.js"></script>
+    <link rel="index" title="Index" href="../genindex.html" />
+    <link rel="search" title="Search" href="../search.html" />
+    <link rel="next" title="Publishing Guide: How to Expose Your Library with smpub" href="../publishing-guide.html" />
+    <link rel="prev" title="Integration with SmartSwitch" href="../appendix/smartswitch.html" /> 
+</head>
+
+<body class="wy-body-for-nav"> 
+  <div class="wy-grid-for-nav">
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search" >
+
+          
+          
+          <a href="../index.html" class="icon icon-home">
+            smpub
+              <img src="../_static/logo.png" class="logo" alt="Logo"/>
+          </a>
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="../search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" aria-label="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+        </div><div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="Navigation menu">
+              <p class="caption" role="heading"><span class="caption-text">User Guide</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../user-guide/installation.html">Installation</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="../user-guide/installation.html#requirements">Requirements</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../user-guide/installation.html#basic-installation">Basic Installation</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../user-guide/installation.html#optional-dependencies">Optional Dependencies</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="../user-guide/installation.html#http-api-support">HTTP/API Support</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../user-guide/installation.html#interactive-mode">Interactive Mode</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../user-guide/installation.html#development-tools">Development Tools</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../user-guide/installation.html#documentation">Documentation</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../user-guide/installation.html#all-dependencies">All Dependencies</a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="../user-guide/installation.html#verify-installation">Verify Installation</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../user-guide/installation.html#next-steps">Next Steps</a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="../user-guide/quickstart.html">Quick Start</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="../user-guide/quickstart.html#create-a-simple-handler">Create a Simple Handler</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../user-guide/quickstart.html#try-cli-mode">Try CLI Mode</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../user-guide/quickstart.html#try-interactive-mode">Try Interactive Mode</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../user-guide/quickstart.html#try-http-mode">Try HTTP Mode</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../user-guide/quickstart.html#next-steps">Next Steps</a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="../user-guide/publishing-guide.html">Publishing Guide: How to Expose Your Library with smpub</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="../user-guide/publishing-guide.html#table-of-contents">Table of Contents</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../user-guide/publishing-guide.html#overview">Overview</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../user-guide/publishing-guide.html#prerequisites">Prerequisites</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../user-guide/publishing-guide.html#step-by-step-guide">Step-by-Step Guide</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="../user-guide/publishing-guide.html#step-1-install-smpub">Step 1: Install smpub</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../user-guide/publishing-guide.html#step-2-create-handler-classes">Step 2: Create Handler Classes</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../user-guide/publishing-guide.html#step-3-create-publisher-application">Step 3: Create Publisher Application</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../user-guide/publishing-guide.html#step-4-create-entry-point">Step 4: Create Entry Point</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../user-guide/publishing-guide.html#step-5-test-your-cli">Step 5: Test Your CLI</a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="../user-guide/publishing-guide.html#handler-requirements">Handler Requirements</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="../user-guide/publishing-guide.html#required-elements">Required Elements</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../user-guide/publishing-guide.html#optional-but-recommended">Optional but Recommended</a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="../user-guide/publishing-guide.html#best-practices">Best Practices</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="../user-guide/publishing-guide.html#separation-of-concerns">1. Separation of Concerns</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../user-guide/publishing-guide.html#type-hints-for-free-validation">2. Type Hints for Free Validation</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../user-guide/publishing-guide.html#clear-documentation">3. Clear Documentation</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../user-guide/publishing-guide.html#error-handling">4. Error Handling</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../user-guide/publishing-guide.html#handler-organization">5. Handler Organization</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../user-guide/publishing-guide.html#publisher-best-practices">6. Publisher Best Practices</a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="../user-guide/publishing-guide.html#common-patterns">Common Patterns</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="../user-guide/publishing-guide.html#pattern-1-database-operations">Pattern 1: Database Operations</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../user-guide/publishing-guide.html#pattern-2-file-operations">Pattern 2: File Operations</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../user-guide/publishing-guide.html#pattern-3-service-integration">Pattern 3: Service Integration</a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="../user-guide/publishing-guide.html#complete-example">Complete Example</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../user-guide/publishing-guide.html#summary">Summary</a></li>
+</ul>
+</li>
+</ul>
+<p class="caption" role="heading"><span class="caption-text">Guides</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../guide/publisher.html">Publisher Class</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="../guide/publisher.html#basic-usage">Basic Usage</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../guide/publisher.html#methods">Methods</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="../guide/publisher.html#publish">publish()</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../guide/publisher.html#run">run()</a></li>
+</ul>
+</li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="../guide/handlers.html">Handler Classes</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="../guide/handlers.html#basic-handler">Basic Handler</a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="../guide/cli-mode.html">CLI Mode</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="../guide/cli-mode.html#usage">Usage</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../guide/cli-mode.html#help">Help</a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="../guide/http-mode.html">HTTP Mode</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="../guide/http-mode.html#starting-server">Starting Server</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../guide/http-mode.html#endpoints">Endpoints</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../guide/http-mode.html#swagger-ui">Swagger UI</a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="../guide/validation.html">Validation</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="../guide/validation.html#automatic-validation">Automatic Validation</a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="../guide/interactive.html">Interactive Mode</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="../guide/interactive.html#installation">Installation</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../guide/interactive.html#complete-test-sequence">Complete Test Sequence</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="../guide/interactive.html#step-1-install-and-setup">Step 1: Install and Setup</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../guide/interactive.html#step-2-register-test-app">Step 2: Register Test App</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../guide/interactive.html#step-3-test-interactive-mode">Step 3: Test Interactive Mode</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../guide/interactive.html#step-4-verify-results">Step 4: Verify Results</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../guide/interactive.html#step-5-cleanup">Step 5: Cleanup</a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="../guide/interactive.html#what-happens">What Happens</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../guide/interactive.html#interactive-vs-normal-mode">Interactive vs Normal Mode</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../guide/interactive.html#questionary-advantages">Questionary Advantages</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../guide/interactive.html#parameter-types">Parameter Types</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="../guide/interactive.html#text-input-str-int-float">Text Input (str, int, float)</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../guide/interactive.html#boolean-confirmation">Boolean Confirmation</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../guide/interactive.html#literal-selection">Literal Selection</a></li>
+</ul>
+</li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="../guide/best-practices.html">Best Practices</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="../guide/best-practices.html#handler-design">Handler Design</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../guide/best-practices.html#type-hints">Type Hints</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../guide/best-practices.html#error-handling">Error Handling</a></li>
+</ul>
+</li>
+</ul>
+<p class="caption" role="heading"><span class="caption-text">Examples</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../examples/index.html">Examples</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="../examples/index.html#available-examples">Available Examples</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="../examples/index.html#calculator-app">Calculator App</a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="../examples/index.html#running-examples">Running Examples</a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="../examples/calculator.html">Calculator Example</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="../examples/calculator.html#source-code">Source Code</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../examples/calculator.html#features">Features</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../examples/calculator.html#cli-usage">CLI Usage</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../examples/calculator.html#http-usage">HTTP Usage</a></li>
+</ul>
+</li>
+</ul>
+<p class="caption" role="heading"><span class="caption-text">API Reference</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../api/publisher.html">Publisher API Reference</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../api/published.html">PublishedClass API Reference</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../api/http.html">HTTP API Reference</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="../api/http.html#fastapi-integration">FastAPI Integration</a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="../api/interactive.html">Interactive API Reference</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../api/validation.html">Validation API Reference</a></li>
+</ul>
+<p class="caption" role="heading"><span class="caption-text">Appendix</span></p>
+<ul class="current">
+<li class="toctree-l1"><a class="reference internal" href="../appendix/architecture.html">Architecture</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="../appendix/architecture.html#overview">Overview</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../appendix/architecture.html#layered-architecture">Layered Architecture</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../appendix/architecture.html#core-components">Core Components</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="../appendix/architecture.html#publisher">Publisher</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../appendix/architecture.html#publishedclass">PublishedClass</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../appendix/architecture.html#publishercontext">PublisherContext</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../appendix/architecture.html#apiswitcher">ApiSwitcher</a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="../appendix/architecture.html#data-flow">Data Flow</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="../appendix/architecture.html#cli-mode-flow">CLI Mode Flow</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../appendix/architecture.html#http-mode-flow">HTTP Mode Flow</a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="../appendix/architecture.html#validation-layer">Validation Layer</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="../appendix/architecture.html#pydantic-integration">Pydantic Integration</a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="../appendix/architecture.html#interactive-layer">Interactive Layer</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="../appendix/architecture.html#textual-integration">Textual Integration</a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="../appendix/architecture.html#http-layer">HTTP Layer</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="../appendix/architecture.html#fastapi-integration">FastAPI Integration</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../appendix/architecture.html#cli-command-smpub-app-serve">CLI Command: <code class="docutils literal notranslate"><span class="pre">smpub</span> <span class="pre">&lt;app&gt;</span> <span class="pre">serve</span></code></a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="../appendix/architecture.html#registry-system">Registry System</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="../appendix/architecture.html#local-registry-published">Local Registry (<code class="docutils literal notranslate"><span class="pre">.published</span></code>)</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../appendix/architecture.html#global-registry-smartlibs-publisher-registry-json">Global Registry (<code class="docutils literal notranslate"><span class="pre">~/.smartlibs/publisher/registry.json</span></code>)</a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="../appendix/architecture.html#design-principles">Design Principles</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="../appendix/architecture.html#separation-of-concerns">1. Separation of Concerns</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../appendix/architecture.html#convention-over-configuration">2. Convention over Configuration</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../appendix/architecture.html#progressive-enhancement">3. Progressive Enhancement</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../appendix/architecture.html#smartswitch-foundation">4. SmartSwitch Foundation</a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="../appendix/architecture.html#extension-points">Extension Points</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="../appendix/architecture.html#custom-validators">Custom Validators</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../appendix/architecture.html#custom-routes">Custom Routes</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../appendix/architecture.html#custom-interactive-forms">Custom Interactive Forms</a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="../appendix/architecture.html#performance-considerations">Performance Considerations</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="../appendix/architecture.html#memory">Memory</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../appendix/architecture.html#validation">Validation</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../appendix/architecture.html#http">HTTP</a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="../appendix/architecture.html#future-architecture">Future Architecture</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="../appendix/architecture.html#planned-enhancements">Planned Enhancements</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../appendix/architecture.html#compatibility">Compatibility</a></li>
+</ul>
+</li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="../appendix/smartswitch.html">Integration with SmartSwitch</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="../appendix/smartswitch.html#how-smpub-uses-smartswitch">How smpub Uses SmartSwitch</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="../appendix/smartswitch.html#parent-child-api-structure">Parent-Child API Structure</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../appendix/smartswitch.html#method-dispatch">Method Dispatch</a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="../appendix/smartswitch.html#switcher-configuration">Switcher Configuration</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="../appendix/smartswitch.html#handler-api-definition">Handler API Definition</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../appendix/smartswitch.html#method-decoration">Method Decoration</a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="../appendix/smartswitch.html#api-discovery">API Discovery</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="../appendix/smartswitch.html#get-api-json">get_api_json()</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../appendix/smartswitch.html#use-cases">Use Cases</a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="../appendix/smartswitch.html#smartswitch-features-not-used">SmartSwitch Features Not Used</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../appendix/smartswitch.html#benefits-of-smartswitch-foundation">Benefits of SmartSwitch Foundation</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="../appendix/smartswitch.html#clean-method-registration">1. Clean Method Registration</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../appendix/smartswitch.html#automatic-discovery">2. Automatic Discovery</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../appendix/smartswitch.html#hierarchical-apis">3. Hierarchical APIs</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../appendix/smartswitch.html#type-safety">4. Type Safety</a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="../appendix/smartswitch.html#comparison-with-direct-use">Comparison with Direct Use</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="../appendix/smartswitch.html#using-smartswitch-directly">Using SmartSwitch Directly</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../appendix/smartswitch.html#using-smpub-smartswitch-more">Using smpub (SmartSwitch + More)</a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="../appendix/smartswitch.html#further-reading">Further Reading</a></li>
+</ul>
+</li>
+<li class="toctree-l1 current"><a class="current reference internal" href="#">Why smpub? The Missing Link Between CLI and API</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="#previously-on-smartswitch">Previously, on SmartSwitch…</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#the-write-once-problem">The Write-Once Problem</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#the-smpub-pattern-smartswitch-publishing">The smpub Pattern: SmartSwitch + Publishing</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="#step-1-define-handlers-with-smartswitch">Step 1: Define Handlers with SmartSwitch</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#step-2-publish-with-smpub">Step 2: Publish with smpub</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#step-3-register-and-use">Step 3: Register and Use</a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="#what-you-actually-get">What You Actually Get</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="#zero-boilerplate-interfaces">1. <strong>Zero Boilerplate Interfaces</strong></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#registry-management">2. <strong>Registry Management</strong></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#interactive-mode">3. <strong>Interactive Mode</strong></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#hierarchical-commands">4. <strong>Hierarchical Commands</strong></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#type-validation-everywhere">5. <strong>Type Validation Everywhere</strong></a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="#the-registry-pattern">The Registry Pattern</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#what-smpub-is-not">What smpub Is NOT</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="#not-a-web-framework">❌ Not a Web Framework</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#not-a-cli-customization-framework">❌ Not a CLI Customization Framework</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#not-for-public-apis">❌ Not for Public APIs</a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="#when-to-use-smpub">When to Use smpub</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="#perfect-fit">✅ Perfect Fit</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#wrong-fit">❌ Wrong Fit</a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="#the-architectural-win-apiswitcher">The Architectural Win: ApiSwitcher</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#real-world-workflow">Real-World Workflow</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="#development">Development</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#local-testing">Local Testing</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#production-deployment">Production Deployment</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#team-sharing">Team Sharing</a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="#comparison-the-full-picture">Comparison: The Full Picture</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#key-takeaways">Key Takeaways</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#what-s-next">What’s Next?</a></li>
+</ul>
+</li>
+</ul>
+<p class="caption" role="heading"><span class="caption-text">Publishing</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../publishing-guide.html">Publishing Guide: How to Expose Your Library with smpub</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="../publishing-guide.html#table-of-contents">Table of Contents</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../publishing-guide.html#overview">Overview</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../publishing-guide.html#prerequisites">Prerequisites</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../publishing-guide.html#step-by-step-guide">Step-by-Step Guide</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="../publishing-guide.html#step-1-install-smpub">Step 1: Install smpub</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../publishing-guide.html#step-2-create-handler-classes">Step 2: Create Handler Classes</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../publishing-guide.html#step-3-create-publisher-application">Step 3: Create Publisher Application</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../publishing-guide.html#step-4-create-entry-point">Step 4: Create Entry Point</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../publishing-guide.html#step-5-test-your-cli">Step 5: Test Your CLI</a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="../publishing-guide.html#handler-requirements">Handler Requirements</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="../publishing-guide.html#required-elements">Required Elements</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../publishing-guide.html#optional-but-recommended">Optional but Recommended</a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="../publishing-guide.html#best-practices">Best Practices</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="../publishing-guide.html#separation-of-concerns">1. Separation of Concerns</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../publishing-guide.html#type-hints-for-free-validation">2. Type Hints for Free Validation</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../publishing-guide.html#clear-documentation">3. Clear Documentation</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../publishing-guide.html#error-handling">4. Error Handling</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../publishing-guide.html#handler-organization">5. Handler Organization</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../publishing-guide.html#publisher-best-practices">6. Publisher Best Practices</a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="../publishing-guide.html#common-patterns">Common Patterns</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="../publishing-guide.html#pattern-1-database-operations">Pattern 1: Database Operations</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../publishing-guide.html#pattern-2-file-operations">Pattern 2: File Operations</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../publishing-guide.html#pattern-3-service-integration">Pattern 3: Service Integration</a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="../publishing-guide.html#complete-example">Complete Example</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../publishing-guide.html#summary">Summary</a></li>
+</ul>
+</li>
+</ul>
+
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap"><nav class="wy-nav-top" aria-label="Mobile navigation menu" >
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="../index.html">smpub</a>
+      </nav>
+
+      <div class="wy-nav-content">
+        <div class="rst-content style-external-links">
+          <div role="navigation" aria-label="Page navigation">
+  <ul class="wy-breadcrumbs">
+      <li><a href="../index.html" class="icon icon-home" aria-label="Home"></a></li>
+      <li class="breadcrumb-item active">Why smpub? The Missing Link Between CLI and API</li>
+      <li class="wy-breadcrumbs-aside">
+              <a href="https://github.com/genropy/smpub/blob/main/docs/philosophy/why-smpub.md" class="fa fa-github"> Edit on GitHub</a>
+      </li>
+  </ul>
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+             
+  <section id="why-smpub-the-missing-link-between-cli-and-api">
+<h1>Why smpub? The Missing Link Between CLI and API<a class="headerlink" href="#why-smpub-the-missing-link-between-cli-and-api" title="Link to this heading"></a></h1>
+<blockquote>
+<div><p><strong>TL;DR</strong>: smpub lets you write your business logic once with SmartSwitch, then instantly expose it as both CLI commands and REST APIs. No boilerplate, no duplication, no choosing between “tool for ops” or “service for developers.” This is the second article in our series on building consistent developer toolkits.</p>
+</div></blockquote>
+<hr class="docutils" />
+<p>You’ve just written a beautiful data processing function. Clean, tested, typed. Now someone asks: “Can we call this from the command line?”</p>
+<p>Sure, you add Click decorators.</p>
+<p>Then: “Can we expose this as an API for the web service?”</p>
+<p>Now you’re writing FastAPI routes that look suspiciously like your Click commands.</p>
+<p>Then: “Can we add the third one too?”</p>
+<p><strong>Stop. There’s a better way.</strong></p>
+<section id="previously-on-smartswitch">
+<h2>Previously, on SmartSwitch…<a class="headerlink" href="#previously-on-smartswitch" title="Link to this heading"></a></h2>
+<p>In our previous article on SmartSwitch (see <a class="reference external" href="https://github.com/genropy/smartswitch">SmartSwitch documentation</a>), we explored SmartSwitch as a standard dispatch pattern for your toolkit. We established that:</p>
+<ul class="simple">
+<li><p><strong>SmartSwitch organizes functions</strong> with decorator-based registration</p></li>
+<li><p><strong>Three dispatch modes</strong>: by-name, by-type (typerule), by-value (valrule)</p></li>
+<li><p><strong>It’s a foundation</strong>, not just dispatch - consistent patterns enable powerful tools</p></li>
+</ul>
+<p>But we left something hanging: <em>“What tools can understand and extend SmartSwitch handlers?”</em></p>
+<p><strong>Enter smpub</strong>: The framework that turns SmartSwitch handlers into production interfaces with zero additional code.</p>
+</section>
+<section id="the-write-once-problem">
+<h2>The Write-Once Problem<a class="headerlink" href="#the-write-once-problem" title="Link to this heading"></a></h2>
+<p>Every internal tool faces the same question: <strong>How will it be used?</strong></p>
+<p><strong>Developers want</strong>:</p>
+<ul class="simple">
+<li><p>HTTP API for automation</p></li>
+<li><p>JSON responses for parsing</p></li>
+<li><p>OpenAPI docs for integration</p></li>
+</ul>
+<p><strong>Ops teams want</strong>:</p>
+<ul class="simple">
+<li><p>CLI for scripting</p></li>
+<li><p>Direct execution without servers</p></li>
+<li><p>Interactive prompts for complex parameters</p></li>
+</ul>
+<p><strong>You want</strong>:</p>
+<ul class="simple">
+<li><p>To write the logic ONCE</p></li>
+<li><p>Not maintain two interfaces</p></li>
+<li><p>Not duplicate validation, docs, and type checking</p></li>
+</ul>
+<p><strong>Traditional approach</strong>: Pick one, promise to add the other later (spoiler: you never do).</p>
+</section>
+<section id="the-smpub-pattern-smartswitch-publishing">
+<h2>The smpub Pattern: SmartSwitch + Publishing<a class="headerlink" href="#the-smpub-pattern-smartswitch-publishing" title="Link to this heading"></a></h2>
+<p>Building on SmartSwitch’s foundation, smpub adds one key concept: <strong>publishing</strong>.</p>
+<section id="step-1-define-handlers-with-smartswitch">
+<h3>Step 1: Define Handlers with SmartSwitch<a class="headerlink" href="#step-1-define-handlers-with-smartswitch" title="Link to this heading"></a></h3>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="kn">from</span><span class="w"> </span><span class="nn">smartswitch</span><span class="w"> </span><span class="kn">import</span> <span class="n">Switcher</span>
+
+<span class="n">handlers</span> <span class="o">=</span> <span class="n">Switcher</span><span class="p">()</span>
+
+<span class="nd">@handlers</span>
+<span class="k">def</span><span class="w"> </span><span class="nf">process_data</span><span class="p">(</span><span class="n">input_file</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span> <span class="n">output_format</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="s2">&quot;json&quot;</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">dict</span><span class="p">:</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;Process data from input file.</span>
+
+<span class="sd">    Args:</span>
+<span class="sd">        input_file: Path to input file</span>
+<span class="sd">        output_format: Output format (json, csv, xml)</span>
+
+<span class="sd">    Returns:</span>
+<span class="sd">        Processed data dictionary</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="c1"># Your business logic here</span>
+    <span class="n">data</span> <span class="o">=</span> <span class="n">load_file</span><span class="p">(</span><span class="n">input_file</span><span class="p">)</span>
+    <span class="k">return</span> <span class="n">transform</span><span class="p">(</span><span class="n">data</span><span class="p">,</span> <span class="n">output_format</span><span class="p">)</span>
+
+<span class="nd">@handlers</span>
+<span class="k">def</span><span class="w"> </span><span class="nf">analyze_results</span><span class="p">(</span><span class="n">data_dir</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span> <span class="n">threshold</span><span class="p">:</span> <span class="nb">float</span> <span class="o">=</span> <span class="mf">0.5</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">list</span><span class="p">:</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;Analyze results from directory.</span>
+
+<span class="sd">    Args:</span>
+<span class="sd">        data_dir: Directory containing data files</span>
+<span class="sd">        threshold: Analysis threshold (0.0-1.0)</span>
+
+<span class="sd">    Returns:</span>
+<span class="sd">        List of analysis results</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="c1"># Your analysis logic</span>
+    <span class="k">return</span> <span class="n">perform_analysis</span><span class="p">(</span><span class="n">data_dir</span><span class="p">,</span> <span class="n">threshold</span><span class="p">)</span>
+</pre></div>
+</div>
+<p><strong>This is just SmartSwitch</strong>. Clean handlers, no framework noise, fully testable.</p>
+</section>
+<section id="step-2-publish-with-smpub">
+<h3>Step 2: Publish with smpub<a class="headerlink" href="#step-2-publish-with-smpub" title="Link to this heading"></a></h3>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="kn">from</span><span class="w"> </span><span class="nn">smpub</span><span class="w"> </span><span class="kn">import</span> <span class="n">Publisher</span><span class="p">,</span> <span class="n">PublishedClass</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">smpub.apiswitcher</span><span class="w"> </span><span class="kn">import</span> <span class="n">ApiSwitcher</span>
+
+<span class="k">class</span><span class="w"> </span><span class="nc">DataTools</span><span class="p">(</span><span class="n">PublishedClass</span><span class="p">):</span>
+    <span class="n">api</span> <span class="o">=</span> <span class="n">ApiSwitcher</span><span class="p">(</span><span class="n">prefix</span><span class="o">=</span><span class="s1">&#39;data_&#39;</span><span class="p">)</span>
+
+    <span class="nd">@api</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">process_data</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">input_file</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span> <span class="n">output_format</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="s2">&quot;json&quot;</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">dict</span><span class="p">:</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Process data from input file.&quot;&quot;&quot;</span>
+        <span class="n">data</span> <span class="o">=</span> <span class="n">load_file</span><span class="p">(</span><span class="n">input_file</span><span class="p">)</span>
+        <span class="k">return</span> <span class="n">transform</span><span class="p">(</span><span class="n">data</span><span class="p">,</span> <span class="n">output_format</span><span class="p">)</span>
+
+    <span class="nd">@api</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">analyze_results</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">data_dir</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span> <span class="n">threshold</span><span class="p">:</span> <span class="nb">float</span> <span class="o">=</span> <span class="mf">0.5</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">list</span><span class="p">:</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Analyze results from directory.&quot;&quot;&quot;</span>
+        <span class="k">return</span> <span class="n">perform_analysis</span><span class="p">(</span><span class="n">data_dir</span><span class="p">,</span> <span class="n">threshold</span><span class="p">)</span>
+
+<span class="k">class</span><span class="w"> </span><span class="nc">MyApp</span><span class="p">(</span><span class="n">Publisher</span><span class="p">):</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">initialize</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">publish</span><span class="p">(</span><span class="n">DataTools</span><span class="p">(),</span> <span class="n">cli</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">openapi</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+
+<span class="n">app</span> <span class="o">=</span> <span class="n">MyApp</span><span class="p">()</span>
+</pre></div>
+</div>
+<p><strong>That’s it.</strong> Same methods, now published.</p>
+</section>
+<section id="step-3-register-and-use">
+<h3>Step 3: Register and Use<a class="headerlink" href="#step-3-register-and-use" title="Link to this heading"></a></h3>
+<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span><span class="c1"># Register your app with smpub</span>
+smpub<span class="w"> </span>add<span class="w"> </span>myapp<span class="w"> </span>/path/to/main.py
+
+<span class="c1"># Use via CLI</span>
+smpub<span class="w"> </span>myapp<span class="w"> </span>data<span class="w"> </span>process-data<span class="w"> </span>--input-file<span class="w"> </span>data.csv<span class="w"> </span>--output-format<span class="w"> </span>json
+
+<span class="c1"># Interactive mode with TUI</span>
+smpub<span class="w"> </span>myapp<span class="w"> </span>data<span class="w"> </span>process-data<span class="w"> </span>--interactive
+
+<span class="c1"># Start HTTP server</span>
+smpub<span class="w"> </span>myapp<span class="w"> </span>serve
+
+<span class="c1"># Or specify port</span>
+smpub<span class="w"> </span>myapp<span class="w"> </span>serve<span class="w"> </span><span class="m">8080</span>
+</pre></div>
+</div>
+<p><strong>Now available via HTTP</strong>:</p>
+<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span><span class="c1"># Your handlers are REST endpoints</span>
+curl<span class="w"> </span>-X<span class="w"> </span>POST<span class="w"> </span>http://localhost:8080/data/process_data<span class="w"> </span><span class="se">\</span>
+<span class="w">  </span>-H<span class="w"> </span><span class="s2">&quot;Content-Type: application/json&quot;</span><span class="w"> </span><span class="se">\</span>
+<span class="w">  </span>-d<span class="w"> </span><span class="s1">&#39;{&quot;input_file&quot;: &quot;data.csv&quot;, &quot;output_format&quot;: &quot;json&quot;}&#39;</span>
+
+<span class="c1"># OpenAPI docs automatically generated</span>
+open<span class="w"> </span>http://localhost:8080/docs
+</pre></div>
+</div>
+</section>
+</section>
+<section id="what-you-actually-get">
+<h2>What You Actually Get<a class="headerlink" href="#what-you-actually-get" title="Link to this heading"></a></h2>
+<section id="zero-boilerplate-interfaces">
+<h3>1. <strong>Zero Boilerplate Interfaces</strong><a class="headerlink" href="#zero-boilerplate-interfaces" title="Link to this heading"></a></h3>
+<p><strong>Without smpub</strong>:</p>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="c1"># cli.py - 50 lines of Click decorators</span>
+<span class="kn">import</span><span class="w"> </span><span class="nn">click</span>
+
+<span class="nd">@click</span><span class="o">.</span><span class="n">command</span><span class="p">()</span>
+<span class="nd">@click</span><span class="o">.</span><span class="n">option</span><span class="p">(</span><span class="s1">&#39;--input-file&#39;</span><span class="p">,</span> <span class="n">required</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+<span class="nd">@click</span><span class="o">.</span><span class="n">option</span><span class="p">(</span><span class="s1">&#39;--output-format&#39;</span><span class="p">,</span> <span class="n">default</span><span class="o">=</span><span class="s1">&#39;json&#39;</span><span class="p">)</span>
+<span class="k">def</span><span class="w"> </span><span class="nf">process_data</span><span class="p">(</span><span class="n">input_file</span><span class="p">,</span> <span class="n">output_format</span><span class="p">):</span>
+    <span class="c1"># Call actual function</span>
+    <span class="n">result</span> <span class="o">=</span> <span class="n">core</span><span class="o">.</span><span class="n">process_data</span><span class="p">(</span><span class="n">input_file</span><span class="p">,</span> <span class="n">output_format</span><span class="p">)</span>
+    <span class="nb">print</span><span class="p">(</span><span class="n">json</span><span class="o">.</span><span class="n">dumps</span><span class="p">(</span><span class="n">result</span><span class="p">))</span>
+
+<span class="c1"># api.py - 50 lines of FastAPI routes</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">fastapi</span><span class="w"> </span><span class="kn">import</span> <span class="n">FastAPI</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">pydantic</span><span class="w"> </span><span class="kn">import</span> <span class="n">BaseModel</span>
+
+<span class="k">class</span><span class="w"> </span><span class="nc">ProcessRequest</span><span class="p">(</span><span class="n">BaseModel</span><span class="p">):</span>
+    <span class="n">input_file</span><span class="p">:</span> <span class="nb">str</span>
+    <span class="n">output_format</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="s2">&quot;json&quot;</span>
+
+<span class="nd">@app</span><span class="o">.</span><span class="n">post</span><span class="p">(</span><span class="s2">&quot;/process_data&quot;</span><span class="p">)</span>
+<span class="k">def</span><span class="w"> </span><span class="nf">process_data</span><span class="p">(</span><span class="n">req</span><span class="p">:</span> <span class="n">ProcessRequest</span><span class="p">):</span>
+    <span class="c1"># Call actual function</span>
+    <span class="k">return</span> <span class="n">core</span><span class="o">.</span><span class="n">process_data</span><span class="p">(</span><span class="n">req</span><span class="o">.</span><span class="n">input_file</span><span class="p">,</span> <span class="n">req</span><span class="o">.</span><span class="n">output_format</span><span class="p">)</span>
+</pre></div>
+</div>
+<p><strong>With smpub</strong>:</p>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="c1"># ONE method definition</span>
+<span class="nd">@api</span>
+<span class="k">def</span><span class="w"> </span><span class="nf">process_data</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">input_file</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span> <span class="n">output_format</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="s2">&quot;json&quot;</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">dict</span><span class="p">:</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;Process data from input file.&quot;&quot;&quot;</span>
+    <span class="c1"># Your actual logic</span>
+    <span class="k">return</span> <span class="n">transform</span><span class="p">(</span><span class="n">load_file</span><span class="p">(</span><span class="n">input_file</span><span class="p">),</span> <span class="n">output_format</span><span class="p">)</span>
+</pre></div>
+</div>
+<p>CLI, HTTP, and OpenAPI docs generated automatically.</p>
+</section>
+<section id="registry-management">
+<h3>2. <strong>Registry Management</strong><a class="headerlink" href="#registry-management" title="Link to this heading"></a></h3>
+<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span><span class="c1"># Register app</span>
+smpub<span class="w"> </span>add<span class="w"> </span>myapp<span class="w"> </span>/path/to/main.py
+
+<span class="c1"># List registered apps</span>
+smpub<span class="w"> </span>list
+
+<span class="c1"># Remove app</span>
+smpub<span class="w"> </span>remove<span class="w"> </span>myapp
+
+<span class="c1"># Show app details</span>
+smpub<span class="w"> </span>show<span class="w"> </span>myapp
+</pre></div>
+</div>
+<p>Your tools become <strong>discoverable</strong>. No more “where did I put that script?”</p>
+</section>
+<section id="interactive-mode">
+<h3>3. <strong>Interactive Mode</strong><a class="headerlink" href="#interactive-mode" title="Link to this heading"></a></h3>
+<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span><span class="c1"># Launch TUI form</span>
+smpub<span class="w"> </span>myapp<span class="w"> </span>data<span class="w"> </span>process-data<span class="w"> </span>--interactive
+</pre></div>
+</div>
+<p>Gets you:</p>
+<ul class="simple">
+<li><p>Type-aware input fields (text, numbers, booleans)</p></li>
+<li><p>Real-time validation</p></li>
+<li><p>Default values pre-filled</p></li>
+<li><p>Rich terminal UI via Textual</p></li>
+</ul>
+<p>Perfect for:</p>
+<ul class="simple">
+<li><p>Complex parameters</p></li>
+<li><p>Long text inputs</p></li>
+<li><p>Teaching new users</p></li>
+</ul>
+</section>
+<section id="hierarchical-commands">
+<h3>4. <strong>Hierarchical Commands</strong><a class="headerlink" href="#hierarchical-commands" title="Link to this heading"></a></h3>
+<p>SmartSwitch’s hierarchical dispatch becomes hierarchical CLI:</p>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="k">class</span><span class="w"> </span><span class="nc">UserTools</span><span class="p">(</span><span class="n">PublishedClass</span><span class="p">):</span>
+    <span class="n">api</span> <span class="o">=</span> <span class="n">ApiSwitcher</span><span class="p">(</span><span class="n">prefix</span><span class="o">=</span><span class="s1">&#39;user_&#39;</span><span class="p">)</span>
+
+    <span class="nd">@api</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">create</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">name</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span> <span class="n">email</span><span class="p">:</span> <span class="nb">str</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">str</span><span class="p">:</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Create user.&quot;&quot;&quot;</span>
+        <span class="k">pass</span>
+
+    <span class="nd">@api</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">delete</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">user_id</span><span class="p">:</span> <span class="nb">int</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">str</span><span class="p">:</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Delete user.&quot;&quot;&quot;</span>
+        <span class="k">pass</span>
+
+<span class="k">class</span><span class="w"> </span><span class="nc">AdminTools</span><span class="p">(</span><span class="n">PublishedClass</span><span class="p">):</span>
+    <span class="n">api</span> <span class="o">=</span> <span class="n">ApiSwitcher</span><span class="p">(</span><span class="n">prefix</span><span class="o">=</span><span class="s1">&#39;admin_&#39;</span><span class="p">)</span>
+
+    <span class="nd">@api</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">promote</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">user_id</span><span class="p">:</span> <span class="nb">int</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">str</span><span class="p">:</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Promote to admin.&quot;&quot;&quot;</span>
+        <span class="k">pass</span>
+</pre></div>
+</div>
+<p>Becomes:</p>
+<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span>smpub<span class="w"> </span>myapp<span class="w"> </span>user<span class="w"> </span>create<span class="w"> </span>--name<span class="w"> </span>Alice<span class="w"> </span>--email<span class="w"> </span>alice@example.com
+smpub<span class="w"> </span>myapp<span class="w"> </span>user<span class="w"> </span>delete<span class="w"> </span>--user-id<span class="w"> </span><span class="m">123</span>
+smpub<span class="w"> </span>myapp<span class="w"> </span>admin<span class="w"> </span>promote<span class="w"> </span>--user-id<span class="w"> </span><span class="m">123</span>
+</pre></div>
+</div>
+<p>And:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">POST</span> <span class="o">/</span><span class="n">user</span><span class="o">/</span><span class="n">create</span>
+<span class="n">POST</span> <span class="o">/</span><span class="n">user</span><span class="o">/</span><span class="n">delete</span>
+<span class="n">POST</span> <span class="o">/</span><span class="n">admin</span><span class="o">/</span><span class="n">promote</span>
+</pre></div>
+</div>
+</section>
+<section id="type-validation-everywhere">
+<h3>5. <strong>Type Validation Everywhere</strong><a class="headerlink" href="#type-validation-everywhere" title="Link to this heading"></a></h3>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="nd">@api</span>
+<span class="k">def</span><span class="w"> </span><span class="nf">analyze</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">threshold</span><span class="p">:</span> <span class="nb">float</span> <span class="o">=</span> <span class="mf">0.5</span><span class="p">,</span> <span class="n">max_items</span><span class="p">:</span> <span class="nb">int</span> <span class="o">=</span> <span class="mi">100</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">list</span><span class="p">:</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;Analyze with validation.&quot;&quot;&quot;</span>
+    <span class="k">pass</span>
+</pre></div>
+</div>
+<p>Pydantic validates:</p>
+<ul class="simple">
+<li><p><strong>CLI</strong>: <code class="docutils literal notranslate"><span class="pre">--threshold</span> <span class="pre">abc</span></code> → error</p></li>
+<li><p><strong>HTTP</strong>: <code class="docutils literal notranslate"><span class="pre">{&quot;threshold&quot;:</span> <span class="pre">&quot;abc&quot;}</span></code> → 422 validation error</p></li>
+<li><p><strong>Interactive</strong>: Form won’t accept invalid input</p></li>
+</ul>
+<p>One definition, validation everywhere.</p>
+</section>
+</section>
+<section id="the-registry-pattern">
+<h2>The Registry Pattern<a class="headerlink" href="#the-registry-pattern" title="Link to this heading"></a></h2>
+<p>smpub maintains a registry of your published apps:</p>
+<p><strong>Local registry</strong>: <code class="docutils literal notranslate"><span class="pre">.published</span></code> file in your project</p>
+<div class="highlight-json notranslate"><div class="highlight"><pre><span></span><span class="p">{</span>
+<span class="w">  </span><span class="nt">&quot;app_name&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;myapp&quot;</span><span class="p">,</span>
+<span class="w">  </span><span class="nt">&quot;main_file&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;main.py&quot;</span><span class="p">,</span>
+<span class="w">  </span><span class="nt">&quot;handlers&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">[</span><span class="s2">&quot;DataTools&quot;</span><span class="p">,</span><span class="w"> </span><span class="s2">&quot;UserTools&quot;</span><span class="p">]</span>
+<span class="p">}</span>
+</pre></div>
+</div>
+<p><strong>Global registry</strong>: <code class="docutils literal notranslate"><span class="pre">~/.smartlibs/publisher/apps.json</span></code></p>
+<div class="highlight-json notranslate"><div class="highlight"><pre><span></span><span class="p">{</span>
+<span class="w">  </span><span class="nt">&quot;myapp&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">{</span>
+<span class="w">    </span><span class="nt">&quot;path&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;/path/to/project&quot;</span><span class="p">,</span>
+<span class="w">    </span><span class="nt">&quot;registered&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;2025-11-10T10:30:00&quot;</span>
+<span class="w">  </span><span class="p">}</span>
+<span class="p">}</span>
+</pre></div>
+</div>
+<p><strong>Benefits</strong>:</p>
+<ul class="simple">
+<li><p>Apps discoverable system-wide</p></li>
+<li><p>Version control tracks <code class="docutils literal notranslate"><span class="pre">.published</span></code> (team shares app definitions)</p></li>
+<li><p>Global registry is personal (each dev can have different paths)</p></li>
+</ul>
+</section>
+<section id="what-smpub-is-not">
+<h2>What smpub Is NOT<a class="headerlink" href="#what-smpub-is-not" title="Link to this heading"></a></h2>
+<p>Let’s be clear about boundaries (these are <strong>design choices</strong>, not limitations):</p>
+<section id="not-a-web-framework">
+<h3>❌ Not a Web Framework<a class="headerlink" href="#not-a-web-framework" title="Link to this heading"></a></h3>
+<ul class="simple">
+<li><p>No HTML templates, sessions, or cookies</p></li>
+<li><p><strong>Use instead</strong>: FastAPI + Jinja2, Flask, Django</p></li>
+<li><p><strong>You CAN</strong>: Connect a frontend to smpub’s HTTP API</p></li>
+</ul>
+</section>
+<section id="not-a-cli-customization-framework">
+<h3>❌ Not a CLI Customization Framework<a class="headerlink" href="#not-a-cli-customization-framework" title="Link to this heading"></a></h3>
+<ul class="simple">
+<li><p>Standard <code class="docutils literal notranslate"><span class="pre">--arg</span> <span class="pre">value</span></code> syntax only</p></li>
+<li><p>No custom parsers, ranges, or choices</p></li>
+<li><p><strong>Use instead</strong>: Click/Typer for maximum CLI control</p></li>
+<li><p><strong>Why</strong>: Custom parsers break automatic API generation</p></li>
+</ul>
+</section>
+<section id="not-for-public-apis">
+<h3>❌ Not for Public APIs<a class="headerlink" href="#not-for-public-apis" title="Link to this heading"></a></h3>
+<ul class="simple">
+<li><p>Built for internal tools, not public-facing services</p></li>
+<li><p>No rate limiting, API keys, or complex auth (yet)</p></li>
+<li><p><strong>Use instead</strong>: FastAPI directly for public APIs</p></li>
+<li><p><strong>You CAN</strong>: Add auth via FastAPI middleware (it’s just FastAPI under the hood)</p></li>
+</ul>
+</section>
+</section>
+<section id="when-to-use-smpub">
+<h2>When to Use smpub<a class="headerlink" href="#when-to-use-smpub" title="Link to this heading"></a></h2>
+<section id="perfect-fit">
+<h3>✅ Perfect Fit<a class="headerlink" href="#perfect-fit" title="Link to this heading"></a></h3>
+<p><strong>Internal tools with dual needs</strong>:</p>
+<ul class="simple">
+<li><p>Database admin tools (CLI for ops, API for automation)</p></li>
+<li><p>Deployment scripts (run locally or trigger via webhook)</p></li>
+<li><p>Data pipelines (CLI for dev, API for production)</p></li>
+<li><p>DevOps utilities (CLI for manual ops, API for CI/CD)</p></li>
+</ul>
+<p><strong>You’re writing multiple tools</strong>:</p>
+<ul class="simple">
+<li><p>Not a one-off script</p></li>
+<li><p>Building a suite of internal utilities</p></li>
+<li><p>Want consistent patterns across tools</p></li>
+</ul>
+<p><strong>You value speed over customization</strong>:</p>
+<ul class="simple">
+<li><p>Rapid prototyping</p></li>
+<li><p>Internal tooling where “good enough” beats “perfect”</p></li>
+<li><p>Teams that prefer convention over configuration</p></li>
+</ul>
+</section>
+<section id="wrong-fit">
+<h3>❌ Wrong Fit<a class="headerlink" href="#wrong-fit" title="Link to this heading"></a></h3>
+<p><strong>Your tool is too simple</strong>:</p>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="c1"># Don&#39;t use smpub for this</span>
+<span class="nd">@app</span><span class="o">.</span><span class="n">command</span><span class="p">()</span>
+<span class="k">def</span><span class="w"> </span><span class="nf">hello</span><span class="p">(</span><span class="n">name</span><span class="p">:</span> <span class="nb">str</span><span class="p">):</span>
+    <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Hello </span><span class="si">{</span><span class="n">name</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
+</pre></div>
+</div>
+<p>Just use Click. Adding smpub is overkill.</p>
+<p><strong>You need complex CLI</strong>:</p>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="c1"># smpub can&#39;t do this</span>
+<span class="nd">@click</span><span class="o">.</span><span class="n">option</span><span class="p">(</span><span class="s1">&#39;--range&#39;</span><span class="p">,</span> <span class="nb">type</span><span class="o">=</span><span class="n">click</span><span class="o">.</span><span class="n">IntRange</span><span class="p">(</span><span class="mi">1</span><span class="p">,</span> <span class="mi">100</span><span class="p">))</span>
+<span class="nd">@click</span><span class="o">.</span><span class="n">option</span><span class="p">(</span><span class="s1">&#39;--choice&#39;</span><span class="p">,</span> <span class="nb">type</span><span class="o">=</span><span class="n">click</span><span class="o">.</span><span class="n">Choice</span><span class="p">([</span><span class="s1">&#39;a&#39;</span><span class="p">,</span> <span class="s1">&#39;b&#39;</span><span class="p">,</span> <span class="s1">&#39;c&#39;</span><span class="p">]))</span>
+<span class="k">def</span><span class="w"> </span><span class="nf">complex_command</span><span class="p">(</span><span class="nb">range</span><span class="p">,</span> <span class="n">choice</span><span class="p">):</span>
+    <span class="k">pass</span>
+</pre></div>
+</div>
+<p>Use Click/Typer directly.</p>
+<p><strong>You’re building a public API</strong>:</p>
+<ul class="simple">
+<li><p>Need custom auth, rate limiting, complex middleware</p></li>
+<li><p>Use FastAPI directly, smpub adds no value</p></li>
+</ul>
+<p><strong>You only need CLI OR API</strong>:</p>
+<ul class="simple">
+<li><p>Only CLI? → Use Click/Typer (simpler)</p></li>
+<li><p>Only API? → Use FastAPI (more flexible)</p></li>
+<li><p>Need both? → <strong>Use smpub</strong></p></li>
+</ul>
+</section>
+</section>
+<section id="the-architectural-win-apiswitcher">
+<h2>The Architectural Win: ApiSwitcher<a class="headerlink" href="#the-architectural-win-apiswitcher" title="Link to this heading"></a></h2>
+<p>One detail worth noting: <strong>ApiSwitcher creates Pydantic models at decoration time</strong>, not runtime.</p>
+<p><strong>Why this matters</strong>:</p>
+<p>FastAPI generates OpenAPI schemas at app startup by introspecting type hints. If you create Pydantic models dynamically at runtime, FastAPI can’t see them.</p>
+<p><strong>smpub’s solution</strong>:</p>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="k">class</span><span class="w"> </span><span class="nc">ApiSwitcher</span><span class="p">(</span><span class="n">Switcher</span><span class="p">):</span>
+    <span class="k">def</span><span class="w"> </span><span class="fm">__call__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">func</span><span class="p">):</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Decorate and create model NOW.&quot;&quot;&quot;</span>
+        <span class="n">decorated</span> <span class="o">=</span> <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="fm">__call__</span><span class="p">(</span><span class="n">func</span><span class="p">)</span>
+        <span class="c1"># Create Pydantic model at decoration time</span>
+        <span class="n">model</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_create_pydantic_model</span><span class="p">(</span><span class="n">func</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_pydantic_models</span><span class="p">[</span><span class="n">func</span><span class="o">.</span><span class="vm">__name__</span><span class="p">]</span> <span class="o">=</span> <span class="n">model</span>
+        <span class="k">return</span> <span class="n">decorated</span>
+</pre></div>
+</div>
+<p>Models exist when FastAPI inspects the app → OpenAPI docs work correctly.</p>
+<p>Not revolutionary, but <strong>correct</strong> and <strong>non-obvious</strong> if you’re building FastAPI integrations.</p>
+</section>
+<section id="real-world-workflow">
+<h2>Real-World Workflow<a class="headerlink" href="#real-world-workflow" title="Link to this heading"></a></h2>
+<section id="development">
+<h3>Development<a class="headerlink" href="#development" title="Link to this heading"></a></h3>
+<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span><span class="c1"># Write handlers</span>
+vim<span class="w"> </span>main.py
+
+<span class="c1"># Test directly</span>
+python<span class="w"> </span>main.py<span class="w"> </span>data<span class="w"> </span>process-data<span class="w"> </span>--input-file<span class="w"> </span>test.csv
+
+<span class="c1"># Or register and use via smpub</span>
+smpub<span class="w"> </span>add<span class="w"> </span>myapp<span class="w"> </span>.
+smpub<span class="w"> </span>myapp<span class="w"> </span>data<span class="w"> </span>process-data<span class="w"> </span>--input-file<span class="w"> </span>test.csv
+</pre></div>
+</div>
+</section>
+<section id="local-testing">
+<h3>Local Testing<a class="headerlink" href="#local-testing" title="Link to this heading"></a></h3>
+<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span><span class="c1"># Start server</span>
+smpub<span class="w"> </span>myapp<span class="w"> </span>serve<span class="w"> </span><span class="m">8000</span>
+
+<span class="c1"># Test HTTP endpoint</span>
+curl<span class="w"> </span>-X<span class="w"> </span>POST<span class="w"> </span>http://localhost:8000/data/process_data<span class="w"> </span><span class="se">\</span>
+<span class="w">  </span>-d<span class="w"> </span><span class="s1">&#39;{&quot;input_file&quot;: &quot;test.csv&quot;, &quot;output_format&quot;: &quot;json&quot;}&#39;</span>
+
+<span class="c1"># Check OpenAPI docs</span>
+open<span class="w"> </span>http://localhost:8000/docs
+</pre></div>
+</div>
+</section>
+<section id="production-deployment">
+<h3>Production Deployment<a class="headerlink" href="#production-deployment" title="Link to this heading"></a></h3>
+<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span><span class="c1"># Deploy as service</span>
+smpub<span class="w"> </span>myapp<span class="w"> </span>serve<span class="w"> </span><span class="m">8080</span>
+
+<span class="c1"># Or use gunicorn/uvicorn</span>
+uvicorn<span class="w"> </span>main:app<span class="w"> </span>--host<span class="w"> </span><span class="m">0</span>.0.0.0<span class="w"> </span>--port<span class="w"> </span><span class="m">8080</span>
+
+<span class="c1"># Ops can still use CLI</span>
+smpub<span class="w"> </span>myapp<span class="w"> </span>data<span class="w"> </span>process-data<span class="w"> </span>--input-file<span class="w"> </span>/data/production.csv
+</pre></div>
+</div>
+</section>
+<section id="team-sharing">
+<h3>Team Sharing<a class="headerlink" href="#team-sharing" title="Link to this heading"></a></h3>
+<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span><span class="c1"># Commit .published to git</span>
+git<span class="w"> </span>add<span class="w"> </span>.published
+git<span class="w"> </span>commit<span class="w"> </span>-m<span class="w"> </span><span class="s2">&quot;Add smpub app definition&quot;</span>
+
+<span class="c1"># Teammates register locally</span>
+git<span class="w"> </span>pull
+smpub<span class="w"> </span>add<span class="w"> </span>myapp<span class="w"> </span>.
+smpub<span class="w"> </span>list<span class="w">  </span><span class="c1"># myapp now available</span>
+</pre></div>
+</div>
+</section>
+</section>
+<section id="comparison-the-full-picture">
+<h2>Comparison: The Full Picture<a class="headerlink" href="#comparison-the-full-picture" title="Link to this heading"></a></h2>
+<table class="docutils align-default">
+<thead>
+<tr class="row-odd"><th class="head"><p>Feature</p></th>
+<th class="head"><p>Click/Typer</p></th>
+<th class="head"><p>FastAPI</p></th>
+<th class="head"><p>smpub</p></th>
+<th class="head"><p>FastAPI + Typer</p></th>
+</tr>
+</thead>
+<tbody>
+<tr class="row-even"><td><p>CLI interface</p></td>
+<td><p>✅</p></td>
+<td><p>❌</p></td>
+<td><p>✅</p></td>
+<td><p>✅</p></td>
+</tr>
+<tr class="row-odd"><td><p>HTTP API</p></td>
+<td><p>❌</p></td>
+<td><p>✅</p></td>
+<td><p>✅</p></td>
+<td><p>✅</p></td>
+</tr>
+<tr class="row-even"><td><p>OpenAPI docs</p></td>
+<td><p>❌</p></td>
+<td><p>✅</p></td>
+<td><p>✅</p></td>
+<td><p>✅</p></td>
+</tr>
+<tr class="row-odd"><td><p>Interactive TUI</p></td>
+<td><p>❌</p></td>
+<td><p>❌</p></td>
+<td><p>✅</p></td>
+<td><p>❌</p></td>
+</tr>
+<tr class="row-even"><td><p>Single definition</p></td>
+<td><p>✅</p></td>
+<td><p>✅</p></td>
+<td><p>✅</p></td>
+<td><p>❌ (two wrappers)</p></td>
+</tr>
+<tr class="row-odd"><td><p>Registry management</p></td>
+<td><p>❌</p></td>
+<td><p>❌</p></td>
+<td><p>✅</p></td>
+<td><p>❌</p></td>
+</tr>
+<tr class="row-even"><td><p>Custom CLI</p></td>
+<td><p>✅ Full</p></td>
+<td><p>❌</p></td>
+<td><p>⚠️ Standard</p></td>
+<td><p>✅ Full</p></td>
+</tr>
+<tr class="row-odd"><td><p>Custom HTTP</p></td>
+<td><p>❌</p></td>
+<td><p>✅ Full</p></td>
+<td><p>⚠️ Standard</p></td>
+<td><p>✅ Full</p></td>
+</tr>
+<tr class="row-even"><td><p>Boilerplate</p></td>
+<td><p>Low</p></td>
+<td><p>Low</p></td>
+<td><p><strong>Minimal</strong></p></td>
+<td><p><strong>High</strong></p></td>
+</tr>
+</tbody>
+</table>
+<p><strong>The trade-off</strong>: smpub gives you less control but eliminates duplication.</p>
+</section>
+<section id="key-takeaways">
+<h2>Key Takeaways<a class="headerlink" href="#key-takeaways" title="Link to this heading"></a></h2>
+<p>If you remember nothing else:</p>
+<p><strong>1. SmartSwitch + Publishing = Dual Interfaces</strong></p>
+<ul class="simple">
+<li><p>Write handlers with SmartSwitch pattern</p></li>
+<li><p>Publish with smpub → Get CLI + HTTP</p></li>
+<li><p>Same validation, docs, and logic everywhere</p></li>
+</ul>
+<p><strong>2. Registry Makes Tools Discoverable</strong></p>
+<ul class="simple">
+<li><p><code class="docutils literal notranslate"><span class="pre">smpub</span> <span class="pre">add</span> <span class="pre">myapp</span> <span class="pre">.</span></code> - register once</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">smpub</span> <span class="pre">list</span></code> - see all tools</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">smpub</span> <span class="pre">myapp</span> <span class="pre">handler</span> <span class="pre">method</span></code> - use anywhere</p></li>
+</ul>
+<p><strong>3. It’s Just FastAPI</strong></p>
+<ul class="simple">
+<li><p>Full FastAPI app accessible</p></li>
+<li><p>Add middleware, auth, custom routes</p></li>
+<li><p>smpub doesn’t lock you in</p></li>
+</ul>
+<p><strong>4. Convention Over Configuration</strong></p>
+<ul class="simple">
+<li><p>Standard <code class="docutils literal notranslate"><span class="pre">--arg</span> <span class="pre">value</span></code> CLI syntax</p></li>
+<li><p>REST POST endpoints</p></li>
+<li><p>Pydantic validation</p></li>
+<li><p>Accept constraints, gain speed</p></li>
+</ul>
+<p><strong>5. The Real Question</strong></p>
+<ul class="simple">
+<li><p>Not “Is this the best framework?”</p></li>
+<li><p>But “Am I writing multiple internal tools that need dual exposure?”</p></li>
+<li><p>If yes → smpub saves massive time</p></li>
+<li><p>If no → stick with Click or FastAPI alone</p></li>
+</ul>
+</section>
+<hr class="docutils" />
+<section id="what-s-next">
+<h2>What’s Next?<a class="headerlink" href="#what-s-next" title="Link to this heading"></a></h2>
+<p>This completes our two-part series on building consistent developer toolkits:</p>
+<p><strong>Part 1</strong>: <a class="reference external" href="https://github.com/genropy/smartswitch">Why SmartSwitch?</a> - Standard dispatch patterns
+<strong>Part 2</strong>: Why smpub? (this article) - Dual CLI/API interfaces</p>
+<p><strong>The pattern works</strong>:</p>
+<ol class="arabic simple">
+<li><p>Adopt SmartSwitch as your dispatch standard</p></li>
+<li><p>Use smpub to expose SmartSwitch handlers</p></li>
+<li><p>Write once, deploy everywhere</p></li>
+</ol>
+<hr class="docutils" />
+<p><strong>Project</strong>: smpub
+<strong>Version</strong>: 0.1.0 (Alpha)
+<strong>Python</strong>: 3.10+
+<strong>License</strong>: MIT
+<strong>Dependencies</strong>: smartswitch, fastapi, textual (optional)
+<strong>GitHub</strong>: <a class="reference external" href="https://github.com/genropy/smpub">github.com/genropy/smpub</a></p>
+<p><strong>Use it for internal tools. Don’t use it for public APIs.</strong></p>
+<p><strong>But if you’re building a suite of internal utilities, smpub eliminates an entire category of boilerplate.</strong></p>
+<hr class="docutils" />
+<p><em>Found this helpful? Questions? Leave a comment below. Want to see smpub in action? Check out the <a class="reference internal" href="../examples/index.html"><span class="std std-doc">examples</span></a> for complete working demos.</em></p>
+</section>
+</section>
+
+
+           </div>
+          </div>
+          <footer><div class="rst-footer-buttons" role="navigation" aria-label="Footer">
+        <a href="../appendix/smartswitch.html" class="btn btn-neutral float-left" title="Integration with SmartSwitch" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left" aria-hidden="true"></span> Previous</a>
+        <a href="../publishing-guide.html" class="btn btn-neutral float-right" title="Publishing Guide: How to Expose Your Library with smpub" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right" aria-hidden="true"></span></a>
+    </div>
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>&#169; Copyright 2025, Genropy Team.</p>
+  </div>
+
+  Built with <a href="https://www.sphinx-doc.org/">Sphinx</a> using a
+    <a href="https://github.com/readthedocs/sphinx_rtd_theme">theme</a>
+    provided by <a href="https://readthedocs.org">Read the Docs</a>.
+   
+
+</footer>
+        </div>
+      </div>
+    </section>
+  </div>
+  <script>
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script> 
+
+</body>
+</html>

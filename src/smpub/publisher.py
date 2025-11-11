@@ -75,7 +75,7 @@ class Publisher:
             http_path: Custom HTTP path (default: /{name})
 
         Raises:
-            TypeError: If target_object uses __slots__ but doesn't inherit from PublishedClass
+            TypeError: If target_object uses __slots__ but doesn't include 'smpublisher' slot
         """
         # Auto-upgrade plain Switcher to ApiSwitcher (Issue #5)
         # This allows users to use plain smartswitch.Switcher without changing imports
@@ -142,10 +142,14 @@ class Publisher:
         try:
             target_object.smpublisher = context
         except AttributeError:
+            # Handler uses __slots__ but doesn't include 'smpublisher'
             raise TypeError(
                 f"Cannot publish {type(target_object).__name__}: "
-                f"class uses __slots__ but doesn't inherit from PublishedClass. "
-                f"Either inherit from PublishedClass or don't use __slots__."
+                f"class uses __slots__ but doesn't include 'smpublisher' slot.\n"
+                f"Add 'smpublisher' to your __slots__:\n\n"
+                f"    class {type(target_object).__name__}:\n"
+                f"        __slots__ = ('your_attrs', 'smpublisher')  # Add this!\n"
+                f"        api = Switcher()\n"
             ) from None
 
         # Link handler's API to parent_api for hierarchical structure

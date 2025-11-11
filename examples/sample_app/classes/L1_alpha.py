@@ -9,7 +9,7 @@ from .L2_alpha_s1 import L2_alpha_s1
 class L1_alpha:
     """Level 1 - Alpha class."""
 
-    api = Switcher(prefix='alpha_')
+    api = Switcher(prefix="alpha_")
 
     def __init__(self):
         self.registry = {}

@@ -9,8 +9,8 @@ from smpub.apiswitcher import ApiSwitcher
 class AccountHandler(PublishedClass):
     """Handler for account management."""
 
-    __slots__ = ('accounts',)
-    api = ApiSwitcher(prefix='account_')
+    __slots__ = ("accounts",)
+    api = ApiSwitcher(prefix="account_")
 
     def __init__(self):
         self.accounts = {}
@@ -23,7 +23,7 @@ class AccountHandler(PublishedClass):
         smtp_port: int = 587,
         username: str = "",
         use_tls: bool = True,
-        auth_method: Literal["plain", "login", "oauth2"] = "plain"
+        auth_method: Literal["plain", "login", "oauth2"] = "plain",
     ):
         """Add a new mail account.
 
@@ -36,10 +36,7 @@ class AccountHandler(PublishedClass):
             auth_method: Authentication method (plain, login, or oauth2)
         """
         if name in self.accounts:
-            return {
-                "success": False,
-                "error": f"Account '{name}' already exists"
-            }
+            return {"success": False, "error": f"Account '{name}' already exists"}
 
         self.accounts[name] = {
             "name": name,
@@ -47,13 +44,13 @@ class AccountHandler(PublishedClass):
             "smtp_port": smtp_port,
             "username": username,
             "use_tls": use_tls,
-            "auth_method": auth_method
+            "auth_method": auth_method,
         }
 
         return {
             "success": True,
             "message": f"Account '{name}' added: {username}@{smtp_host}:{smtp_port}",
-            "account": self.accounts[name]
+            "account": self.accounts[name],
         }
 
     @api
@@ -64,32 +61,22 @@ class AccountHandler(PublishedClass):
             name: Account name to delete
         """
         if name not in self.accounts:
-            return {
-                "success": False,
-                "error": f"Account '{name}' not found"
-            }
+            return {"success": False, "error": f"Account '{name}' not found"}
 
         account = self.accounts.pop(name)
-        return {
-            "success": True,
-            "message": f"Account '{name}' deleted",
-            "account": account
-        }
+        return {"success": True, "message": f"Account '{name}' deleted", "account": account}
 
     @api
     def account_list(self):
         """List all mail accounts."""
-        return {
-            "count": len(self.accounts),
-            "accounts": list(self.accounts.values())
-        }
+        return {"count": len(self.accounts), "accounts": list(self.accounts.values())}
 
 
 class MailHandler(PublishedClass):
     """Handler for mail operations."""
 
-    __slots__ = ('account_handler', 'messages')
-    api = ApiSwitcher(prefix='mail_')
+    __slots__ = ("account_handler", "messages")
+    api = ApiSwitcher(prefix="mail_")
 
     def __init__(self, account_handler):
         self.account_handler = account_handler
@@ -103,7 +90,7 @@ class MailHandler(PublishedClass):
         subject: str,
         body: str,
         priority: Literal["low", "normal", "high"] = "normal",
-        html: bool = False
+        html: bool = False,
     ):
         """Send an email message.
 
@@ -118,7 +105,7 @@ class MailHandler(PublishedClass):
         if account not in self.account_handler.accounts:
             return {
                 "success": False,
-                "error": f"Account '{account}' not found. Use 'account add' first."
+                "error": f"Account '{account}' not found. Use 'account add' first.",
             }
 
         account_data = self.account_handler.accounts[account]
@@ -131,7 +118,7 @@ class MailHandler(PublishedClass):
             "body": body,
             "priority": priority,
             "html": html,
-            "status": "sent"
+            "status": "sent",
         }
         self.messages.append(message)
 
@@ -139,26 +126,20 @@ class MailHandler(PublishedClass):
             "success": True,
             "message": f"Email sent to {to} via account '{account}'",
             "message_id": message["id"],
-            "details": message
+            "details": message,
         }
 
     @api
     def mail_list(self):
         """List all sent messages."""
-        return {
-            "count": len(self.messages),
-            "messages": self.messages
-        }
+        return {"count": len(self.messages), "messages": self.messages}
 
     @api
     def mail_clear(self):
         """Clear all sent messages."""
         count = len(self.messages)
         self.messages.clear()
-        return {
-            "success": True,
-            "cleared": count
-        }
+        return {"success": True, "cleared": count}
 
 
 class MainClass(Publisher):
@@ -167,8 +148,8 @@ class MainClass(Publisher):
     def initialize(self):
         self.account = AccountHandler()
         self.mail = MailHandler(self.account)
-        self.publish('account', self.account, cli=True, openapi=True)
-        self.publish('mail', self.mail, cli=True, openapi=True)
+        self.publish("account", self.account, cli=True, openapi=True)
+        self.publish("mail", self.mail, cli=True, openapi=True)
 
 
 if __name__ == "__main__":

@@ -1,13 +1,14 @@
 """Test http/openapi.py module for comprehensive coverage."""
 
-from smpub import Publisher, ApiSwitcher
+from smpub import Publisher
+from smartswitch import Switcher
 from smpub.http.openapi import generate_openapi_schema, _python_type_to_openapi
 
 
 class SimpleHandler:
     """Handler with various parameter types."""
 
-    api = ApiSwitcher(prefix="simple_")
+    api = Switcher(prefix="simple_")
 
     @api
     def simple_string(self, name: str):
@@ -64,7 +65,7 @@ class SimpleHandler:
 class ComplexHandler:
     """Handler with complex types."""
 
-    api = ApiSwitcher(prefix="complex_")
+    api = Switcher(prefix="complex_")
 
     @api
     def complex_list(self, items: list):
@@ -351,7 +352,7 @@ class TestOpenAPISchema:
         """Should handle multiple handlers in schema."""
 
         class Handler1:
-            api = ApiSwitcher(prefix="h1_")
+            api = Switcher(prefix="h1_")
 
             @api
             def h1_method(self, value: str):
@@ -359,7 +360,7 @@ class TestOpenAPISchema:
                 return value
 
         class Handler2:
-            api = ApiSwitcher(prefix="h2_")
+            api = Switcher(prefix="h2_")
 
             @api
             def h2_method(self, value: int):

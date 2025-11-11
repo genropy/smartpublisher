@@ -25,7 +25,7 @@ class Publisher:
         self.loop = None
 
         # Call initialize hook if subclass defines it
-        if hasattr(self, 'initialize'):
+        if hasattr(self, "initialize"):
             self.initialize()
 
     def publish(self, name, target_object):
@@ -74,15 +74,10 @@ class Publisher:
         if name:
             # Get structure for specific instance
             instance = self.published_instances[name]
-            return {
-                'name': name,
-                'methods': instance.api.list()
-            }
+            return {"name": name, "methods": instance.api.list()}
         else:
             # Get structure for all instances
             result = {}
             for instance_name, instance in self.published_instances.items():
-                result[instance_name] = {
-                    'methods': instance.api.list()
-                }
+                result[instance_name] = {"methods": instance.api.list()}
             return result

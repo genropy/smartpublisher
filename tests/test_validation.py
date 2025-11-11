@@ -138,7 +138,7 @@ class TestValidateArgs:
             validate_args(method_required_only, [])
 
         error_dict = exc_info.value.errors()
-        field_names = [e['loc'][0] for e in error_dict]
+        field_names = [e["loc"][0] for e in error_dict]
         assert "name" in field_names
         assert "age" in field_names
 
@@ -193,15 +193,15 @@ class TestGetParameterInfo:
 
         assert len(info) == 2
 
-        name_param = next(p for p in info if p['name'] == 'name')
-        assert name_param['type'] == 'str'
-        assert name_param['required'] is True
-        assert name_param['default'] is None
+        name_param = next(p for p in info if p["name"] == "name")
+        assert name_param["type"] == "str"
+        assert name_param["required"] is True
+        assert name_param["default"] is None
 
-        age_param = next(p for p in info if p['name'] == 'age')
-        assert age_param['type'] == 'int'
-        assert age_param['required'] is True
-        assert age_param['default'] is None
+        age_param = next(p for p in info if p["name"] == "age")
+        assert age_param["type"] == "int"
+        assert age_param["required"] is True
+        assert age_param["default"] is None
 
     def test_optional_parameters(self):
         """Should extract optional parameter info with defaults."""
@@ -209,23 +209,23 @@ class TestGetParameterInfo:
 
         assert len(info) == 3
 
-        name_param = next(p for p in info if p['name'] == 'name')
-        assert name_param['required'] is True
+        name_param = next(p for p in info if p["name"] == "name")
+        assert name_param["required"] is True
 
-        age_param = next(p for p in info if p['name'] == 'age')
-        assert age_param['required'] is False
-        assert age_param['default'] == 25
+        age_param = next(p for p in info if p["name"] == "age")
+        assert age_param["required"] is False
+        assert age_param["default"] == 25
 
-        active_param = next(p for p in info if p['name'] == 'active')
-        assert active_param['required'] is False
-        assert active_param['default'] is True
+        active_param = next(p for p in info if p["name"] == "active")
+        assert active_param["required"] is False
+        assert active_param["default"] is True
 
     def test_type_names(self):
         """Should extract correct type names."""
         info = get_parameter_info(method_all_types)
 
-        types = {p['name']: p['type'] for p in info}
-        assert types['text'] == 'str'
-        assert types['number'] == 'int'
-        assert types['decimal'] == 'float'
-        assert types['flag'] == 'bool'
+        types = {p["name"]: p["type"] for p in info}
+        assert types["text"] == "str"
+        assert types["number"] == "int"
+        assert types["decimal"] == "float"
+        assert types["flag"] == "bool"

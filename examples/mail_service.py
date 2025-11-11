@@ -9,8 +9,8 @@ from smartswitch import Switcher
 class MailHandler(PublishedClass):
     """Handler for mail operations."""
 
-    __slots__ = ('config', 'messages')
-    api = Switcher(prefix='mail_')
+    __slots__ = ("config", "messages")
+    api = Switcher(prefix="mail_")
 
     def __init__(self):
         self.config = {}
@@ -23,7 +23,7 @@ class MailHandler(PublishedClass):
         smtp_port: int = 587,
         username: str = "",
         use_tls: bool = True,
-        auth_method: Literal["plain", "login", "oauth2"] = "plain"
+        auth_method: Literal["plain", "login", "oauth2"] = "plain",
     ):
         """Configure mail account settings.
 
@@ -40,13 +40,13 @@ class MailHandler(PublishedClass):
             "username": username,
             "use_tls": use_tls,
             "auth_method": auth_method,
-            "configured": True
+            "configured": True,
         }
 
         return {
             "success": True,
             "message": f"Mail account configured: {username}@{smtp_host}:{smtp_port}",
-            "config": self.config
+            "config": self.config,
         }
 
     @api
@@ -56,7 +56,7 @@ class MailHandler(PublishedClass):
         subject: str,
         body: str,
         priority: Literal["low", "normal", "high"] = "normal",
-        html: bool = False
+        html: bool = False,
     ):
         """Send an email message.
 
@@ -70,7 +70,7 @@ class MailHandler(PublishedClass):
         if not self.config.get("configured"):
             return {
                 "success": False,
-                "error": "Mail account not configured. Run configure_account first."
+                "error": "Mail account not configured. Run configure_account first.",
             }
 
         message = {
@@ -81,7 +81,7 @@ class MailHandler(PublishedClass):
             "body": body,
             "priority": priority,
             "html": html,
-            "status": "sent"
+            "status": "sent",
         }
         self.messages.append(message)
 
@@ -89,25 +89,19 @@ class MailHandler(PublishedClass):
             "success": True,
             "message": f"Email sent to {to}",
             "message_id": message["id"],
-            "details": message
+            "details": message,
         }
 
     @api
     def mail_list_sent(self):
         """List all sent messages."""
-        return {
-            "count": len(self.messages),
-            "messages": self.messages
-        }
+        return {"count": len(self.messages), "messages": self.messages}
 
     @api
     def mail_get_config(self):
         """Get current mail configuration."""
         if not self.config.get("configured"):
-            return {
-                "configured": False,
-                "message": "Mail account not configured"
-            }
+            return {"configured": False, "message": "Mail account not configured"}
 
         # Don't expose sensitive data in real scenario
         return {
@@ -116,7 +110,7 @@ class MailHandler(PublishedClass):
             "smtp_port": self.config["smtp_port"],
             "username": self.config["username"],
             "use_tls": self.config["use_tls"],
-            "auth_method": self.config["auth_method"]
+            "auth_method": self.config["auth_method"],
         }
 
     @api
@@ -124,10 +118,7 @@ class MailHandler(PublishedClass):
         """Clear all sent messages."""
         count = len(self.messages)
         self.messages.clear()
-        return {
-            "success": True,
-            "cleared": count
-        }
+        return {"success": True, "cleared": count}
 
 
 class MailApp(Publisher):
@@ -135,7 +126,7 @@ class MailApp(Publisher):
 
     def initialize(self):
         self.mail = MailHandler()
-        self.publish('mail', self.mail, cli=True, openapi=True)
+        self.publish("mail", self.mail, cli=True, openapi=True)
 
 
 if __name__ == "__main__":

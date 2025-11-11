@@ -1,0 +1,711 @@
+
+
+<!DOCTYPE html>
+<html class="writer-html5" lang="en" data-content_root="./">
+<head>
+  <meta charset="utf-8" /><meta name="viewport" content="width=device-width, initial-scale=1" />
+
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>smpub - Smart Publisher &mdash; smpub 0.2.0 documentation</title>
+      <link rel="stylesheet" type="text/css" href="_static/pygments.css?v=b86133f3" />
+      <link rel="stylesheet" type="text/css" href="_static/css/theme.css?v=e59714d7" />
+      <link rel="stylesheet" type="text/css" href="_static/custom.css?v=957296ec" />
+
+  
+    <link rel="shortcut icon" href="_static/logo.png"/>
+      <script src="_static/jquery.js?v=5d32c60e"></script>
+      <script src="_static/_sphinx_javascript_frameworks_compat.js?v=2cd50e6c"></script>
+      <script src="_static/documentation_options.js?v=938c9ccc"></script>
+      <script src="_static/doctools.js?v=9bcbadda"></script>
+      <script src="_static/sphinx_highlight.js?v=dc90522c"></script>
+    <script src="_static/js/theme.js"></script>
+    <link rel="index" title="Index" href="genindex.html" />
+    <link rel="search" title="Search" href="search.html" />
+    <link rel="next" title="Installation" href="user-guide/installation.html" /> 
+</head>
+
+<body class="wy-body-for-nav"> 
+  <div class="wy-grid-for-nav">
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search" >
+
+          
+          
+          <a href="#" class="icon icon-home">
+            smpub
+              <img src="_static/logo.png" class="logo" alt="Logo"/>
+          </a>
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" aria-label="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+        </div><div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="Navigation menu">
+              <p class="caption" role="heading"><span class="caption-text">User Guide</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="user-guide/installation.html">Installation</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="user-guide/installation.html#requirements">Requirements</a></li>
+<li class="toctree-l2"><a class="reference internal" href="user-guide/installation.html#basic-installation">Basic Installation</a></li>
+<li class="toctree-l2"><a class="reference internal" href="user-guide/installation.html#optional-dependencies">Optional Dependencies</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="user-guide/installation.html#http-api-support">HTTP/API Support</a></li>
+<li class="toctree-l3"><a class="reference internal" href="user-guide/installation.html#interactive-mode">Interactive Mode</a></li>
+<li class="toctree-l3"><a class="reference internal" href="user-guide/installation.html#development-tools">Development Tools</a></li>
+<li class="toctree-l3"><a class="reference internal" href="user-guide/installation.html#documentation">Documentation</a></li>
+<li class="toctree-l3"><a class="reference internal" href="user-guide/installation.html#all-dependencies">All Dependencies</a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="user-guide/installation.html#verify-installation">Verify Installation</a></li>
+<li class="toctree-l2"><a class="reference internal" href="user-guide/installation.html#next-steps">Next Steps</a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="user-guide/quickstart.html">Quick Start</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="user-guide/quickstart.html#create-a-simple-handler">Create a Simple Handler</a></li>
+<li class="toctree-l2"><a class="reference internal" href="user-guide/quickstart.html#try-cli-mode">Try CLI Mode</a></li>
+<li class="toctree-l2"><a class="reference internal" href="user-guide/quickstart.html#try-interactive-mode">Try Interactive Mode</a></li>
+<li class="toctree-l2"><a class="reference internal" href="user-guide/quickstart.html#try-http-mode">Try HTTP Mode</a></li>
+<li class="toctree-l2"><a class="reference internal" href="user-guide/quickstart.html#next-steps">Next Steps</a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="user-guide/publishing-guide.html">Publishing Guide: How to Expose Your Library with smpub</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="user-guide/publishing-guide.html#table-of-contents">Table of Contents</a></li>
+<li class="toctree-l2"><a class="reference internal" href="user-guide/publishing-guide.html#overview">Overview</a></li>
+<li class="toctree-l2"><a class="reference internal" href="user-guide/publishing-guide.html#prerequisites">Prerequisites</a></li>
+<li class="toctree-l2"><a class="reference internal" href="user-guide/publishing-guide.html#step-by-step-guide">Step-by-Step Guide</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="user-guide/publishing-guide.html#step-1-install-smpub">Step 1: Install smpub</a></li>
+<li class="toctree-l3"><a class="reference internal" href="user-guide/publishing-guide.html#step-2-create-handler-classes">Step 2: Create Handler Classes</a></li>
+<li class="toctree-l3"><a class="reference internal" href="user-guide/publishing-guide.html#step-3-create-publisher-application">Step 3: Create Publisher Application</a></li>
+<li class="toctree-l3"><a class="reference internal" href="user-guide/publishing-guide.html#step-4-create-entry-point">Step 4: Create Entry Point</a></li>
+<li class="toctree-l3"><a class="reference internal" href="user-guide/publishing-guide.html#step-5-test-your-cli">Step 5: Test Your CLI</a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="user-guide/publishing-guide.html#handler-requirements">Handler Requirements</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="user-guide/publishing-guide.html#required-elements">Required Elements</a></li>
+<li class="toctree-l3"><a class="reference internal" href="user-guide/publishing-guide.html#optional-but-recommended">Optional but Recommended</a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="user-guide/publishing-guide.html#best-practices">Best Practices</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="user-guide/publishing-guide.html#separation-of-concerns">1. Separation of Concerns</a></li>
+<li class="toctree-l3"><a class="reference internal" href="user-guide/publishing-guide.html#type-hints-for-free-validation">2. Type Hints for Free Validation</a></li>
+<li class="toctree-l3"><a class="reference internal" href="user-guide/publishing-guide.html#clear-documentation">3. Clear Documentation</a></li>
+<li class="toctree-l3"><a class="reference internal" href="user-guide/publishing-guide.html#error-handling">4. Error Handling</a></li>
+<li class="toctree-l3"><a class="reference internal" href="user-guide/publishing-guide.html#handler-organization">5. Handler Organization</a></li>
+<li class="toctree-l3"><a class="reference internal" href="user-guide/publishing-guide.html#publisher-best-practices">6. Publisher Best Practices</a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="user-guide/publishing-guide.html#common-patterns">Common Patterns</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="user-guide/publishing-guide.html#pattern-1-database-operations">Pattern 1: Database Operations</a></li>
+<li class="toctree-l3"><a class="reference internal" href="user-guide/publishing-guide.html#pattern-2-file-operations">Pattern 2: File Operations</a></li>
+<li class="toctree-l3"><a class="reference internal" href="user-guide/publishing-guide.html#pattern-3-service-integration">Pattern 3: Service Integration</a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="user-guide/publishing-guide.html#complete-example">Complete Example</a></li>
+<li class="toctree-l2"><a class="reference internal" href="user-guide/publishing-guide.html#summary">Summary</a></li>
+</ul>
+</li>
+</ul>
+<p class="caption" role="heading"><span class="caption-text">Guides</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="guide/publisher.html">Publisher Class</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="guide/publisher.html#basic-usage">Basic Usage</a></li>
+<li class="toctree-l2"><a class="reference internal" href="guide/publisher.html#methods">Methods</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="guide/publisher.html#publish">publish()</a></li>
+<li class="toctree-l3"><a class="reference internal" href="guide/publisher.html#run">run()</a></li>
+</ul>
+</li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="guide/handlers.html">Handler Classes</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="guide/handlers.html#basic-handler">Basic Handler</a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="guide/cli-mode.html">CLI Mode</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="guide/cli-mode.html#usage">Usage</a></li>
+<li class="toctree-l2"><a class="reference internal" href="guide/cli-mode.html#help">Help</a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="guide/http-mode.html">HTTP Mode</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="guide/http-mode.html#starting-server">Starting Server</a></li>
+<li class="toctree-l2"><a class="reference internal" href="guide/http-mode.html#endpoints">Endpoints</a></li>
+<li class="toctree-l2"><a class="reference internal" href="guide/http-mode.html#swagger-ui">Swagger UI</a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="guide/validation.html">Validation</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="guide/validation.html#automatic-validation">Automatic Validation</a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="guide/interactive.html">Interactive Mode</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="guide/interactive.html#installation">Installation</a></li>
+<li class="toctree-l2"><a class="reference internal" href="guide/interactive.html#complete-test-sequence">Complete Test Sequence</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="guide/interactive.html#step-1-install-and-setup">Step 1: Install and Setup</a></li>
+<li class="toctree-l3"><a class="reference internal" href="guide/interactive.html#step-2-register-test-app">Step 2: Register Test App</a></li>
+<li class="toctree-l3"><a class="reference internal" href="guide/interactive.html#step-3-test-interactive-mode">Step 3: Test Interactive Mode</a></li>
+<li class="toctree-l3"><a class="reference internal" href="guide/interactive.html#step-4-verify-results">Step 4: Verify Results</a></li>
+<li class="toctree-l3"><a class="reference internal" href="guide/interactive.html#step-5-cleanup">Step 5: Cleanup</a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="guide/interactive.html#what-happens">What Happens</a></li>
+<li class="toctree-l2"><a class="reference internal" href="guide/interactive.html#interactive-vs-normal-mode">Interactive vs Normal Mode</a></li>
+<li class="toctree-l2"><a class="reference internal" href="guide/interactive.html#questionary-advantages">Questionary Advantages</a></li>
+<li class="toctree-l2"><a class="reference internal" href="guide/interactive.html#parameter-types">Parameter Types</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="guide/interactive.html#text-input-str-int-float">Text Input (str, int, float)</a></li>
+<li class="toctree-l3"><a class="reference internal" href="guide/interactive.html#boolean-confirmation">Boolean Confirmation</a></li>
+<li class="toctree-l3"><a class="reference internal" href="guide/interactive.html#literal-selection">Literal Selection</a></li>
+</ul>
+</li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="guide/best-practices.html">Best Practices</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="guide/best-practices.html#handler-design">Handler Design</a></li>
+<li class="toctree-l2"><a class="reference internal" href="guide/best-practices.html#type-hints">Type Hints</a></li>
+<li class="toctree-l2"><a class="reference internal" href="guide/best-practices.html#error-handling">Error Handling</a></li>
+</ul>
+</li>
+</ul>
+<p class="caption" role="heading"><span class="caption-text">Examples</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="examples/index.html">Examples</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="examples/index.html#available-examples">Available Examples</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="examples/index.html#calculator-app">Calculator App</a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="examples/index.html#running-examples">Running Examples</a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="examples/calculator.html">Calculator Example</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="examples/calculator.html#source-code">Source Code</a></li>
+<li class="toctree-l2"><a class="reference internal" href="examples/calculator.html#features">Features</a></li>
+<li class="toctree-l2"><a class="reference internal" href="examples/calculator.html#cli-usage">CLI Usage</a></li>
+<li class="toctree-l2"><a class="reference internal" href="examples/calculator.html#http-usage">HTTP Usage</a></li>
+</ul>
+</li>
+</ul>
+<p class="caption" role="heading"><span class="caption-text">API Reference</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="api/publisher.html">Publisher API Reference</a></li>
+<li class="toctree-l1"><a class="reference internal" href="api/published.html">PublishedClass API Reference</a></li>
+<li class="toctree-l1"><a class="reference internal" href="api/http.html">HTTP API Reference</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="api/http.html#fastapi-integration">FastAPI Integration</a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="api/interactive.html">Interactive API Reference</a></li>
+<li class="toctree-l1"><a class="reference internal" href="api/validation.html">Validation API Reference</a></li>
+</ul>
+<p class="caption" role="heading"><span class="caption-text">Appendix</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="appendix/architecture.html">Architecture</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="appendix/architecture.html#overview">Overview</a></li>
+<li class="toctree-l2"><a class="reference internal" href="appendix/architecture.html#layered-architecture">Layered Architecture</a></li>
+<li class="toctree-l2"><a class="reference internal" href="appendix/architecture.html#core-components">Core Components</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="appendix/architecture.html#publisher">Publisher</a></li>
+<li class="toctree-l3"><a class="reference internal" href="appendix/architecture.html#publishedclass">PublishedClass</a></li>
+<li class="toctree-l3"><a class="reference internal" href="appendix/architecture.html#publishercontext">PublisherContext</a></li>
+<li class="toctree-l3"><a class="reference internal" href="appendix/architecture.html#apiswitcher">ApiSwitcher</a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="appendix/architecture.html#data-flow">Data Flow</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="appendix/architecture.html#cli-mode-flow">CLI Mode Flow</a></li>
+<li class="toctree-l3"><a class="reference internal" href="appendix/architecture.html#http-mode-flow">HTTP Mode Flow</a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="appendix/architecture.html#validation-layer">Validation Layer</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="appendix/architecture.html#pydantic-integration">Pydantic Integration</a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="appendix/architecture.html#interactive-layer">Interactive Layer</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="appendix/architecture.html#textual-integration">Textual Integration</a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="appendix/architecture.html#http-layer">HTTP Layer</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="appendix/architecture.html#fastapi-integration">FastAPI Integration</a></li>
+<li class="toctree-l3"><a class="reference internal" href="appendix/architecture.html#cli-command-smpub-app-serve">CLI Command: <code class="docutils literal notranslate"><span class="pre">smpub</span> <span class="pre">&lt;app&gt;</span> <span class="pre">serve</span></code></a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="appendix/architecture.html#registry-system">Registry System</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="appendix/architecture.html#local-registry-published">Local Registry (<code class="docutils literal notranslate"><span class="pre">.published</span></code>)</a></li>
+<li class="toctree-l3"><a class="reference internal" href="appendix/architecture.html#global-registry-smartlibs-publisher-registry-json">Global Registry (<code class="docutils literal notranslate"><span class="pre">~/.smartlibs/publisher/registry.json</span></code>)</a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="appendix/architecture.html#design-principles">Design Principles</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="appendix/architecture.html#separation-of-concerns">1. Separation of Concerns</a></li>
+<li class="toctree-l3"><a class="reference internal" href="appendix/architecture.html#convention-over-configuration">2. Convention over Configuration</a></li>
+<li class="toctree-l3"><a class="reference internal" href="appendix/architecture.html#progressive-enhancement">3. Progressive Enhancement</a></li>
+<li class="toctree-l3"><a class="reference internal" href="appendix/architecture.html#smartswitch-foundation">4. SmartSwitch Foundation</a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="appendix/architecture.html#extension-points">Extension Points</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="appendix/architecture.html#custom-validators">Custom Validators</a></li>
+<li class="toctree-l3"><a class="reference internal" href="appendix/architecture.html#custom-routes">Custom Routes</a></li>
+<li class="toctree-l3"><a class="reference internal" href="appendix/architecture.html#custom-interactive-forms">Custom Interactive Forms</a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="appendix/architecture.html#performance-considerations">Performance Considerations</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="appendix/architecture.html#memory">Memory</a></li>
+<li class="toctree-l3"><a class="reference internal" href="appendix/architecture.html#validation">Validation</a></li>
+<li class="toctree-l3"><a class="reference internal" href="appendix/architecture.html#http">HTTP</a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="appendix/architecture.html#future-architecture">Future Architecture</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="appendix/architecture.html#planned-enhancements">Planned Enhancements</a></li>
+<li class="toctree-l3"><a class="reference internal" href="appendix/architecture.html#compatibility">Compatibility</a></li>
+</ul>
+</li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="appendix/smartswitch.html">Integration with SmartSwitch</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="appendix/smartswitch.html#how-smpub-uses-smartswitch">How smpub Uses SmartSwitch</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="appendix/smartswitch.html#parent-child-api-structure">Parent-Child API Structure</a></li>
+<li class="toctree-l3"><a class="reference internal" href="appendix/smartswitch.html#method-dispatch">Method Dispatch</a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="appendix/smartswitch.html#switcher-configuration">Switcher Configuration</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="appendix/smartswitch.html#handler-api-definition">Handler API Definition</a></li>
+<li class="toctree-l3"><a class="reference internal" href="appendix/smartswitch.html#method-decoration">Method Decoration</a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="appendix/smartswitch.html#api-discovery">API Discovery</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="appendix/smartswitch.html#get-api-json">get_api_json()</a></li>
+<li class="toctree-l3"><a class="reference internal" href="appendix/smartswitch.html#use-cases">Use Cases</a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="appendix/smartswitch.html#smartswitch-features-not-used">SmartSwitch Features Not Used</a></li>
+<li class="toctree-l2"><a class="reference internal" href="appendix/smartswitch.html#benefits-of-smartswitch-foundation">Benefits of SmartSwitch Foundation</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="appendix/smartswitch.html#clean-method-registration">1. Clean Method Registration</a></li>
+<li class="toctree-l3"><a class="reference internal" href="appendix/smartswitch.html#automatic-discovery">2. Automatic Discovery</a></li>
+<li class="toctree-l3"><a class="reference internal" href="appendix/smartswitch.html#hierarchical-apis">3. Hierarchical APIs</a></li>
+<li class="toctree-l3"><a class="reference internal" href="appendix/smartswitch.html#type-safety">4. Type Safety</a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="appendix/smartswitch.html#comparison-with-direct-use">Comparison with Direct Use</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="appendix/smartswitch.html#using-smartswitch-directly">Using SmartSwitch Directly</a></li>
+<li class="toctree-l3"><a class="reference internal" href="appendix/smartswitch.html#using-smpub-smartswitch-more">Using smpub (SmartSwitch + More)</a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="appendix/smartswitch.html#further-reading">Further Reading</a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="philosophy/why-smpub.html">Why smpub? The Missing Link Between CLI and API</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="philosophy/why-smpub.html#previously-on-smartswitch">Previously, on SmartSwitch…</a></li>
+<li class="toctree-l2"><a class="reference internal" href="philosophy/why-smpub.html#the-write-once-problem">The Write-Once Problem</a></li>
+<li class="toctree-l2"><a class="reference internal" href="philosophy/why-smpub.html#the-smpub-pattern-smartswitch-publishing">The smpub Pattern: SmartSwitch + Publishing</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="philosophy/why-smpub.html#step-1-define-handlers-with-smartswitch">Step 1: Define Handlers with SmartSwitch</a></li>
+<li class="toctree-l3"><a class="reference internal" href="philosophy/why-smpub.html#step-2-publish-with-smpub">Step 2: Publish with smpub</a></li>
+<li class="toctree-l3"><a class="reference internal" href="philosophy/why-smpub.html#step-3-register-and-use">Step 3: Register and Use</a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="philosophy/why-smpub.html#what-you-actually-get">What You Actually Get</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="philosophy/why-smpub.html#zero-boilerplate-interfaces">1. <strong>Zero Boilerplate Interfaces</strong></a></li>
+<li class="toctree-l3"><a class="reference internal" href="philosophy/why-smpub.html#registry-management">2. <strong>Registry Management</strong></a></li>
+<li class="toctree-l3"><a class="reference internal" href="philosophy/why-smpub.html#interactive-mode">3. <strong>Interactive Mode</strong></a></li>
+<li class="toctree-l3"><a class="reference internal" href="philosophy/why-smpub.html#hierarchical-commands">4. <strong>Hierarchical Commands</strong></a></li>
+<li class="toctree-l3"><a class="reference internal" href="philosophy/why-smpub.html#type-validation-everywhere">5. <strong>Type Validation Everywhere</strong></a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="philosophy/why-smpub.html#the-registry-pattern">The Registry Pattern</a></li>
+<li class="toctree-l2"><a class="reference internal" href="philosophy/why-smpub.html#what-smpub-is-not">What smpub Is NOT</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="philosophy/why-smpub.html#not-a-web-framework">❌ Not a Web Framework</a></li>
+<li class="toctree-l3"><a class="reference internal" href="philosophy/why-smpub.html#not-a-cli-customization-framework">❌ Not a CLI Customization Framework</a></li>
+<li class="toctree-l3"><a class="reference internal" href="philosophy/why-smpub.html#not-for-public-apis">❌ Not for Public APIs</a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="philosophy/why-smpub.html#when-to-use-smpub">When to Use smpub</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="philosophy/why-smpub.html#perfect-fit">✅ Perfect Fit</a></li>
+<li class="toctree-l3"><a class="reference internal" href="philosophy/why-smpub.html#wrong-fit">❌ Wrong Fit</a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="philosophy/why-smpub.html#the-architectural-win-apiswitcher">The Architectural Win: ApiSwitcher</a></li>
+<li class="toctree-l2"><a class="reference internal" href="philosophy/why-smpub.html#real-world-workflow">Real-World Workflow</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="philosophy/why-smpub.html#development">Development</a></li>
+<li class="toctree-l3"><a class="reference internal" href="philosophy/why-smpub.html#local-testing">Local Testing</a></li>
+<li class="toctree-l3"><a class="reference internal" href="philosophy/why-smpub.html#production-deployment">Production Deployment</a></li>
+<li class="toctree-l3"><a class="reference internal" href="philosophy/why-smpub.html#team-sharing">Team Sharing</a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="philosophy/why-smpub.html#comparison-the-full-picture">Comparison: The Full Picture</a></li>
+<li class="toctree-l2"><a class="reference internal" href="philosophy/why-smpub.html#key-takeaways">Key Takeaways</a></li>
+<li class="toctree-l2"><a class="reference internal" href="philosophy/why-smpub.html#what-s-next">What’s Next?</a></li>
+</ul>
+</li>
+</ul>
+<p class="caption" role="heading"><span class="caption-text">Publishing</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="publishing-guide.html">Publishing Guide: How to Expose Your Library with smpub</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="publishing-guide.html#table-of-contents">Table of Contents</a></li>
+<li class="toctree-l2"><a class="reference internal" href="publishing-guide.html#overview">Overview</a></li>
+<li class="toctree-l2"><a class="reference internal" href="publishing-guide.html#prerequisites">Prerequisites</a></li>
+<li class="toctree-l2"><a class="reference internal" href="publishing-guide.html#step-by-step-guide">Step-by-Step Guide</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="publishing-guide.html#step-1-install-smpub">Step 1: Install smpub</a></li>
+<li class="toctree-l3"><a class="reference internal" href="publishing-guide.html#step-2-create-handler-classes">Step 2: Create Handler Classes</a></li>
+<li class="toctree-l3"><a class="reference internal" href="publishing-guide.html#step-3-create-publisher-application">Step 3: Create Publisher Application</a></li>
+<li class="toctree-l3"><a class="reference internal" href="publishing-guide.html#step-4-create-entry-point">Step 4: Create Entry Point</a></li>
+<li class="toctree-l3"><a class="reference internal" href="publishing-guide.html#step-5-test-your-cli">Step 5: Test Your CLI</a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="publishing-guide.html#handler-requirements">Handler Requirements</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="publishing-guide.html#required-elements">Required Elements</a></li>
+<li class="toctree-l3"><a class="reference internal" href="publishing-guide.html#optional-but-recommended">Optional but Recommended</a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="publishing-guide.html#best-practices">Best Practices</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="publishing-guide.html#separation-of-concerns">1. Separation of Concerns</a></li>
+<li class="toctree-l3"><a class="reference internal" href="publishing-guide.html#type-hints-for-free-validation">2. Type Hints for Free Validation</a></li>
+<li class="toctree-l3"><a class="reference internal" href="publishing-guide.html#clear-documentation">3. Clear Documentation</a></li>
+<li class="toctree-l3"><a class="reference internal" href="publishing-guide.html#error-handling">4. Error Handling</a></li>
+<li class="toctree-l3"><a class="reference internal" href="publishing-guide.html#handler-organization">5. Handler Organization</a></li>
+<li class="toctree-l3"><a class="reference internal" href="publishing-guide.html#publisher-best-practices">6. Publisher Best Practices</a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="publishing-guide.html#common-patterns">Common Patterns</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="publishing-guide.html#pattern-1-database-operations">Pattern 1: Database Operations</a></li>
+<li class="toctree-l3"><a class="reference internal" href="publishing-guide.html#pattern-2-file-operations">Pattern 2: File Operations</a></li>
+<li class="toctree-l3"><a class="reference internal" href="publishing-guide.html#pattern-3-service-integration">Pattern 3: Service Integration</a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="publishing-guide.html#complete-example">Complete Example</a></li>
+<li class="toctree-l2"><a class="reference internal" href="publishing-guide.html#summary">Summary</a></li>
+</ul>
+</li>
+</ul>
+
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap"><nav class="wy-nav-top" aria-label="Mobile navigation menu" >
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="#">smpub</a>
+      </nav>
+
+      <div class="wy-nav-content">
+        <div class="rst-content style-external-links">
+          <div role="navigation" aria-label="Page navigation">
+  <ul class="wy-breadcrumbs">
+      <li><a href="#" class="icon icon-home" aria-label="Home"></a></li>
+      <li class="breadcrumb-item active">smpub - Smart Publisher</li>
+      <li class="wy-breadcrumbs-aside">
+              <a href="https://github.com/genropy/smpub/blob/main/docs/index.md" class="fa fa-github"> Edit on GitHub</a>
+      </li>
+  </ul>
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+             
+  <div align="center">
+<img src="assets/logo.png" alt="smpub Logo" width="200"/>
+<section id="smpub-smart-publisher">
+<h1>smpub - Smart Publisher<a class="headerlink" href="#smpub-smart-publisher" title="Link to this heading"></a></h1>
+<p><strong>CLI/API framework based on SmartSwitch</strong></p>
+</div>
+<p><a class="reference external" href="https://pypi.org/project/smpub/"><img alt="PyPI" src="https://img.shields.io/pypi/v/smpub" /></a>
+<a class="reference external" href="https://pypi.org/project/smpub/"><img alt="Python" src="https://img.shields.io/pypi/pyversions/smpub" /></a>
+<a class="reference external" href="https://github.com/genropy/smpub/blob/main/LICENSE"><img alt="License" src="https://img.shields.io/pypi/l/smpub" /></a>
+<a class="reference external" href="https://codecov.io/gh/genropy/smpub"><img alt="codecov" src="https://codecov.io/gh/genropy/smpub/branch/main/graph/badge.svg" /></a>
+<a class="reference external" href="https://smpub.readthedocs.io"><img alt="Documentation" src="https://readthedocs.org/projects/smpub/badge/?version=latest" /></a>
+<a class="reference external" href="https://github.com/softwell/genro-libs"><img alt="Part of Genro-Libs" src="https://img.shields.io/badge/Genro--Libs-toolkit-blue" /></a></p>
+<p>Build CLI and API applications with automatic command dispatch using <a class="reference external" href="https://github.com/genropy/smartswitch">SmartSwitch</a>.</p>
+<section id="features">
+<h2>Features<a class="headerlink" href="#features" title="Link to this heading"></a></h2>
+<ul class="simple">
+<li><p>🎯 <strong>Publisher Pattern</strong> - Register handlers and expose them via CLI/API</p></li>
+<li><p>🔀 <strong>SmartSwitch Integration</strong> - Rule-based function dispatch</p></li>
+<li><p>💻 <strong>CLI Generation</strong> - Automatic command-line interface</p></li>
+<li><p>✅ <strong>Pydantic Validation</strong> - Automatic type validation and conversion</p></li>
+<li><p>🎨 <strong>Interactive Mode</strong> - Optional questionary-based parameter prompting</p></li>
+<li><p>🌐 <strong>HTTP/API Mode</strong> - FastAPI integration with Swagger UI</p></li>
+<li><p>📝 <strong>Registry System</strong> - Local/global app registration</p></li>
+<li><p>🏗️ <strong>Clean API</strong> - Simple decorator-based handler definition</p></li>
+</ul>
+</section>
+<section id="quick-start">
+<h2>Quick Start<a class="headerlink" href="#quick-start" title="Link to this heading"></a></h2>
+<section id="installation">
+<h3>Installation<a class="headerlink" href="#installation" title="Link to this heading"></a></h3>
+<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span>pip<span class="w"> </span>install<span class="w"> </span>smpub
+
+<span class="c1"># With HTTP support</span>
+pip<span class="w"> </span>install<span class="w"> </span>smpub<span class="o">[</span>http<span class="o">]</span>
+
+<span class="c1"># Interactive mode uses questionary (install separately)</span>
+pip<span class="w"> </span>install<span class="w"> </span>questionary
+</pre></div>
+</div>
+</section>
+<section id="basic-example">
+<h3>Basic Example<a class="headerlink" href="#basic-example" title="Link to this heading"></a></h3>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="kn">from</span><span class="w"> </span><span class="nn">smpub</span><span class="w"> </span><span class="kn">import</span> <span class="n">Publisher</span><span class="p">,</span> <span class="n">PublishedClass</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">smartswitch</span><span class="w"> </span><span class="kn">import</span> <span class="n">Switcher</span>
+
+<span class="k">class</span><span class="w"> </span><span class="nc">UserHandler</span><span class="p">(</span><span class="n">PublishedClass</span><span class="p">):</span>
+    <span class="vm">__slots__</span> <span class="o">=</span> <span class="p">(</span><span class="s1">&#39;users&#39;</span><span class="p">,)</span>
+    <span class="n">api</span> <span class="o">=</span> <span class="n">Switcher</span><span class="p">(</span><span class="n">prefix</span><span class="o">=</span><span class="s1">&#39;user_&#39;</span><span class="p">)</span>
+
+    <span class="k">def</span><span class="w"> </span><span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">users</span> <span class="o">=</span> <span class="p">{}</span>
+
+    <span class="nd">@api</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">user_add</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">name</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span> <span class="n">email</span><span class="p">:</span> <span class="nb">str</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">str</span><span class="p">:</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Add a new user.&quot;&quot;&quot;</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">users</span><span class="p">[</span><span class="n">name</span><span class="p">]</span> <span class="o">=</span> <span class="n">email</span>
+        <span class="k">return</span> <span class="sa">f</span><span class="s2">&quot;User </span><span class="si">{</span><span class="n">name</span><span class="si">}</span><span class="s2"> added&quot;</span>
+
+    <span class="nd">@api</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">user_list</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">list</span><span class="p">:</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;List all users.&quot;&quot;&quot;</span>
+        <span class="k">return</span> <span class="nb">list</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">users</span><span class="o">.</span><span class="n">keys</span><span class="p">())</span>
+
+<span class="k">class</span><span class="w"> </span><span class="nc">MainClass</span><span class="p">(</span><span class="n">Publisher</span><span class="p">):</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">initialize</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">users</span> <span class="o">=</span> <span class="n">UserHandler</span><span class="p">()</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">publish</span><span class="p">(</span><span class="s1">&#39;users&#39;</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">users</span><span class="p">,</span> <span class="n">cli</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">openapi</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+
+<span class="k">if</span> <span class="vm">__name__</span> <span class="o">==</span> <span class="s2">&quot;__main__&quot;</span><span class="p">:</span>
+    <span class="n">app</span> <span class="o">=</span> <span class="n">MainClass</span><span class="p">()</span>
+    <span class="n">app</span><span class="o">.</span><span class="n">run</span><span class="p">()</span>  <span class="c1"># Auto-detect CLI or HTTP mode</span>
+</pre></div>
+</div>
+</section>
+<section id="cli-mode">
+<h3>CLI Mode<a class="headerlink" href="#cli-mode" title="Link to this heading"></a></h3>
+<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span><span class="c1"># Run commands</span>
+python<span class="w"> </span>myapp.py<span class="w"> </span>users<span class="w"> </span>add<span class="w"> </span>john<span class="w"> </span>john@example.com
+python<span class="w"> </span>myapp.py<span class="w"> </span>users<span class="w"> </span>list
+
+<span class="c1"># Interactive mode</span>
+python<span class="w"> </span>myapp.py<span class="w"> </span>users<span class="w"> </span>add<span class="w"> </span>--interactive
+</pre></div>
+</div>
+</section>
+<section id="http-mode">
+<h3>HTTP Mode<a class="headerlink" href="#http-mode" title="Link to this heading"></a></h3>
+<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span><span class="c1"># Start HTTP server</span>
+python<span class="w"> </span>myapp.py
+
+<span class="c1"># Access Swagger UI</span>
+open<span class="w"> </span>http://localhost:8000/docs
+</pre></div>
+</div>
+</section>
+</section>
+<section id="documentation">
+<h2>Documentation<a class="headerlink" href="#documentation" title="Link to this heading"></a></h2>
+<div class="toctree-wrapper compound">
+<p class="caption" role="heading"><span class="caption-text">User Guide</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="user-guide/installation.html">Installation</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="user-guide/installation.html#requirements">Requirements</a></li>
+<li class="toctree-l2"><a class="reference internal" href="user-guide/installation.html#basic-installation">Basic Installation</a></li>
+<li class="toctree-l2"><a class="reference internal" href="user-guide/installation.html#optional-dependencies">Optional Dependencies</a></li>
+<li class="toctree-l2"><a class="reference internal" href="user-guide/installation.html#verify-installation">Verify Installation</a></li>
+<li class="toctree-l2"><a class="reference internal" href="user-guide/installation.html#next-steps">Next Steps</a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="user-guide/quickstart.html">Quick Start</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="user-guide/quickstart.html#create-a-simple-handler">Create a Simple Handler</a></li>
+<li class="toctree-l2"><a class="reference internal" href="user-guide/quickstart.html#try-cli-mode">Try CLI Mode</a></li>
+<li class="toctree-l2"><a class="reference internal" href="user-guide/quickstart.html#try-interactive-mode">Try Interactive Mode</a></li>
+<li class="toctree-l2"><a class="reference internal" href="user-guide/quickstart.html#try-http-mode">Try HTTP Mode</a></li>
+<li class="toctree-l2"><a class="reference internal" href="user-guide/quickstart.html#next-steps">Next Steps</a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="user-guide/publishing-guide.html">Publishing Guide: How to Expose Your Library with smpub</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="user-guide/publishing-guide.html#table-of-contents">Table of Contents</a></li>
+<li class="toctree-l2"><a class="reference internal" href="user-guide/publishing-guide.html#overview">Overview</a></li>
+<li class="toctree-l2"><a class="reference internal" href="user-guide/publishing-guide.html#prerequisites">Prerequisites</a></li>
+<li class="toctree-l2"><a class="reference internal" href="user-guide/publishing-guide.html#step-by-step-guide">Step-by-Step Guide</a></li>
+<li class="toctree-l2"><a class="reference internal" href="user-guide/publishing-guide.html#handler-requirements">Handler Requirements</a></li>
+<li class="toctree-l2"><a class="reference internal" href="user-guide/publishing-guide.html#best-practices">Best Practices</a></li>
+<li class="toctree-l2"><a class="reference internal" href="user-guide/publishing-guide.html#common-patterns">Common Patterns</a></li>
+<li class="toctree-l2"><a class="reference internal" href="user-guide/publishing-guide.html#complete-example">Complete Example</a></li>
+<li class="toctree-l2"><a class="reference internal" href="user-guide/publishing-guide.html#summary">Summary</a></li>
+</ul>
+</li>
+</ul>
+</div>
+<div class="toctree-wrapper compound">
+<p class="caption" role="heading"><span class="caption-text">Guides</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="guide/publisher.html">Publisher Class</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="guide/publisher.html#basic-usage">Basic Usage</a></li>
+<li class="toctree-l2"><a class="reference internal" href="guide/publisher.html#methods">Methods</a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="guide/handlers.html">Handler Classes</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="guide/handlers.html#basic-handler">Basic Handler</a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="guide/cli-mode.html">CLI Mode</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="guide/cli-mode.html#usage">Usage</a></li>
+<li class="toctree-l2"><a class="reference internal" href="guide/cli-mode.html#help">Help</a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="guide/http-mode.html">HTTP Mode</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="guide/http-mode.html#starting-server">Starting Server</a></li>
+<li class="toctree-l2"><a class="reference internal" href="guide/http-mode.html#endpoints">Endpoints</a></li>
+<li class="toctree-l2"><a class="reference internal" href="guide/http-mode.html#swagger-ui">Swagger UI</a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="guide/validation.html">Validation</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="guide/validation.html#automatic-validation">Automatic Validation</a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="guide/interactive.html">Interactive Mode</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="guide/interactive.html#installation">Installation</a></li>
+<li class="toctree-l2"><a class="reference internal" href="guide/interactive.html#complete-test-sequence">Complete Test Sequence</a></li>
+<li class="toctree-l2"><a class="reference internal" href="guide/interactive.html#what-happens">What Happens</a></li>
+<li class="toctree-l2"><a class="reference internal" href="guide/interactive.html#interactive-vs-normal-mode">Interactive vs Normal Mode</a></li>
+<li class="toctree-l2"><a class="reference internal" href="guide/interactive.html#questionary-advantages">Questionary Advantages</a></li>
+<li class="toctree-l2"><a class="reference internal" href="guide/interactive.html#parameter-types">Parameter Types</a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="guide/best-practices.html">Best Practices</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="guide/best-practices.html#handler-design">Handler Design</a></li>
+<li class="toctree-l2"><a class="reference internal" href="guide/best-practices.html#type-hints">Type Hints</a></li>
+<li class="toctree-l2"><a class="reference internal" href="guide/best-practices.html#error-handling">Error Handling</a></li>
+</ul>
+</li>
+</ul>
+</div>
+<div class="toctree-wrapper compound">
+<p class="caption" role="heading"><span class="caption-text">Examples</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="examples/index.html">Examples</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="examples/index.html#available-examples">Available Examples</a></li>
+<li class="toctree-l2"><a class="reference internal" href="examples/index.html#running-examples">Running Examples</a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="examples/calculator.html">Calculator Example</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="examples/calculator.html#source-code">Source Code</a></li>
+<li class="toctree-l2"><a class="reference internal" href="examples/calculator.html#features">Features</a></li>
+<li class="toctree-l2"><a class="reference internal" href="examples/calculator.html#cli-usage">CLI Usage</a></li>
+<li class="toctree-l2"><a class="reference internal" href="examples/calculator.html#http-usage">HTTP Usage</a></li>
+</ul>
+</li>
+</ul>
+</div>
+<div class="toctree-wrapper compound">
+<p class="caption" role="heading"><span class="caption-text">API Reference</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="api/publisher.html">Publisher API Reference</a></li>
+<li class="toctree-l1"><a class="reference internal" href="api/published.html">PublishedClass API Reference</a></li>
+<li class="toctree-l1"><a class="reference internal" href="api/http.html">HTTP API Reference</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="api/http.html#fastapi-integration">FastAPI Integration</a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="api/interactive.html">Interactive API Reference</a></li>
+<li class="toctree-l1"><a class="reference internal" href="api/validation.html">Validation API Reference</a></li>
+</ul>
+</div>
+<div class="toctree-wrapper compound">
+<p class="caption" role="heading"><span class="caption-text">Appendix</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="appendix/architecture.html">Architecture</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="appendix/architecture.html#overview">Overview</a></li>
+<li class="toctree-l2"><a class="reference internal" href="appendix/architecture.html#layered-architecture">Layered Architecture</a></li>
+<li class="toctree-l2"><a class="reference internal" href="appendix/architecture.html#core-components">Core Components</a></li>
+<li class="toctree-l2"><a class="reference internal" href="appendix/architecture.html#data-flow">Data Flow</a></li>
+<li class="toctree-l2"><a class="reference internal" href="appendix/architecture.html#validation-layer">Validation Layer</a></li>
+<li class="toctree-l2"><a class="reference internal" href="appendix/architecture.html#interactive-layer">Interactive Layer</a></li>
+<li class="toctree-l2"><a class="reference internal" href="appendix/architecture.html#http-layer">HTTP Layer</a></li>
+<li class="toctree-l2"><a class="reference internal" href="appendix/architecture.html#registry-system">Registry System</a></li>
+<li class="toctree-l2"><a class="reference internal" href="appendix/architecture.html#design-principles">Design Principles</a></li>
+<li class="toctree-l2"><a class="reference internal" href="appendix/architecture.html#extension-points">Extension Points</a></li>
+<li class="toctree-l2"><a class="reference internal" href="appendix/architecture.html#performance-considerations">Performance Considerations</a></li>
+<li class="toctree-l2"><a class="reference internal" href="appendix/architecture.html#future-architecture">Future Architecture</a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="appendix/smartswitch.html">Integration with SmartSwitch</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="appendix/smartswitch.html#how-smpub-uses-smartswitch">How smpub Uses SmartSwitch</a></li>
+<li class="toctree-l2"><a class="reference internal" href="appendix/smartswitch.html#switcher-configuration">Switcher Configuration</a></li>
+<li class="toctree-l2"><a class="reference internal" href="appendix/smartswitch.html#api-discovery">API Discovery</a></li>
+<li class="toctree-l2"><a class="reference internal" href="appendix/smartswitch.html#smartswitch-features-not-used">SmartSwitch Features Not Used</a></li>
+<li class="toctree-l2"><a class="reference internal" href="appendix/smartswitch.html#benefits-of-smartswitch-foundation">Benefits of SmartSwitch Foundation</a></li>
+<li class="toctree-l2"><a class="reference internal" href="appendix/smartswitch.html#comparison-with-direct-use">Comparison with Direct Use</a></li>
+<li class="toctree-l2"><a class="reference internal" href="appendix/smartswitch.html#further-reading">Further Reading</a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="philosophy/why-smpub.html">Why smpub? The Missing Link Between CLI and API</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="philosophy/why-smpub.html#previously-on-smartswitch">Previously, on SmartSwitch…</a></li>
+<li class="toctree-l2"><a class="reference internal" href="philosophy/why-smpub.html#the-write-once-problem">The Write-Once Problem</a></li>
+<li class="toctree-l2"><a class="reference internal" href="philosophy/why-smpub.html#the-smpub-pattern-smartswitch-publishing">The smpub Pattern: SmartSwitch + Publishing</a></li>
+<li class="toctree-l2"><a class="reference internal" href="philosophy/why-smpub.html#what-you-actually-get">What You Actually Get</a></li>
+<li class="toctree-l2"><a class="reference internal" href="philosophy/why-smpub.html#the-registry-pattern">The Registry Pattern</a></li>
+<li class="toctree-l2"><a class="reference internal" href="philosophy/why-smpub.html#what-smpub-is-not">What smpub Is NOT</a></li>
+<li class="toctree-l2"><a class="reference internal" href="philosophy/why-smpub.html#when-to-use-smpub">When to Use smpub</a></li>
+<li class="toctree-l2"><a class="reference internal" href="philosophy/why-smpub.html#the-architectural-win-apiswitcher">The Architectural Win: ApiSwitcher</a></li>
+<li class="toctree-l2"><a class="reference internal" href="philosophy/why-smpub.html#real-world-workflow">Real-World Workflow</a></li>
+<li class="toctree-l2"><a class="reference internal" href="philosophy/why-smpub.html#comparison-the-full-picture">Comparison: The Full Picture</a></li>
+<li class="toctree-l2"><a class="reference internal" href="philosophy/why-smpub.html#key-takeaways">Key Takeaways</a></li>
+<li class="toctree-l2"><a class="reference internal" href="philosophy/why-smpub.html#what-s-next">What’s Next?</a></li>
+</ul>
+</li>
+</ul>
+</div>
+<div class="toctree-wrapper compound">
+<p class="caption" role="heading"><span class="caption-text">Publishing</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="publishing-guide.html">Publishing Guide: How to Expose Your Library with smpub</a></li>
+</ul>
+</div>
+</section>
+<section id="part-of-genro-libs-family">
+<h2>Part of Genro-Libs Family<a class="headerlink" href="#part-of-genro-libs-family" title="Link to this heading"></a></h2>
+<p>smpub is part of the <a class="reference external" href="https://github.com/softwell/genro-libs">Genro-Libs toolkit</a>, a collection of general-purpose Python developer tools.</p>
+<p><strong>Related Projects:</strong></p>
+<ul class="simple">
+<li><p><a class="reference external" href="https://github.com/genropy/smartswitch">smartswitch</a> - Rule-based function dispatch (used by smpub)</p></li>
+<li><p><a class="reference external" href="https://github.com/genropy/gtext">gtext</a> - Text transformation tool</p></li>
+</ul>
+</section>
+<section id="license">
+<h2>License<a class="headerlink" href="#license" title="Link to this heading"></a></h2>
+<p>MIT License - see <a class="reference external" href="https://github.com/genropy/smpub/blob/main/LICENSE">LICENSE</a> file for details.</p>
+</section>
+<section id="author">
+<h2>Author<a class="headerlink" href="#author" title="Link to this heading"></a></h2>
+<p><strong>Genropy Team</strong> - <a class="reference external" href="mailto:info&#37;&#52;&#48;genropy&#46;org">info<span>&#64;</span>genropy<span>&#46;</span>org</a></p>
+</section>
+<section id="links">
+<h2>Links<a class="headerlink" href="#links" title="Link to this heading"></a></h2>
+<ul class="simple">
+<li><p><a class="reference external" href="https://github.com/genropy/smpub">GitHub Repository</a></p></li>
+<li><p><a class="reference external" href="https://smpub.readthedocs.io">Documentation</a></p></li>
+<li><p><a class="reference external" href="https://pypi.org/project/smpub/">PyPI Package</a></p></li>
+<li><p><a class="reference external" href="https://github.com/genropy/smpub/issues">Issue Tracker</a></p></li>
+</ul>
+</section>
+</section>
+
+
+           </div>
+          </div>
+          <footer><div class="rst-footer-buttons" role="navigation" aria-label="Footer">
+        <a href="user-guide/installation.html" class="btn btn-neutral float-right" title="Installation" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right" aria-hidden="true"></span></a>
+    </div>
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>&#169; Copyright 2025, Genropy Team.</p>
+  </div>
+
+  Built with <a href="https://www.sphinx-doc.org/">Sphinx</a> using a
+    <a href="https://github.com/readthedocs/sphinx_rtd_theme">theme</a>
+    provided by <a href="https://readthedocs.org">Read the Docs</a>.
+   
+
+</footer>
+        </div>
+      </div>
+    </section>
+  </div>
+  <script>
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script> 
+
+</body>
+</html>
