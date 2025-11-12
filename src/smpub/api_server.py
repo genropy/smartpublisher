@@ -139,9 +139,15 @@ def create_fastapi_app(
                             # For read methods, return result directly without wrapper if it's a string
                             # (formatted output like markdown/html/table)
                             if isinstance(result, str):
-                                from fastapi.responses import PlainTextResponse
+                                format_type = params_dict.get("format", "json")
+                                if format_type == "html":
+                                    from fastapi.responses import HTMLResponse
 
-                                return PlainTextResponse(content=result)
+                                    return HTMLResponse(content=result)
+                                else:
+                                    from fastapi.responses import PlainTextResponse
+
+                                    return PlainTextResponse(content=result)
 
                             return {"result": result}
                         except ValidationError as e:
