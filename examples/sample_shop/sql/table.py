@@ -180,12 +180,13 @@ class Table:
 
         return self._success(**{result_key: record})
 
-    def _list(self, columns, cursor=None, where=None, params=None, order_by=None, result_key='records'):
+    def _list(self, columns, format='json', cursor=None, where=None, params=None, order_by=None, result_key='records'):
         """
         Generic list operation.
 
         Args:
             columns: List of column names to select
+            format: Output format (json|markdown|table|html)
             cursor: Database cursor
             where: Optional WHERE clause (without WHERE keyword)
             params: Optional tuple of parameters for WHERE clause
@@ -193,7 +194,8 @@ class Table:
             result_key: Key name for the results list in response dict
 
         Returns:
-            Success dict with count and records list
+            Success dict with count and records list (format='json')
+            or formatted string (other formats)
         """
         cols = ','.join(columns)
         query = f"SELECT {cols} FROM {self._table_name}"
@@ -217,7 +219,140 @@ class Table:
             for row in rows
         ]
 
-        return self._success(count=len(records), **{result_key: records})
+        # Apply formatting
+        return self._apply_format(records, columns, format, result_key)
+
+    def _apply_format(self, records, columns, format='json', result_key='records', **extra_data):
+        """
+        Apply formatting to a list of records.
+
+        This helper can be used by both _list() and custom list methods
+        that prepare their own data.
+
+        Args:
+            records: List of record dictionaries
+            columns: List of column names (for table headers)
+            format: Output format (json|markdown|table|html)
+            result_key: Key name for the results list in JSON response
+            **extra_data: Additional data to include in JSON response (e.g., grand_total)
+
+        Returns:
+            Success dict with data (format='json') or formatted string (other formats)
+        """
+        if format == 'json':
+            return self._success(count=len(records), **{result_key: records}, **extra_data)
+        elif format == 'markdown':
+            return self._format_markdown(records, columns)
+        elif format == 'table':
+            return self._format_table(records, columns)
+        elif format == 'html':
+            return self._format_html(records, columns)
+        else:
+            # Unknown format, default to json
+            return self._success(count=len(records), **{result_key: records}, **extra_data)
+
+    # Formatters
+    def _format_markdown(self, records, columns):
+        """
+        Format records as markdown table.
+
+        Args:
+            records: List of record dictionaries
+            columns: List of column names
+
+        Returns:
+            String with markdown table
+        """
+        if not records:
+            return "No records found."
+
+        # Header
+        header = "| " + " | ".join(columns) + " |"
+        separator = "|" + "|".join([" --- "] * len(columns)) + "|"
+
+        # Rows
+        rows = []
+        for record in records:
+            values = [str(record.get(col, '')) for col in columns]
+            row = "| " + " | ".join(values) + " |"
+            rows.append(row)
+
+        return "\n".join([header, separator] + rows)
+
+    def _format_table(self, records, columns):
+        """
+        Format records as ASCII table.
+
+        Args:
+            records: List of record dictionaries
+            columns: List of column names
+
+        Returns:
+            String with ASCII art table
+        """
+        if not records:
+            return "No records found."
+
+        # Calculate column widths
+        widths = {col: len(col) for col in columns}
+        for record in records:
+            for col in columns:
+                value_len = len(str(record.get(col, '')))
+                if value_len > widths[col]:
+                    widths[col] = value_len
+
+        # Build format string
+        row_format = "| " + " | ".join(f"{{:<{widths[col]}}}" for col in columns) + " |"
+        separator = "+" + "+".join(["-" * (widths[col] + 2) for col in columns]) + "+"
+
+        # Header
+        lines = [separator]
+        lines.append(row_format.format(*columns))
+        lines.append(separator)
+
+        # Rows
+        for record in records:
+            values = [str(record.get(col, '')) for col in columns]
+            lines.append(row_format.format(*values))
+
+        lines.append(separator)
+        return "\n".join(lines)
+
+    def _format_html(self, records, columns):
+        """
+        Format records as HTML table.
+
+        Args:
+            records: List of record dictionaries
+            columns: List of column names
+
+        Returns:
+            String with HTML table
+        """
+        if not records:
+            return "<p>No records found.</p>"
+
+        # Header
+        lines = ['<table>']
+        lines.append('  <thead>')
+        lines.append('    <tr>')
+        for col in columns:
+            lines.append(f'      <th>{col}</th>')
+        lines.append('    </tr>')
+        lines.append('  </thead>')
+
+        # Body
+        lines.append('  <tbody>')
+        for record in records:
+            lines.append('    <tr>')
+            for col in columns:
+                value = record.get(col, '')
+                lines.append(f'      <td>{value}</td>')
+            lines.append('    </tr>')
+        lines.append('  </tbody>')
+        lines.append('</table>')
+
+        return "\n".join(lines)
 
     @classmethod
     def create_switcher(cls, name):

@@ -5,7 +5,7 @@ Utilities for publishable handlers and API discovery.
 import inspect
 
 
-def discover_api_json(target, recursive=False, switcher_name='api') -> dict:
+def discover_api_json(target, recursive=False, switcher_name="api") -> dict:
     """
     Discover API schema from a handler (class or instance).
 
@@ -121,7 +121,7 @@ class PublisherContext:
 
     __slots__ = ("parent_api", "_handler", "switcher_name")
 
-    def __init__(self, handler, switcher_name='api'):
+    def __init__(self, handler, switcher_name="api"):
         """
         Initialize context for a handler.
 

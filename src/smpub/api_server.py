@@ -77,9 +77,9 @@ def create_fastapi_app(
             # Get Pydantic model from func._plugin_meta['pydantic']
             # This is prepared by PydanticPlugin during decoration via on_decorate() hook
             RequestModel = None
-            if hasattr(method, '_plugin_meta') and 'pydantic' in method._plugin_meta:
-                pydantic_meta = method._plugin_meta['pydantic']
-                RequestModel = pydantic_meta.get('model')
+            if hasattr(method, "_plugin_meta") and "pydantic" in method._plugin_meta:
+                pydantic_meta = method._plugin_meta["pydantic"]
+                RequestModel = pydantic_meta.get("model")
 
             # Store endpoint info
             route_path = f"{http_path}/{api_method_name}"

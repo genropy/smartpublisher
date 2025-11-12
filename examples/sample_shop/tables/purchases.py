@@ -99,17 +99,18 @@ class Purchases(Table):
         }
 
     @dbop
-    def list(self, article_id: int | None = None, cursor=None, autocommit: bool = True) -> dict:
+    def list(self, format: str = 'json', article_id: int | None = None, cursor=None, autocommit: bool = False):
         """
         List purchases, optionally filtered by article.
 
         Args:
+            format: Output format (json|markdown|table|html)
             article_id: Optional filter by article
             cursor: Database cursor (auto-injected by DbopPlugin)
             autocommit: Auto-commit transaction (handled by DbopPlugin)
 
         Returns:
-            Dictionary with list of purchases
+            Dictionary with list of purchases (json) or formatted string
         """
         if article_id is not None:
             query = """
@@ -150,12 +151,10 @@ class Purchases(Table):
         # Calculate totals
         grand_total = sum(p["total"] for p in purchases)
 
-        return {
-            "success": True,
-            "count": len(purchases),
-            "purchases": purchases,
-            "grand_total": grand_total
-        }
+        # Apply formatting using base class helper
+        # Note: grand_total is only included in JSON format via extra_data
+        columns = ['id', 'article_id', 'code', 'description', 'quantity', 'unit_price', 'total', 'purchase_date']
+        return self._apply_format(purchases, columns, format, result_key='purchases', grand_total=grand_total)
 
     @dbop
     def get(self, id: int, cursor=None, autocommit: bool = True) -> dict:

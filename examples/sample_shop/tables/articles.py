@@ -108,17 +108,18 @@ class Articles(Table):
         }
 
     @dbop
-    def list(self, article_type_id: int | None = None, cursor=None, autocommit: bool = True) -> dict:
+    def list(self, format: str = 'json', article_type_id: int | None = None, cursor=None, autocommit: bool = False):
         """
         List articles, optionally filtered by type.
 
         Args:
+            format: Output format (json|markdown|table|html)
             article_type_id: Optional filter by article type
             cursor: Database cursor (auto-injected by DbopPlugin)
             autocommit: Auto-commit transaction (handled by DbopPlugin)
 
         Returns:
-            Dictionary with list of articles
+            Dictionary with list of articles (json) or formatted string
         """
         if article_type_id is not None:
             query = """
@@ -151,11 +152,9 @@ class Articles(Table):
             for row in rows
         ]
 
-        return {
-            "success": True,
-            "count": len(articles),
-            "articles": articles
-        }
+        # Apply formatting using base class helper
+        columns = ['id', 'code', 'description', 'price', 'type']
+        return self._apply_format(articles, columns, format, result_key='articles')
 
     @dbop
     def get(self, id: int, cursor=None, autocommit: bool = True) -> dict:

@@ -68,19 +68,21 @@ class ArticleTypes(Table):
         return result
 
     @dbop
-    def list(self, cursor=None, autocommit: bool = False) -> dict:
+    def list(self, format: str = 'json', cursor=None, autocommit: bool = False):
         """
         List all article types.
 
         Args:
+            format: Output format (json|markdown|table|html)
             cursor: Database cursor (auto-injected by DbopPlugin)
             autocommit: Auto-commit transaction (handled by DbopPlugin)
 
         Returns:
-            Dictionary with list of article types
+            Dictionary with list of article types (json) or formatted string
         """
         return self._list(
             columns=['id', 'name', 'description'],
+            format=format,
             order_by='name',
             result_key='types',
             cursor=cursor

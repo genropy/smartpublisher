@@ -67,6 +67,7 @@ class Publisher:
 
     def _publish_default_help(self):
         """Publish a default help handler when no on_init() is defined."""
+
         class DefaultHelp:
             """Default help handler - shown when Publisher has no on_init()."""
 
@@ -77,14 +78,14 @@ class Publisher:
                     "instructions": [
                         "1. Override on_init() in your Publisher subclass",
                         "2. Use self.publish(name, handler_instance) to publish handlers",
-                        "3. Example: self.publish('myhandler', MyHandler())"
+                        "3. Example: self.publish('myhandler', MyHandler())",
                     ],
                     "example": """
 class MyPublisher(Publisher):
     def on_init(self):
         handler = MyHandler()
         self.publish('myhandler', handler)
-"""
+""",
                 }
 
         self.publish("help", DefaultHelp())
@@ -97,7 +98,7 @@ class MyPublisher(Publisher):
         openapi: bool = True,
         cli_name: str | None = None,
         http_path: str | None = None,
-        switcher_name: str = 'api',
+        switcher_name: str = "api",
     ):
         """
         Publish an object and register for CLI/OpenAPI exposure.
@@ -149,14 +150,14 @@ class MyPublisher(Publisher):
             effective_cli_name = cli_name if cli_name is not None else name
             self._cli_handlers[effective_cli_name] = {
                 "handler": target_object,
-                "switcher_name": switcher_name
+                "switcher_name": switcher_name,
             }
         if openapi:
             effective_http_path = http_path if http_path is not None else f"/{name}"
             self._openapi_handlers[effective_http_path] = {
                 "handler": target_object,
                 "name": name,
-                "switcher_name": switcher_name
+                "switcher_name": switcher_name,
             }
 
     def _ensure_plugins(self, handler_api):
@@ -172,7 +173,7 @@ class MyPublisher(Publisher):
             handler_api: The Switcher instance from the handler class
         """
         # Get current plugin names
-        current_plugins = {p.plugin_name for p in handler_api._plugins if hasattr(p, 'plugin_name')}
+        current_plugins = {p.plugin_name for p in handler_api._plugins if hasattr(p, "plugin_name")}
 
         # Check for SmartasyncPlugin and remove it temporarily (must be last)
         smartasync_plugin = None
@@ -181,27 +182,27 @@ class MyPublisher(Publisher):
                 smartasync_plugin = plugin
                 handler_api._plugins.remove(plugin)
                 # Also remove from registry
-                if 'smartasync' in handler_api._plugin_registry:
-                    del handler_api._plugin_registry['smartasync']
+                if "smartasync" in handler_api._plugin_registry:
+                    del handler_api._plugin_registry["smartasync"]
                 break
 
         # Track which plugins we add (for retroactive on_decorate)
         new_plugins = []
 
         # Add Logging if missing
-        if 'logger' not in current_plugins:
-            handler_api.plug('logging', mode='silent')
-            new_plugins.append(('logger', handler_api._plugins[-1]))
+        if "logger" not in current_plugins:
+            handler_api.plug("logging", mode="silent")
+            new_plugins.append(("logger", handler_api._plugins[-1]))
 
         # Add Pydantic if missing
-        if 'pydantic' not in current_plugins:
-            handler_api.plug('pydantic')
-            new_plugins.append(('pydantic', handler_api._plugins[-1]))
+        if "pydantic" not in current_plugins:
+            handler_api.plug("pydantic")
+            new_plugins.append(("pydantic", handler_api._plugins[-1]))
 
         # Re-add or add SmartasyncPlugin at the end
         if smartasync_plugin:
             handler_api._plugins.append(smartasync_plugin)
-            handler_api._plugin_registry['smartasync'] = smartasync_plugin
+            handler_api._plugin_registry["smartasync"] = smartasync_plugin
         else:
             handler_api.plug(SmartasyncPlugin())
 
@@ -209,7 +210,7 @@ class MyPublisher(Publisher):
         if new_plugins:
             for method_name, method_func in handler_api._handlers.items():
                 for plugin_name, plugin in new_plugins:
-                    if hasattr(plugin, 'on_decorate'):
+                    if hasattr(plugin, "on_decorate"):
                         plugin.on_decorate(method_func, handler_api)
 
     def run(self, mode: str | None = None, port: int = 8000):
@@ -277,7 +278,9 @@ class MyPublisher(Publisher):
 
         # Get handler's Switcher
         if not hasattr(handler.__class__, switcher_name):
-            print(f"Error: Handler '{handler_name}' has no Switcher (missing '{switcher_name}' class variable)")
+            print(
+                f"Error: Handler '{handler_name}' has no Switcher (missing '{switcher_name}' class variable)"
+            )
             sys.exit(1)
 
         switcher = getattr(handler.__class__, switcher_name)
