@@ -54,3 +54,4 @@ docs/_build/  # Sphinx build output
 
 # Test
 examples/published_shop/*.db
+_build/
