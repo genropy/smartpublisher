@@ -21,8 +21,8 @@ from pathlib import Path
 smpub_root = Path(__file__).parent.parent.parent.parent
 sys.path.insert(0, str(smpub_root))
 
-from smpub import Publisher
-from examples.demo_shop.sample_shop.shop import Shop
+from smpub import Publisher  # noqa: E402
+from examples.demo_shop.sample_shop.shop import Shop  # noqa: E402
 
 
 class PublishedShop(Publisher):
