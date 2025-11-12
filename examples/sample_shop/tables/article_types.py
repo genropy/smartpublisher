@@ -6,9 +6,9 @@ from ..sql import Table
 class ArticleTypes(Table):
     """Manage article types like shoes, clothing, books."""
 
-    _table_name = 'article_types'  # Database table name
-    _registry_name = 'types'        # Registry key for shop.db.table('types')
-    dbop = Table.create_switcher('types')
+    _table_name = "article_types"  # Database table name
+    _registry_name = "types"  # Registry key for shop.db.table('types')
+    dbop = Table.create_switcher("types")
 
     @dbop
     def add(self, name: str, description: str = "", cursor=None, autocommit: bool = False) -> dict:
@@ -25,13 +25,13 @@ class ArticleTypes(Table):
             Dictionary with id and confirmation message
         """
         result = self._add(
-            columns=['name', 'description'],
+            columns=["name", "description"],
             values=[name, description],
-            unique_check={'name': name},
-            cursor=cursor
+            unique_check={"name": name},
+            cursor=cursor,
         )
-        if result['success']:
-            result['message'] = f"Article type '{name}' created with id {result['id']}"
+        if result["success"]:
+            result["message"] = f"Article type '{name}' created with id {result['id']}"
         return result
 
     @dbop
@@ -63,12 +63,12 @@ class ArticleTypes(Table):
 
         # Delete using helper
         result = self._remove(id, cursor)
-        if result['success']:
-            result['message'] = f"Article type '{name}' (id={id}) removed"
+        if result["success"]:
+            result["message"] = f"Article type '{name}' (id={id}) removed"
         return result
 
     @dbop
-    def list(self, format: str = 'json', cursor=None):
+    def list(self, format: str = "json", cursor=None):
         """
         List all article types.
 
@@ -80,11 +80,11 @@ class ArticleTypes(Table):
             Dictionary with list of article types (json) or formatted string
         """
         return self._list(
-            columns=['id', 'name', 'description'],
+            columns=["id", "name", "description"],
             format=format,
-            order_by='name',
-            result_key='types',
-            cursor=cursor
+            order_by="name",
+            result_key="types",
+            cursor=cursor,
         )
 
     @dbop
@@ -100,8 +100,5 @@ class ArticleTypes(Table):
             Dictionary with article type details
         """
         return self._get(
-            id=id,
-            columns=['id', 'name', 'description'],
-            result_key='type',
-            cursor=cursor
+            id=id, columns=["id", "name", "description"], result_key="type", cursor=cursor
         )

@@ -30,16 +30,19 @@ class SqliteAdapter(DbAdapter):
         cursor = self.cursor()
 
         # Article types table
-        cursor.execute("""
+        cursor.execute(
+            """
             CREATE TABLE IF NOT EXISTS article_types (
                 id INTEGER PRIMARY KEY AUTOINCREMENT,
                 name TEXT NOT NULL UNIQUE,
                 description TEXT
             )
-        """)
+        """
+        )
 
         # Articles table
-        cursor.execute("""
+        cursor.execute(
+            """
             CREATE TABLE IF NOT EXISTS articles (
                 id INTEGER PRIMARY KEY AUTOINCREMENT,
                 article_type_id INTEGER NOT NULL,
@@ -48,10 +51,12 @@ class SqliteAdapter(DbAdapter):
                 price REAL NOT NULL,
                 FOREIGN KEY (article_type_id) REFERENCES article_types(id)
             )
-        """)
+        """
+        )
 
         # Purchases table
-        cursor.execute("""
+        cursor.execute(
+            """
             CREATE TABLE IF NOT EXISTS purchases (
                 id INTEGER PRIMARY KEY AUTOINCREMENT,
                 article_id INTEGER NOT NULL,
@@ -59,6 +64,7 @@ class SqliteAdapter(DbAdapter):
                 purchase_date TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
                 FOREIGN KEY (article_id) REFERENCES articles(id)
             )
-        """)
+        """
+        )
 
         self.commit()

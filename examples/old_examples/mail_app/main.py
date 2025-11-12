@@ -5,6 +5,7 @@ from typing import Literal
 from smartswitch import Switcher
 from smpub import Publisher
 
+
 class AccountHandler:
     """Handler for account management."""
 
@@ -140,6 +141,7 @@ class MailHandler:
         self.messages.clear()
         return {"success": True, "cleared": count}
 
+
 class MainClass(Publisher):
     """Mail service application."""
 
@@ -148,6 +150,7 @@ class MainClass(Publisher):
         self.mail = MailHandler(self.account)
         self.publish("account", self.account, cli=True, openapi=True)
         self.publish("mail", self.mail, cli=True, openapi=True)
+
 
 if __name__ == "__main__":
     app = MainClass()

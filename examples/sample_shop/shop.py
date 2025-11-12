@@ -81,19 +81,19 @@ class Shop:
             ("electronics", "Electronic devices and gadgets"),
             ("clothing", "Apparel and accessories"),
             ("books", "Books and publications"),
-            ("home", "Home and kitchen items")
+            ("home", "Home and kitchen items"),
         ]
 
         type_ids = []
         for name, desc in types_data:
-            result = self.db.table('types').add(name, desc, autocommit=False)
-            if result['success']:
-                type_ids.append(result['id'])
+            result = self.db.table("types").add(name, desc, autocommit=False)
+            if result["success"]:
+                type_ids.append(result["id"])
 
         # Articles (5 per type)
         articles_data = [
             # Electronics
-            ("LAPTOP001", "MacBook Pro 16\"", 2499.00),
+            ("LAPTOP001", 'MacBook Pro 16"', 2499.00),
             ("PHONE001", "iPhone 15 Pro", 1199.00),
             ("TABLET001", "iPad Air", 599.00),
             ("MOUSE001", "Wireless Mouse", 29.99),
@@ -121,19 +121,19 @@ class Shop:
         article_ids = []
         for i, (code, desc, price) in enumerate(articles_data):
             type_idx = i // 5  # 5 articles per type
-            result = self.db.table('articles').add(
+            result = self.db.table("articles").add(
                 type_ids[type_idx], code, desc, price, autocommit=False
             )
-            if result['success']:
-                article_ids.append(result['id'])
+            if result["success"]:
+                article_ids.append(result["id"])
 
         # Purchases (120 total, distributed randomly)
         purchase_count = 0
         for _ in range(120):
             article_id = random.choice(article_ids)
             quantity = random.randint(1, 10)
-            result = self.db.table('purchases').add(article_id, quantity, autocommit=False)
-            if result['success']:
+            result = self.db.table("purchases").add(article_id, quantity, autocommit=False)
+            if result["success"]:
                 purchase_count += 1
 
         # Commit all changes
@@ -143,15 +143,15 @@ class Shop:
             "success": True,
             "types": len(type_ids),
             "articles": len(article_ids),
-            "purchases": purchase_count
+            "purchases": purchase_count,
         }
 
 
 if __name__ == "__main__":
     # Example: multiple Shop instances with different databases
     # Each instance is completely independent with its own connection pool
-    myapp = Shop('sqlite:shop1.db')
-    mysecond_app = Shop('sqlite:shop2.db')
+    myapp = Shop("sqlite:shop1.db")
+    mysecond_app = Shop("sqlite:shop2.db")
 
     # You can work with both shops independently:
     # - Copy articles from one shop to another

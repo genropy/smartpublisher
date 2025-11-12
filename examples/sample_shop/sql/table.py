@@ -67,10 +67,7 @@ class Table:
         Returns:
             True if value is unique (not found), False if already exists
         """
-        cursor.execute(
-            f"SELECT id FROM {self._table_name} WHERE {column} = ?",
-            (value,)
-        )
+        cursor.execute(f"SELECT id FROM {self._table_name} WHERE {column} = ?", (value,))
         return cursor.fetchone() is None
 
     def _check_count(self, where=None, params=None, cursor=None):
@@ -119,12 +116,9 @@ class Table:
                     return self._error(f"{col}='{val}' already exists")
 
         # Insert
-        placeholders = ','.join(['?'] * len(values))
-        cols = ','.join(columns)
-        cursor.execute(
-            f"INSERT INTO {self._table_name} ({cols}) VALUES ({placeholders})",
-            values
-        )
+        placeholders = ",".join(["?"] * len(values))
+        cols = ",".join(columns)
+        cursor.execute(f"INSERT INTO {self._table_name} ({cols}) VALUES ({placeholders})", values)
 
         result_id = cursor.lastrowid
         if message is None:
@@ -152,7 +146,7 @@ class Table:
 
         return self._success(message=f"Record id={id} removed")
 
-    def _get(self, id, columns, cursor=None, result_key='record'):
+    def _get(self, id, columns, cursor=None, result_key="record"):
         """
         Generic get by id operation.
 
@@ -165,11 +159,8 @@ class Table:
         Returns:
             Success dict with record data, or error dict
         """
-        cols = ','.join(columns)
-        cursor.execute(
-            f"SELECT {cols} FROM {self._table_name} WHERE id = ?",
-            (id,)
-        )
+        cols = ",".join(columns)
+        cursor.execute(f"SELECT {cols} FROM {self._table_name} WHERE id = ?", (id,))
         row = cursor.fetchone()
 
         if not row:
@@ -180,7 +171,16 @@ class Table:
 
         return self._success(**{result_key: record})
 
-    def _list(self, columns, format='json', cursor=None, where=None, params=None, order_by=None, result_key='records'):
+    def _list(
+        self,
+        columns,
+        format="json",
+        cursor=None,
+        where=None,
+        params=None,
+        order_by=None,
+        result_key="records",
+    ):
         """
         Generic list operation.
 
@@ -197,7 +197,7 @@ class Table:
             Success dict with count and records list (format='json')
             or formatted string (other formats)
         """
-        cols = ','.join(columns)
+        cols = ",".join(columns)
         query = f"SELECT {cols} FROM {self._table_name}"
 
         if where:
@@ -214,15 +214,12 @@ class Table:
         rows = cursor.fetchall()
 
         # Build results list
-        records = [
-            {col: row[i] for i, col in enumerate(columns)}
-            for row in rows
-        ]
+        records = [{col: row[i] for i, col in enumerate(columns)} for row in rows]
 
         # Apply formatting
         return self._apply_format(records, columns, format, result_key)
 
-    def _apply_format(self, records, columns, format='json', result_key='records', **extra_data):
+    def _apply_format(self, records, columns, format="json", result_key="records", **extra_data):
         """
         Apply formatting to a list of records.
 
@@ -239,13 +236,13 @@ class Table:
         Returns:
             Success dict with data (format='json') or formatted string (other formats)
         """
-        if format == 'json':
+        if format == "json":
             return self._success(count=len(records), **{result_key: records}, **extra_data)
-        elif format == 'markdown':
+        elif format == "markdown":
             return self._format_markdown(records, columns)
-        elif format == 'table':
+        elif format == "table":
             return self._format_table(records, columns)
-        elif format == 'html':
+        elif format == "html":
             return self._format_html(records, columns)
         else:
             # Unknown format, default to json
@@ -273,7 +270,7 @@ class Table:
         # Rows
         rows = []
         for record in records:
-            values = [str(record.get(col, '')) for col in columns]
+            values = [str(record.get(col, "")) for col in columns]
             row = "| " + " | ".join(values) + " |"
             rows.append(row)
 
@@ -297,7 +294,7 @@ class Table:
         widths = {col: len(col) for col in columns}
         for record in records:
             for col in columns:
-                value_len = len(str(record.get(col, '')))
+                value_len = len(str(record.get(col, "")))
                 if value_len > widths[col]:
                     widths[col] = value_len
 
@@ -312,7 +309,7 @@ class Table:
 
         # Rows
         for record in records:
-            values = [str(record.get(col, '')) for col in columns]
+            values = [str(record.get(col, "")) for col in columns]
             lines.append(row_format.format(*values))
 
         lines.append(separator)
@@ -333,24 +330,24 @@ class Table:
             return "<p>No records found.</p>"
 
         # Header
-        lines = ['<table>']
-        lines.append('  <thead>')
-        lines.append('    <tr>')
+        lines = ["<table>"]
+        lines.append("  <thead>")
+        lines.append("    <tr>")
         for col in columns:
-            lines.append(f'      <th>{col}</th>')
-        lines.append('    </tr>')
-        lines.append('  </thead>')
+            lines.append(f"      <th>{col}</th>")
+        lines.append("    </tr>")
+        lines.append("  </thead>")
 
         # Body
-        lines.append('  <tbody>')
+        lines.append("  <tbody>")
         for record in records:
-            lines.append('    <tr>')
+            lines.append("    <tr>")
             for col in columns:
-                value = record.get(col, '')
-                lines.append(f'      <td>{value}</td>')
-            lines.append('    </tr>')
-        lines.append('  </tbody>')
-        lines.append('</table>')
+                value = record.get(col, "")
+                lines.append(f"      <td>{value}</td>")
+            lines.append("    </tr>")
+        lines.append("  </tbody>")
+        lines.append("</table>")
 
         return "\n".join(lines)
 
@@ -368,6 +365,6 @@ class Table:
         return (
             Switcher(name=name)
             .plug("logging", mode="silent")  # Logging (disabled by default)
-            .plug("pydantic")                 # Validation
-            .plug(DbopPlugin())               # Transaction management + cursor injection
+            .plug("pydantic")  # Validation
+            .plug(DbopPlugin())  # Transaction management + cursor injection
         )

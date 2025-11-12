@@ -26,4 +26,3 @@ See `old_examples/` for archived examples that may be incomplete or use old patt
 """
 
 __all__ = ["sample_shop", "published_shop"]
-

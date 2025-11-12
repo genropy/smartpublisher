@@ -60,7 +60,7 @@ class DbopPlugin(BasePlugin):
             handler_instance = args[0]
 
             # Check if handler has db attribute
-            if not hasattr(handler_instance, 'db'):
+            if not hasattr(handler_instance, "db"):
                 raise AttributeError(
                     f"{handler_instance.__class__.__name__} must have 'db' attribute "
                     f"for DbopPlugin to work"
@@ -69,11 +69,11 @@ class DbopPlugin(BasePlugin):
             db = handler_instance.db
 
             # Get autocommit from kwargs or use default False
-            autocommit = kwargs.get('autocommit', False)
+            autocommit = kwargs.get("autocommit", False)
 
             # Inject cursor if not provided
-            if 'cursor' not in kwargs or kwargs['cursor'] is None:
-                kwargs['cursor'] = db.cursor()
+            if "cursor" not in kwargs or kwargs["cursor"] is None:
+                kwargs["cursor"] = db.cursor()
 
             try:
                 # Call the original function with injected cursor

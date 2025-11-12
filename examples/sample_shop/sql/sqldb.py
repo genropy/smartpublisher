@@ -72,11 +72,11 @@ class SqlDb:
         Args:
             table_class: Table manager class (must have _table_name attribute)
         """
-        if not hasattr(table_class, '_table_name'):
+        if not hasattr(table_class, "_table_name"):
             raise ValueError(f"Table class {table_class.__name__} must have _table_name attribute")
 
         # Use _registry_name if present, otherwise _table_name
-        name = getattr(table_class, '_registry_name', table_class._table_name)
+        name = getattr(table_class, "_registry_name", table_class._table_name)
         instance = table_class(self)
         self.tables[name] = instance
 
@@ -106,7 +106,7 @@ class SqlDb:
         Returns:
             Database connection object (thread-local)
         """
-        if not hasattr(self._thread_local, 'conn') or self._thread_local.conn is None:
+        if not hasattr(self._thread_local, "conn") or self._thread_local.conn is None:
             self._thread_local.conn = self.adapter.connect()
         return self._thread_local.conn
 
@@ -143,7 +143,7 @@ class SqlDb:
         """
         # Parse connection string and create adapter
         try:
-            db_type, connection_info = connection_string.split(':', 1)
+            db_type, connection_info = connection_string.split(":", 1)
         except ValueError:
             raise ValueError(
                 f"Invalid connection string format: '{connection_string}'. "

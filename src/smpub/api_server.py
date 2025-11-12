@@ -4,10 +4,10 @@ FastAPI integration for Publisher HTTP mode.
 
 import inspect
 from enum import Enum
-from typing import Any, Optional
+from typing import Any
 
 try:
-    from fastapi import FastAPI, HTTPException, Query
+    from fastapi import FastAPI, HTTPException, Depends
     from pydantic import ValidationError
 except ImportError:
     FastAPI = None
@@ -119,15 +119,12 @@ def create_fastapi_app(
 
             if is_read_only:
                 # For read-only methods, use GET with query parameters
+                # FastAPI with Depends() automatically converts Pydantic model fields to query params
                 def make_get_endpoint(method_ref, model_cls):
-                    # Get field info from Pydantic model
-                    fields = model_cls.model_fields
-
-                    async def endpoint_func(**kwargs):
+                    async def endpoint_func(params: model_cls = Depends()):
                         f"""Auto-generated GET endpoint for {handler_name}.{api_method_name}"""
                         try:
-                            # Convert query parameters using the Pydantic model for validation
-                            params_dict = model_cls(**kwargs).model_dump()
+                            params_dict = params.model_dump()
 
                             # Convert enum values back to strings
                             for key, value in params_dict.items():
@@ -154,26 +151,6 @@ def create_fastapi_app(
 
                     # Set proper name for FastAPI introspection
                     endpoint_func.__name__ = f"{handler_name}_{api_method_name}"
-
-                    # Build annotations for query parameters
-                    annotations = {}
-                    for field_name, field_info in fields.items():
-                        # Skip cursor and autocommit parameters
-                        if field_name in ("cursor", "autocommit"):
-                            continue
-
-                        field_type = field_info.annotation
-                        is_required = field_info.is_required()
-
-                        if is_required:
-                            annotations[field_name] = field_type
-                        else:
-                            # For optional parameters, use Optional and Query with default
-                            default_value = field_info.default
-                            annotations[field_name] = Optional[field_type]
-
-                    annotations["return"] = dict
-                    endpoint_func.__annotations__ = annotations
 
                     return endpoint_func
 

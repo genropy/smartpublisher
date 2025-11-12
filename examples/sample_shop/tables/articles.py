@@ -8,8 +8,8 @@ from ..sql import Table
 class Articles(Table):
     """Manage shop articles with code, description, price."""
 
-    _table_name = 'articles'
-    dbop = Table.create_switcher('articles')
+    _table_name = "articles"
+    dbop = Table.create_switcher("articles")
 
     @dbop
     def add(
@@ -19,7 +19,7 @@ class Articles(Table):
         description: str,
         price: Annotated[float, Field(gt=0, description="Price must be greater than zero")],
         cursor=None,
-        autocommit: bool = False
+        autocommit: bool = False,
     ) -> dict:
         """
         Add a new article.
@@ -39,10 +39,7 @@ class Articles(Table):
         cursor.execute("SELECT name FROM article_types WHERE id = ?", (article_type_id,))
         type_row = cursor.fetchone()
         if not type_row:
-            return {
-                "success": False,
-                "error": f"Article type with id {article_type_id} not found"
-            }
+            return {"success": False, "error": f"Article type with id {article_type_id} not found"}
 
         # Check if code already exists
         cursor.execute("SELECT id FROM articles WHERE code = ?", (code,))
@@ -50,20 +47,20 @@ class Articles(Table):
         if existing:
             return {
                 "success": False,
-                "error": f"Article with code '{code}' already exists with id {existing[0]}"
+                "error": f"Article with code '{code}' already exists with id {existing[0]}",
             }
 
         # Insert
         cursor.execute(
             """INSERT INTO articles (article_type_id, code, description, price)
                VALUES (?, ?, ?, ?)""",
-            (article_type_id, code, description, price)
+            (article_type_id, code, description, price),
         )
 
         return {
             "success": True,
             "id": cursor.lastrowid,
-            "message": f"Article '{code}' created with id {cursor.lastrowid}"
+            "message": f"Article '{code}' created with id {cursor.lastrowid}",
         }
 
     @dbop
@@ -83,10 +80,7 @@ class Articles(Table):
         cursor.execute("SELECT code FROM articles WHERE id = ?", (id,))
         row = cursor.fetchone()
         if not row:
-            return {
-                "success": False,
-                "error": f"Article with id {id} not found"
-            }
+            return {"success": False, "error": f"Article with id {id} not found"}
 
         code = row[0]
 
@@ -96,19 +90,16 @@ class Articles(Table):
         if count > 0:
             return {
                 "success": False,
-                "error": f"Cannot remove: there are {count} purchases for this article"
+                "error": f"Cannot remove: there are {count} purchases for this article",
             }
 
         # Delete
         cursor.execute("DELETE FROM articles WHERE id = ?", (id,))
 
-        return {
-            "success": True,
-            "message": f"Article '{code}' (id={id}) removed"
-        }
+        return {"success": True, "message": f"Article '{code}' (id={id}) removed"}
 
     @dbop
-    def list(self, format: str = 'json', article_type_id: int | None = None, cursor=None):
+    def list(self, format: str = "json", article_type_id: int | None = None, cursor=None):
         """
         List articles, optionally filtered by type.
 
@@ -141,19 +132,13 @@ class Articles(Table):
         rows = cursor.fetchall()
 
         articles = [
-            {
-                "id": row[0],
-                "code": row[1],
-                "description": row[2],
-                "price": row[3],
-                "type": row[4]
-            }
+            {"id": row[0], "code": row[1], "description": row[2], "price": row[3], "type": row[4]}
             for row in rows
         ]
 
         # Apply formatting using base class helper
-        columns = ['id', 'code', 'description', 'price', 'type']
-        return self._apply_format(articles, columns, format, result_key='articles')
+        columns = ["id", "code", "description", "price", "type"]
+        return self._apply_format(articles, columns, format, result_key="articles")
 
     @dbop
     def get(self, id: int, cursor=None) -> dict:
@@ -178,10 +163,7 @@ class Articles(Table):
         row = cursor.fetchone()
 
         if not row:
-            return {
-                "success": False,
-                "error": f"Article with id {id} not found"
-            }
+            return {"success": False, "error": f"Article with id {id} not found"}
 
         return {
             "success": True,
@@ -191,8 +173,8 @@ class Articles(Table):
                 "description": row[2],
                 "price": row[3],
                 "article_type_id": row[4],
-                "type": row[5]
-            }
+                "type": row[5],
+            },
         }
 
     @dbop
@@ -201,7 +183,7 @@ class Articles(Table):
         id: int,
         new_price: Annotated[float, Field(gt=0, description="Price must be greater than zero")],
         cursor=None,
-        autocommit: bool = False
+        autocommit: bool = False,
     ) -> dict:
         """
         Update article price.
@@ -219,10 +201,7 @@ class Articles(Table):
         cursor.execute("SELECT code, price FROM articles WHERE id = ?", (id,))
         row = cursor.fetchone()
         if not row:
-            return {
-                "success": False,
-                "error": f"Article with id {id} not found"
-            }
+            return {"success": False, "error": f"Article with id {id} not found"}
 
         code = row[0]
         old_price = row[1]
@@ -232,5 +211,5 @@ class Articles(Table):
 
         return {
             "success": True,
-            "message": f"Article '{code}' price updated from {old_price} to {new_price}"
+            "message": f"Article '{code}' price updated from {old_price} to {new_price}",
         }

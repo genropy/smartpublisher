@@ -39,25 +39,19 @@ def main():
     # 2. List article types
     print("2. Listing article types...")
     result = shop.types.list()
-    for t in result['types']:
+    for t in result["types"]:
         print(f"   - {t['name']}: {t['description']}")
     print()
 
     # 3. Add articles
     print("3. Adding articles...")
     result = shop.articles.add(
-        article_type_id=1,
-        code="LAPTOP001",
-        description="MacBook Pro 16",
-        price=2499.00
+        article_type_id=1, code="LAPTOP001", description="MacBook Pro 16", price=2499.00
     )
     print(f"   {result.get('message', result.get('error', 'OK'))}")
 
     result = shop.articles.add(
-        article_type_id=2,
-        code="BOOK001",
-        description="Python Programming",
-        price=49.99
+        article_type_id=2, code="BOOK001", description="Python Programming", price=49.99
     )
     print(f"   {result.get('message', result.get('error', 'OK'))}")
     print()
@@ -65,7 +59,7 @@ def main():
     # 4. List articles
     print("4. Listing articles...")
     result = shop.articles.list()
-    for article in result['articles']:
+    for article in result["articles"]:
         print(f"   - {article['code']}: {article['description']} (${article['price']})")
     print()
 

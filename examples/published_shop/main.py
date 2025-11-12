@@ -43,13 +43,13 @@ class PublishedShop(Publisher):
         # Import and instantiate Shop - it's just a normal Python class
         # Use a database file in the current directory
         db_path = Path(__file__).parent / "shop.db"
-        shop = Shop(f'sqlite:{db_path}')
+        shop = Shop(f"sqlite:{db_path}")
 
         # Publish table managers for CLI/HTTP access
         # Note: Table classes use 'dbop' instead of 'api' for their Switcher
-        self.publish("types", shop.db.table('types'), switcher_name='dbop')
-        self.publish("articles", shop.db.table('articles'), switcher_name='dbop')
-        self.publish("purchases", shop.db.table('purchases'), switcher_name='dbop')
+        self.publish("types", shop.db.table("types"), switcher_name="dbop")
+        self.publish("articles", shop.db.table("articles"), switcher_name="dbop")
+        self.publish("purchases", shop.db.table("purchases"), switcher_name="dbop")
 
 
 if __name__ == "__main__":

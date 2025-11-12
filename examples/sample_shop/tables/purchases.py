@@ -8,8 +8,8 @@ from ..sql import Table
 class Purchases(Table):
     """Manage purchases of articles."""
 
-    _table_name = 'purchases'
-    dbop = Table.create_switcher('purchases')
+    _table_name = "purchases"
+    dbop = Table.create_switcher("purchases")
 
     @dbop
     def add(
@@ -17,7 +17,7 @@ class Purchases(Table):
         article_id: int,
         quantity: Annotated[int, Field(gt=0, description="Quantity must be greater than zero")],
         cursor=None,
-        autocommit: bool = False
+        autocommit: bool = False,
     ) -> dict:
         """
         Register a new purchase.
@@ -32,16 +32,10 @@ class Purchases(Table):
             Dictionary with purchase id and total
         """
         # Check if article exists and get price
-        cursor.execute(
-            "SELECT code, description, price FROM articles WHERE id = ?",
-            (article_id,)
-        )
+        cursor.execute("SELECT code, description, price FROM articles WHERE id = ?", (article_id,))
         article_row = cursor.fetchone()
         if not article_row:
-            return {
-                "success": False,
-                "error": f"Article with id {article_id} not found"
-            }
+            return {"success": False, "error": f"Article with id {article_id} not found"}
 
         code = article_row[0]
         description = article_row[1]
@@ -50,22 +44,16 @@ class Purchases(Table):
 
         # Insert purchase
         cursor.execute(
-            "INSERT INTO purchases (article_id, quantity) VALUES (?, ?)",
-            (article_id, quantity)
+            "INSERT INTO purchases (article_id, quantity) VALUES (?, ?)", (article_id, quantity)
         )
 
         return {
             "success": True,
             "id": cursor.lastrowid,
-            "article": {
-                "id": article_id,
-                "code": code,
-                "description": description,
-                "price": price
-            },
+            "article": {"id": article_id, "code": code, "description": description, "price": price},
             "quantity": quantity,
             "total": total,
-            "message": f"Purchase registered: {quantity}x {code} = ${total:.2f}"
+            "message": f"Purchase registered: {quantity}x {code} = ${total:.2f}",
         }
 
     @dbop
@@ -85,21 +73,15 @@ class Purchases(Table):
         cursor.execute("SELECT article_id, quantity FROM purchases WHERE id = ?", (id,))
         row = cursor.fetchone()
         if not row:
-            return {
-                "success": False,
-                "error": f"Purchase with id {id} not found"
-            }
+            return {"success": False, "error": f"Purchase with id {id} not found"}
 
         # Delete
         cursor.execute("DELETE FROM purchases WHERE id = ?", (id,))
 
-        return {
-            "success": True,
-            "message": f"Purchase id={id} removed"
-        }
+        return {"success": True, "message": f"Purchase id={id} removed"}
 
     @dbop
-    def list(self, format: str = 'json', article_id: int | None = None, cursor=None):
+    def list(self, format: str = "json", article_id: int | None = None, cursor=None):
         """
         List purchases, optionally filtered by article.
 
@@ -142,7 +124,7 @@ class Purchases(Table):
                 "quantity": row[4],
                 "unit_price": row[5],
                 "total": row[4] * row[5],
-                "purchase_date": row[6]
+                "purchase_date": row[6],
             }
             for row in rows
         ]
@@ -152,8 +134,19 @@ class Purchases(Table):
 
         # Apply formatting using base class helper
         # Note: grand_total is only included in JSON format via extra_data
-        columns = ['id', 'article_id', 'code', 'description', 'quantity', 'unit_price', 'total', 'purchase_date']
-        return self._apply_format(purchases, columns, format, result_key='purchases', grand_total=grand_total)
+        columns = [
+            "id",
+            "article_id",
+            "code",
+            "description",
+            "quantity",
+            "unit_price",
+            "total",
+            "purchase_date",
+        ]
+        return self._apply_format(
+            purchases, columns, format, result_key="purchases", grand_total=grand_total
+        )
 
     @dbop
     def get(self, id: int, cursor=None) -> dict:
@@ -178,10 +171,7 @@ class Purchases(Table):
         row = cursor.fetchone()
 
         if not row:
-            return {
-                "success": False,
-                "error": f"Purchase with id {id} not found"
-            }
+            return {"success": False, "error": f"Purchase with id {id} not found"}
 
         return {
             "success": True,
@@ -193,8 +183,8 @@ class Purchases(Table):
                 "quantity": row[4],
                 "unit_price": row[5],
                 "total": row[4] * row[5],
-                "purchase_date": row[6]
-            }
+                "purchase_date": row[6],
+            },
         }
 
     @dbop
@@ -231,7 +221,7 @@ class Purchases(Table):
                 "description": row[1],
                 "total_quantity": row[2],
                 "purchase_count": row[3],
-                "total_value": row[4]
+                "total_value": row[4],
             }
             for row in rows
         ]
@@ -246,5 +236,5 @@ class Purchases(Table):
             "success": True,
             "total_purchases": total_purchases,
             "total_revenue": total_revenue,
-            "top_articles": top_articles
+            "top_articles": top_articles,
         }

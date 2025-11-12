@@ -25,7 +25,7 @@ def temp_db():
 @pytest.fixture
 def shop(temp_db):
     """Create a Shop instance for testing."""
-    return Shop(f'sqlite:{temp_db}')
+    return Shop(f"sqlite:{temp_db}")
 
 
 def test_populate_db(shop):
@@ -43,7 +43,7 @@ def test_populate_db_creates_types(shop):
     shop.populateDb()
 
     # Check types
-    types = shop.db.table('types').list()
+    types = shop.db.table("types").list()
     assert types["count"] == 4
     assert types["success"] is True
 
@@ -60,7 +60,7 @@ def test_populate_db_creates_articles(shop):
     shop.populateDb()
 
     # Check articles
-    articles = shop.db.table('articles').list()
+    articles = shop.db.table("articles").list()
     assert articles["count"] == 20
     assert articles["success"] is True
 
@@ -74,7 +74,7 @@ def test_populate_db_creates_purchases(shop):
     shop.populateDb()
 
     # Check purchases
-    purchases = shop.db.table('purchases').list()
+    purchases = shop.db.table("purchases").list()
     assert purchases["count"] == 120
     assert purchases["success"] is True
 
@@ -88,7 +88,7 @@ def test_populate_db_statistics(shop):
     shop.populateDb()
 
     # Get statistics
-    stats = shop.db.table('purchases').statistics()
+    stats = shop.db.table("purchases").statistics()
 
     assert stats["success"] is True
     assert stats["total_purchases"] == 120
@@ -104,9 +104,9 @@ def test_populate_db_transaction(shop):
     assert result["success"] is True
 
     # Verify data is actually committed
-    types = shop.db.table('types').list()
-    articles = shop.db.table('articles').list()
-    purchases = shop.db.table('purchases').list()
+    types = shop.db.table("types").list()
+    articles = shop.db.table("articles").list()
+    purchases = shop.db.table("purchases").list()
 
     assert types["count"] == 4
     assert articles["count"] == 20

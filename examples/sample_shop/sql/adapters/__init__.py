@@ -6,8 +6,8 @@ from .postgres import PostgresAdapter
 
 # Registry of available adapters
 ADAPTERS = {
-    'sqlite': SqliteAdapter,
-    'postgres': PostgresAdapter,
+    "sqlite": SqliteAdapter,
+    "postgres": PostgresAdapter,
 }
 
 __all__ = [
