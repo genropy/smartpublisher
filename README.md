@@ -21,6 +21,86 @@
 
 Build CLI and API applications with automatic command dispatch using [SmartSwitch](https://github.com/genropy/smartswitch).
 
+## What is smpub?
+
+### The Problem
+
+When you write a Python library, you typically need to provide multiple interfaces:
+
+- **Pythonic API** - Import and use directly in code
+- **CLI interface** - Command-line usage for scripts and users
+- **HTTP/API** - Web access, integrations, remote calls
+
+Traditionally, this means writing three different interfaces with lots of boilerplate code.
+
+### The Solution
+
+**smpub** (Smart Publisher) offers an elegant approach:
+
+1. **Write your library once** using [SmartSwitch](https://github.com/genropy/smartswitch) for method dispatch
+2. **Get three interfaces automatically**: Python, CLI, and HTTP/API
+
+**[SmartSwitch](https://github.com/genropy/smartswitch)** provides an elegant Pythonic dispatch system using decorators. **smpub** takes that dispatch system and automatically transforms it into CLI commands and HTTP endpoints.
+
+### Key Concept
+
+```
+Pythonic dispatch (SmartSwitch) → Automatic CLI + HTTP (smpub)
+```
+
+**One codebase, three interfaces:**
+
+```python
+# 1. Your library (uses SmartSwitch for elegant dispatch)
+from smartswitch import Switcher
+
+class MyService:
+    api = Switcher(prefix='my_')
+
+    @api
+    def my_operation(self, param: str):
+        """Process a parameter."""
+        return {"result": param}
+
+# 2. Publishing layer (uses smpub) - just ~20 lines!
+from smpub import Publisher
+
+class MyApp(Publisher):
+    def on_init(self):
+        self.publish("service", MyService())
+```
+
+**Result**: Your service is now accessible three ways:
+
+```python
+# Python API (direct import)
+from myapp import MyService
+service = MyService()
+service.my_operation("test")
+```
+
+```bash
+# CLI (automatic)
+python myapp.py service operation test
+
+# HTTP API (automatic)
+curl http://localhost:8000/service/operation -d '{"param": "test"}'
+# Plus OpenAPI/Swagger at /docs
+```
+
+### Why SmartSwitch?
+
+SmartSwitch provides an **elegant Pythonic dispatch** system with:
+
+- Clean decorator syntax (`@api`)
+- Plugin chain for cross-cutting concerns (logging, validation, transactions)
+- Type-safe method routing
+- Composable behavior
+
+When you use SmartSwitch, your code is already well-structured for dispatch. smpub simply transforms that dispatch into multiple interfaces.
+
+**Learn more**: See how a real application uses SmartSwitch plugins in the [Demo Shop documentation](https://github.com/genropy/smpub/tree/main/examples/demo_shop) (SQL database with transaction management, validation, and format negotiation).
+
 ## Features
 
 - 🎯 **Publisher Pattern** - Register handlers and expose them via CLI/API
@@ -42,7 +122,13 @@ pip install smpub[http]
 
 ## Quick Start
 
-### 1. Create Handlers
+### Workflow
+
+```
+1. Write your code with SmartSwitch → 2. Create Publisher → 3. Get CLI + HTTP API
+```
+
+### 1. Write Your Service (with SmartSwitch)
 
 ```python
 from typing import Literal
@@ -89,70 +175,103 @@ class MailHandler:
         return {"success": True, "message_id": len(self.messages)}
 ```
 
-### 2. Create an App
+### 2. Create Publisher (with smpub)
 
 ```python
 from smpub import Publisher
 
-class MainClass(Publisher):
-    def initialize(self):
+class MailApp(Publisher):
+    def on_init(self):
         self.account = AccountHandler()
         self.mail = MailHandler(self.account)
-        self.publish('account', self.account, cli=True, openapi=True)
-        self.publish('mail', self.mail, cli=True, openapi=True)
+        # Publish handlers - that's it!
+        self.publish('account', self.account)
+        self.publish('mail', self.mail)
 
 if __name__ == "__main__":
-    app = MainClass()
+    app = MailApp()
     app.run()  # Auto-detect CLI or HTTP mode
 ```
 
-### 3. Use It
+### 3. Use It - Direct Execution
 
-**CLI Mode:**
+**CLI Mode** (direct execution):
+
 ```bash
-# Register your app
-smpub add mailapp --path ~/projects/mailapp
-
 # Add mail account
-smpub mailapp account add work smtp.gmail.com 587 user@work.com
+python mailapp.py account add work smtp.gmail.com 587 user@work.com
 
 # Send email
-smpub mailapp mail send work recipient@example.com "Hello" "Message body"
+python mailapp.py mail send work recipient@example.com "Hello" "Message body"
+
+# Interactive mode (prompts for parameters)
+python mailapp.py mail send --interactive
 ```
 
-**HTTP Mode:**
+**HTTP Mode** (automatic):
 
 ```bash
-# Start server
+# Start server (no CLI args = HTTP mode)
 python mailapp.py
 # Opens Swagger UI at http://localhost:8000/docs
 
 # Call API
 curl -X POST http://localhost:8000/mail/send \
   -H "Content-Type: application/json" \
-  -d '{"to": "user@example.com", "subject": "Hello", "body": "Message"}'
+  -d '{"account": "work", "to": "user@example.com", "subject": "Hello", "body": "Message"}'
 ```
 
-**Interactive Mode:**
+### 4. Optional: Register for Global Access
+
+Register your app to use it from anywhere:
 
 ```bash
-smpub mailapp mail send --interactive
-# Prompts for each parameter with type hints
+# Register app
+smpub register mailapp ~/projects/mailapp
+
+# Now use from anywhere
+smpub run mailapp account list
+smpub serve mailapp  # Start HTTP server
+
+# List registered apps
+smpub list
+
+# Unregister
+smpub unregister mailapp
 ```
+
+**When to use registry?**
+- You have multiple apps and want to switch between them
+- You want to use your app from any directory
+- You're building reusable tools for your team
 
 ## Documentation
 
-For complete documentation, visit [smpub.readthedocs.io](https://smpub.readthedocs.io).
+### Main Documentation
+
+For complete framework documentation, visit [smpub.readthedocs.io](https://smpub.readthedocs.io).
 
 Topics covered:
-
 - Publisher and handler patterns
+- Registry system (register/run apps)
 - CLI command structure
+- HTTP/API mode with FastAPI
 - Type validation with Pydantic
 - Interactive mode with questionary
-- HTTP/API mode with FastAPI
-- Registry system (local/global)
-- Architecture and design
+
+### Real-World Example
+
+For a complete example showing SmartSwitch plugins, database adapters, and advanced patterns, see:
+
+**[Demo Shop Documentation](https://github.com/genropy/smpub/tree/main/examples/demo_shop)** - E-commerce library with:
+- SQL database system with adapters (SQLite/PostgreSQL)
+- Table managers with CRUD operations
+- SmartSwitch plugin chain (Logging, Pydantic, DbOp)
+- Transaction management
+- Format negotiation (JSON, Markdown, HTML)
+- Published in ~20 lines with smpub
+
+The demo shows how a well-structured SmartSwitch application becomes trivial to publish.
 
 ## Part of Genro-Libs Family
 

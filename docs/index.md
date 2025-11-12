@@ -17,6 +17,98 @@
 
 Build CLI and API applications with automatic command dispatch using [SmartSwitch](https://github.com/genropy/smartswitch).
 
+## What is smpub?
+
+### The Problem
+
+When you write a Python library, you typically need to provide multiple interfaces:
+
+- **Pythonic API** - Import and use directly in code
+- **CLI interface** - Command-line usage for scripts and users
+- **HTTP/API** - Web access, integrations, remote calls
+
+Traditionally, this means writing three different interfaces with lots of boilerplate code.
+
+### The Solution
+
+**smpub** (Smart Publisher) offers an elegant approach:
+
+1. **Write your library once** using [SmartSwitch](https://github.com/genropy/smartswitch) for method dispatch
+2. **Get three interfaces automatically**: Python, CLI, and HTTP/API
+
+**[SmartSwitch](https://github.com/genropy/smartswitch)** provides an elegant Pythonic dispatch system using decorators. **smpub** takes that dispatch system and automatically transforms it into CLI commands and HTTP endpoints.
+
+### Key Concept
+
+```text
+Pythonic dispatch (SmartSwitch) → Automatic CLI + HTTP (smpub)
+```
+
+**One codebase, three interfaces:**
+
+```python
+# 1. Your library (uses SmartSwitch for elegant dispatch)
+from smartswitch import Switcher
+
+class MyService:
+    api = Switcher(prefix='my_')
+
+    @api
+    def my_operation(self, param: str):
+        """Process a parameter."""
+        return {"result": param}
+
+# 2. Publishing layer (uses smpub) - just ~20 lines!
+from smpub import Publisher
+
+class MyApp(Publisher):
+    def on_init(self):
+        self.publish("service", MyService())
+```
+
+**Result**: Your service is now accessible three ways:
+
+**Python API** (direct import):
+
+```python
+from myapp import MyService
+service = MyService()
+result = service.my_operation("test")
+```
+
+**CLI** (automatic):
+
+```bash
+python myapp.py service operation test
+```
+
+**HTTP API** (automatic):
+
+```bash
+# Start server
+python myapp.py
+
+# Call API
+curl http://localhost:8000/service/operation \
+  -H "Content-Type: application/json" \
+  -d '{"param": "test"}'
+
+# OpenAPI/Swagger UI at http://localhost:8000/docs
+```
+
+### Why SmartSwitch?
+
+SmartSwitch provides an **elegant Pythonic dispatch** system with:
+
+- Clean decorator syntax (`@api`)
+- Plugin chain for cross-cutting concerns (logging, validation, transactions)
+- Type-safe method routing
+- Composable behavior
+
+When you use SmartSwitch, your code is already well-structured for dispatch. smpub simply transforms that dispatch into multiple interfaces.
+
+**Real-world example**: See the [Demo Shop](https://github.com/genropy/smpub/tree/main/examples/demo_shop) - a complete e-commerce application showing SmartSwitch plugins for database transactions, validation, and format negotiation. Published in ~20 lines with smpub.
+
 ## Features
 
 - 🎯 **Publisher Pattern** - Register handlers and expose them via CLI/API
