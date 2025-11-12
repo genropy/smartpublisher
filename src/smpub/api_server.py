@@ -4,10 +4,10 @@ FastAPI integration for Publisher HTTP mode.
 
 import inspect
 from enum import Enum
-from typing import Any
+from typing import Any, Optional
 
 try:
-    from fastapi import FastAPI, HTTPException
+    from fastapi import FastAPI, HTTPException, Query
     from pydantic import ValidationError
 except ImportError:
     FastAPI = None
@@ -81,6 +81,10 @@ def create_fastapi_app(
                 pydantic_meta = method._plugin_meta["pydantic"]
                 RequestModel = pydantic_meta.get("model")
 
+            # Determine if this is a read-only method (use GET) or write method (use POST)
+            read_only_methods = {"list", "get", "search", "find", "statistics", "count", "exists"}
+            is_read_only = api_method_name in read_only_methods
+
             # Store endpoint info
             route_path = f"{http_path}/{api_method_name}"
             endpoints.append(
@@ -90,6 +94,7 @@ def create_fastapi_app(
                     "api_method_name": api_method_name,
                     "method": method,
                     "RequestModel": RequestModel,
+                    "is_read_only": is_read_only,
                 }
             )
 
@@ -105,47 +110,110 @@ def create_fastapi_app(
         api_method_name = endpoint_info["api_method_name"]
         method = endpoint_info["method"]
         RequestModel = endpoint_info["RequestModel"]
+        is_read_only = endpoint_info["is_read_only"]
 
         if RequestModel:
             # Store model in module globals so FastAPI can find it
             model_name = RequestModel.__name__
             setattr(this_module, model_name, RequestModel)
 
-            # Create endpoint function with proper type annotation
-            # ApiSwitcher models are created at decoration time, so FastAPI can introspect them
-            def make_endpoint(method_ref, model_cls):
-                async def endpoint_func(body: model_cls):
-                    f"""Auto-generated endpoint for {handler_name}.{api_method_name}"""
-                    try:
-                        params_dict = body.model_dump()
-                        # Convert enum values back to strings
-                        for key, value in params_dict.items():
-                            if isinstance(value, Enum):
-                                params_dict[key] = value.value
+            if is_read_only:
+                # For read-only methods, use GET with query parameters
+                def make_get_endpoint(method_ref, model_cls):
+                    # Get field info from Pydantic model
+                    fields = model_cls.model_fields
 
-                        # Call method - smartasync handles async/sync automatically
-                        # If method is async, smartasync detects event loop and returns coroutine
-                        result = method_ref(**params_dict)
-                        # If result is coroutine, await it
-                        if inspect.iscoroutine(result):
-                            result = await result
+                    async def endpoint_func(**kwargs):
+                        f"""Auto-generated GET endpoint for {handler_name}.{api_method_name}"""
+                        try:
+                            # Convert query parameters using the Pydantic model for validation
+                            params_dict = model_cls(**kwargs).model_dump()
 
-                        return {"result": result}
-                    except ValidationError as e:
-                        raise HTTPException(status_code=422, detail=str(e))
-                    except Exception as e:
-                        raise HTTPException(status_code=500, detail=str(e))
+                            # Convert enum values back to strings
+                            for key, value in params_dict.items():
+                                if isinstance(value, Enum):
+                                    params_dict[key] = value.value
 
-                # Set proper name and annotations for FastAPI introspection
-                endpoint_func.__name__ = f"{handler_name}_{api_method_name}"
-                endpoint_func.__annotations__ = {"body": model_cls, "return": dict}
+                            # Call method - smartasync handles async/sync automatically
+                            result = method_ref(**params_dict)
+                            if inspect.iscoroutine(result):
+                                result = await result
 
-                return endpoint_func
+                            # For read methods, return result directly without wrapper if it's a string
+                            # (formatted output like markdown/html/table)
+                            if isinstance(result, str):
+                                from fastapi.responses import PlainTextResponse
 
-            endpoint_func = make_endpoint(method, RequestModel)
+                                return PlainTextResponse(content=result)
 
-            # Register with FastAPI
-            app.post(route_path, summary=f"{handler_name}.{api_method_name}")(endpoint_func)
+                            return {"result": result}
+                        except ValidationError as e:
+                            raise HTTPException(status_code=422, detail=str(e))
+                        except Exception as e:
+                            raise HTTPException(status_code=500, detail=str(e))
+
+                    # Set proper name for FastAPI introspection
+                    endpoint_func.__name__ = f"{handler_name}_{api_method_name}"
+
+                    # Build annotations for query parameters
+                    annotations = {}
+                    for field_name, field_info in fields.items():
+                        # Skip cursor and autocommit parameters
+                        if field_name in ("cursor", "autocommit"):
+                            continue
+
+                        field_type = field_info.annotation
+                        is_required = field_info.is_required()
+
+                        if is_required:
+                            annotations[field_name] = field_type
+                        else:
+                            # For optional parameters, use Optional and Query with default
+                            default_value = field_info.default
+                            annotations[field_name] = Optional[field_type]
+
+                    annotations["return"] = dict
+                    endpoint_func.__annotations__ = annotations
+
+                    return endpoint_func
+
+                endpoint_func = make_get_endpoint(method, RequestModel)
+
+                # Register with FastAPI as GET
+                app.get(route_path, summary=f"{handler_name}.{api_method_name}")(endpoint_func)
+            else:
+                # For write methods, use POST with request body
+                def make_post_endpoint(method_ref, model_cls):
+                    async def endpoint_func(body: model_cls):
+                        f"""Auto-generated POST endpoint for {handler_name}.{api_method_name}"""
+                        try:
+                            params_dict = body.model_dump()
+                            # Convert enum values back to strings
+                            for key, value in params_dict.items():
+                                if isinstance(value, Enum):
+                                    params_dict[key] = value.value
+
+                            # Call method - smartasync handles async/sync automatically
+                            result = method_ref(**params_dict)
+                            if inspect.iscoroutine(result):
+                                result = await result
+
+                            return {"result": result}
+                        except ValidationError as e:
+                            raise HTTPException(status_code=422, detail=str(e))
+                        except Exception as e:
+                            raise HTTPException(status_code=500, detail=str(e))
+
+                    # Set proper name and annotations for FastAPI introspection
+                    endpoint_func.__name__ = f"{handler_name}_{api_method_name}"
+                    endpoint_func.__annotations__ = {"body": model_cls, "return": dict}
+
+                    return endpoint_func
+
+                endpoint_func = make_post_endpoint(method, RequestModel)
+
+                # Register with FastAPI as POST
+                app.post(route_path, summary=f"{handler_name}.{api_method_name}")(endpoint_func)
 
         else:
             # No parameters - simple GET endpoint

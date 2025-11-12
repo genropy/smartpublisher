@@ -68,14 +68,13 @@ class ArticleTypes(Table):
         return result
 
     @dbop
-    def list(self, format: str = 'json', cursor=None, autocommit: bool = False):
+    def list(self, format: str = 'json', cursor=None):
         """
         List all article types.
 
         Args:
             format: Output format (json|markdown|table|html)
             cursor: Database cursor (auto-injected by DbopPlugin)
-            autocommit: Auto-commit transaction (handled by DbopPlugin)
 
         Returns:
             Dictionary with list of article types (json) or formatted string
@@ -89,14 +88,13 @@ class ArticleTypes(Table):
         )
 
     @dbop
-    def get(self, id: int, cursor=None, autocommit: bool = False) -> dict:
+    def get(self, id: int, cursor=None) -> dict:
         """
         Get a single article type by id.
 
         Args:
             id: Article type id
             cursor: Database cursor (auto-injected by DbopPlugin)
-            autocommit: Auto-commit transaction (handled by DbopPlugin)
 
         Returns:
             Dictionary with article type details

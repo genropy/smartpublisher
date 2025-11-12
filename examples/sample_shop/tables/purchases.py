@@ -99,7 +99,7 @@ class Purchases(Table):
         }
 
     @dbop
-    def list(self, format: str = 'json', article_id: int | None = None, cursor=None, autocommit: bool = False):
+    def list(self, format: str = 'json', article_id: int | None = None, cursor=None):
         """
         List purchases, optionally filtered by article.
 
@@ -107,7 +107,6 @@ class Purchases(Table):
             format: Output format (json|markdown|table|html)
             article_id: Optional filter by article
             cursor: Database cursor (auto-injected by DbopPlugin)
-            autocommit: Auto-commit transaction (handled by DbopPlugin)
 
         Returns:
             Dictionary with list of purchases (json) or formatted string
@@ -157,14 +156,13 @@ class Purchases(Table):
         return self._apply_format(purchases, columns, format, result_key='purchases', grand_total=grand_total)
 
     @dbop
-    def get(self, id: int, cursor=None, autocommit: bool = True) -> dict:
+    def get(self, id: int, cursor=None) -> dict:
         """
         Get a single purchase by id.
 
         Args:
             id: Purchase id
             cursor: Database cursor (auto-injected by DbopPlugin)
-            autocommit: Auto-commit transaction (handled by DbopPlugin)
 
         Returns:
             Dictionary with purchase details
@@ -200,13 +198,12 @@ class Purchases(Table):
         }
 
     @dbop
-    def statistics(self, cursor=None, autocommit: bool = True) -> dict:
+    def statistics(self, cursor=None) -> dict:
         """
         Get purchase statistics.
 
         Args:
             cursor: Database cursor (auto-injected by DbopPlugin)
-            autocommit: Auto-commit transaction (handled by DbopPlugin)
 
         Returns:
             Dictionary with aggregated statistics
