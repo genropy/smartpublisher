@@ -107,7 +107,7 @@ When you use SmartSwitch, your code is already well-structured for dispatch. smp
 - 🔀 **SmartSwitch Integration** - Rule-based function dispatch
 - 💻 **CLI Generation** - Automatic command-line interface
 - ✅ **Pydantic Validation** - Automatic type validation and conversion
-- 🎨 **Interactive Mode** - Optional questionary-based parameter prompting
+- 🎨 **Interactive Mode** - Optional Textual TUI for parameter prompting
 - 🌐 **HTTP/API Mode** - FastAPI with OpenAPI/Swagger UI
 - 📝 **Registry System** - Local/global app registration
 
@@ -257,7 +257,7 @@ Topics covered:
 - CLI command structure
 - HTTP/API mode with FastAPI
 - Type validation with Pydantic
-- Interactive mode with questionary
+- Interactive mode with Textual TUI
 
 ### Real-World Example
 
@@ -287,7 +287,7 @@ smpub is part of the [Genro-Libs toolkit](https://github.com/softwell/genro-libs
 - Python 3.10+
 - smartswitch >= 0.1.0
 - pydantic >= 2.0
-- questionary (optional, for interactive mode)
+- textual >= 0.41.0 (optional, for interactive mode)
 
 ## Development
 

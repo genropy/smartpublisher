@@ -27,20 +27,21 @@ def parse_docstring_params(docstring: str) -> dict[str, str]:
     current_desc = []
 
     for line in docstring.split("\n"):
-        line = line.strip()
+        stripped_line = line.strip()
 
         # Check if we're entering Args section
-        if line.startswith("Args:"):
+        if stripped_line.startswith("Args:"):
             in_args_section = True
             continue
 
-        # Exit Args section on next section or empty line after params
-        if in_args_section and line and not line.startswith(" ") and ":" not in line:
+        # Exit Args section on next section (non-indented line that's not a param definition)
+        # Check before stripping to preserve indentation info
+        if in_args_section and stripped_line and not line.startswith(" ") and ":" not in stripped_line:
             break
 
         if in_args_section:
             # Match parameter line: "    name: description" or "    name (type): description"
-            match = re.match(r"^\s*(\w+)(?:\s*\([^)]+\))?\s*:\s*(.+)$", line)
+            match = re.match(r"^\s*(\w+)(?:\s*\([^)]+\))?\s*:\s*(.+)$", stripped_line)
             if match:
                 # Save previous parameter
                 if current_param:
@@ -49,9 +50,9 @@ def parse_docstring_params(docstring: str) -> dict[str, str]:
                 # Start new parameter
                 current_param = match.group(1)
                 current_desc = [match.group(2)]
-            elif current_param and line:
+            elif current_param and stripped_line:
                 # Continuation of previous parameter description
-                current_desc.append(line)
+                current_desc.append(stripped_line)
 
     # Save last parameter
     if current_param:

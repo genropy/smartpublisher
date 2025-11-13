@@ -229,3 +229,158 @@ class TestGetParameterInfo:
         assert types["number"] == "int"
         assert types["decimal"] == "float"
         assert types["flag"] == "bool"
+
+
+# Additional test methods for better coverage
+class TestParseDocstringParams:
+    """Test docstring parameter parsing."""
+
+    def test_empty_docstring(self):
+        """Should return empty dict for None/empty docstring."""
+        from smartpublisher.validation import parse_docstring_params
+
+        assert parse_docstring_params(None) == {}
+        assert parse_docstring_params("") == {}
+
+    def test_simple_args_section(self):
+        """Should parse simple Args section."""
+        from smartpublisher.validation import parse_docstring_params
+
+        docstring = """
+        Some method description.
+
+        Args:
+            name: The user's name
+            age: The user's age
+        """
+        params = parse_docstring_params(docstring)
+
+        assert "name" in params
+        assert params["name"] == "The user's name"
+        assert "age" in params
+        assert params["age"] == "The user's age"
+
+    def test_args_with_types(self):
+        """Should parse Args with type annotations."""
+        from smartpublisher.validation import parse_docstring_params
+
+        docstring = """
+        Args:
+            name (str): The user's name
+            age (int): The user's age
+        """
+        params = parse_docstring_params(docstring)
+
+        assert params["name"] == "The user's name"
+        assert params["age"] == "The user's age"
+
+    def test_multiline_descriptions(self):
+        """Should handle multiline parameter descriptions."""
+        from smartpublisher.validation import parse_docstring_params
+
+        docstring = """
+        Args:
+            name: The user's name
+                which can be very long
+                and span multiple lines
+            age: The age
+        """
+        params = parse_docstring_params(docstring)
+
+        assert "name" in params
+        assert "which can be very long" in params["name"]
+        assert "and span multiple lines" in params["name"]
+        assert "age" in params
+
+    def test_args_section_terminated_by_next_section(self):
+        """Should stop parsing at next section."""
+        from smartpublisher.validation import parse_docstring_params
+
+        docstring = """
+        Args:
+            name: The user's name
+
+        Returns:
+            Something else
+        """
+        params = parse_docstring_params(docstring)
+
+        assert "name" in params
+        assert "Returns" not in params
+
+    def test_no_args_section(self):
+        """Should return empty dict if no Args section."""
+        from smartpublisher.validation import parse_docstring_params
+
+        docstring = """
+        Just a description.
+
+        Returns:
+            Something
+        """
+        params = parse_docstring_params(docstring)
+
+        assert params == {}
+
+
+class TestEdgeCases:
+    """Test edge cases and special scenarios."""
+
+    def test_method_with_self_parameter(self):
+        """Should skip 'self' parameter in instance methods."""
+
+        class TestClass:
+            def instance_method(self, name: str, age: int = 25):
+                """Instance method."""
+                pass
+
+        Model = create_pydantic_model(TestClass.instance_method)
+        instance = Model(name="Alice", age=30)
+
+        # Should have fields for name and age, but not self
+        assert instance.name == "Alice"
+        assert instance.age == 30
+        assert not hasattr(instance, "self")
+
+    def test_get_parameter_info_skips_self(self):
+        """Should skip 'self' in parameter info."""
+
+        class TestClass:
+            def instance_method(self, name: str):
+                pass
+
+        info = get_parameter_info(TestClass.instance_method)
+
+        # Should only have 'name', not 'self'
+        assert len(info) == 1
+        assert info[0]["name"] == "name"
+
+    def test_complex_type_annotations(self):
+        """Should handle Optional and Union types."""
+        from typing import Optional, Union
+
+        def method_with_optional(value: Optional[str] = None, number: Union[int, float] = 0):
+            pass
+
+        info = get_parameter_info(method_with_optional)
+
+        assert len(info) == 2
+        # Type should be string representation of the annotation
+        assert "Optional" in info[0]["type"] or "str" in info[0]["type"]
+
+    def test_method_with_no_type_annotations(self):
+        """Should handle methods without type annotations."""
+
+        def method_no_types(name, age=25):
+            pass
+
+        Model = create_pydantic_model(method_no_types)
+        instance = Model(name="Alice", age=30)
+
+        assert instance.name == "Alice"
+        assert instance.age == 30
+
+        # get_parameter_info should show 'Any' for untyped params
+        info = get_parameter_info(method_no_types)
+        assert info[0]["type"] == "Any"
+        assert info[1]["type"] == "Any"

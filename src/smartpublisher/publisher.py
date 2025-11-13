@@ -329,7 +329,7 @@ class MyPublisher(Publisher):
         print(f"  {prog_name} <handler> <method> [args...]")
         print(f"  {prog_name} <handler> <method> --interactive\n")
         print("Options:")
-        print("  --interactive, -i  Prompt for parameters interactively (requires gum)\n")
+        print("  --interactive, -i  Prompt for parameters interactively (requires textual)\n")
         print("Available handlers:")
         for name in sorted(self._cli_handlers.keys()):
             handler = self._cli_handlers[name]["handler"]
