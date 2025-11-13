@@ -9,7 +9,7 @@ User-friendly parameter prompting with questionary.
 pip install questionary
 
 # 2. Install smpub
-pip install smpub
+pip install smartpublisher
 ```
 
 ## Complete Test Sequence

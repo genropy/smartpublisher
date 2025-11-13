@@ -3,7 +3,7 @@
 
 from typing import Literal
 from smartswitch import Switcher
-from smpub import Publisher
+from smartpublisher import Publisher
 
 
 class AccountHandler:

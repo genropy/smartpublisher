@@ -8,7 +8,7 @@ from unittest.mock import patch
 import pytest
 from smartswitch import Switcher
 
-from smpub import Publisher, PublisherContext
+from smartpublisher import Publisher, PublisherContext
 
 
 # Test fixtures
@@ -270,7 +270,7 @@ class TestCLIExecution:
         assert "1" in captured.out
         assert app.typed.counter == 1
 
-    @patch("smpub.publisher.prompt_for_parameters")
+    @patch("smartpublisher.publisher.prompt_for_parameters")
     def test_cli_interactive_mode(self, mock_prompt, capsys):
         """Should prompt for parameters in interactive mode."""
         mock_prompt.return_value = ["testkey", "testvalue"]

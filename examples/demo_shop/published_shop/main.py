@@ -1,14 +1,14 @@
 """
-smpub Publisher for Shop class.
+smartpublisher Publisher for Shop class.
 
 This is ONLY the publisher - the actual Shop implementation is in sample_shop/.
 
 Key points:
 1. Shop is a standalone Python library (see ../sample_shop/)
 2. This file just imports Shop and publishes it
-3. smpub is a thin layer - Shop doesn't know about it
+3. smartpublisher is a thin layer - Shop doesn't know about it
 
-To use Shop without smpub, see:
+To use Shop without smartpublisher, see:
 - ../sample_shop/example_pythonic.py
 - ../sample_shop/shop_usage.ipynb
 """
@@ -16,12 +16,12 @@ To use Shop without smpub, see:
 import sys
 from pathlib import Path
 
-# Add smpub root to path (to import smpub package)
+# Add smpub root to path (to import smartpublisher package)
 # And add examples parent to path (to import examples.demo_shop)
 smpub_root = Path(__file__).parent.parent.parent.parent
 sys.path.insert(0, str(smpub_root))
 
-from smpub import Publisher  # noqa: E402
+from smartpublisher import Publisher  # noqa: E402
 from examples.demo_shop.sample_shop.shop import Shop  # noqa: E402
 
 
@@ -34,10 +34,13 @@ class PublishedShop(Publisher):
     2. Instantiate it (normal Python object)
     3. Publish it (add CLI/HTTP layer)
 
-    That's it! smpub is just a thin publishing layer.
+    That's it! smartpublisher is just a thin publishing layer.
 
     Note: We implement on_init() instead of __init__() to avoid calling super().
     Publisher.__init__() will call our on_init() after setting up the infrastructure.
+
+    The CLI command remains 'smpub' for convenience:
+        python main.py types list
     """
 
     def on_init(self):

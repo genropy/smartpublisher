@@ -1,9 +1,9 @@
 """Test http/fastapi_app.py module for comprehensive coverage."""
 
 from fastapi.testclient import TestClient
-from smpub import Publisher
+from smartpublisher import Publisher
 from smartswitch import Switcher
-from smpub.http.fastapi_app import create_fastapi_app
+from smartpublisher.http.fastapi_app import create_fastapi_app
 
 
 class TestHandler:

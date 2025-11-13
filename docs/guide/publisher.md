@@ -5,7 +5,7 @@ The Publisher class is the base for all smpub applications.
 ## Basic Usage
 
 ```python
-from smpub import Publisher
+from smartpublisher import Publisher
 
 class MyApp(Publisher):
     def initialize(self):

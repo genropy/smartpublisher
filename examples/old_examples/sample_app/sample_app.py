@@ -11,7 +11,7 @@ sys.path.insert(0, "../../src")
 from classes.L1_alpha import L1_alpha
 from classes.L1_beta import L1_beta
 from classes.L1_gamma import L1_gamma
-from smpub import Publisher
+from smartpublisher import Publisher
 
 
 class MainClass(Publisher):

@@ -10,7 +10,7 @@ A complete calculator application demonstrating:
 - Parameter validation
 - History tracking
 
-See [calculator_http.py](https://github.com/genropy/smpub/blob/main/examples/calculator_http.py)
+See [calculator_http.py](https://github.com/genropy/smartpublisher/blob/main/examples/calculator_http.py)
 
 [Read more](calculator.md)
 
@@ -19,7 +19,7 @@ See [calculator_http.py](https://github.com/genropy/smpub/blob/main/examples/cal
 Clone the repository:
 
 ```bash
-git clone https://github.com/genropy/smpub.git
+git clone https://github.com/genropy/smartpublisher.git
 cd smpub/examples
 ```
 

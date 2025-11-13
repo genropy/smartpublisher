@@ -2,7 +2,7 @@
 """Mail service example with configuration and sending."""
 
 from typing import Literal
-from smpub import Publisher, PublishedClass
+from smartpublisher import Publisher, PublishedClass
 from smartswitch import Switcher
 
 

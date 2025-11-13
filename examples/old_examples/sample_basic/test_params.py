@@ -7,7 +7,7 @@ import sys
 sys.path.insert(0, "../../src")
 
 from smartswitch import Switcher
-from smpub import Publisher
+from smartpublisher import Publisher
 
 
 class TestHandler:

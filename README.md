@@ -8,12 +8,12 @@
 
 </div>
 
-[![PyPI version](https://img.shields.io/pypi/v/smpub.svg)](https://pypi.org/project/smpub/)
-[![Tests](https://github.com/genropy/smpub/actions/workflows/test.yml/badge.svg)](https://github.com/genropy/smpub/actions/workflows/test.yml)
+[![PyPI version](https://img.shields.io/pypi/v/smpub.svg)](https://pypi.org/project/smartpublisher/)
+[![Tests](https://github.com/genropy/smartpublisher/actions/workflows/test.yml/badge.svg)](https://github.com/genropy/smartpublisher/actions/workflows/test.yml)
 [![codecov](https://codecov.io/gh/genropy/smpub/branch/main/graph/badge.svg)](https://codecov.io/gh/genropy/smpub)
 [![Python 3.10+](https://img.shields.io/badge/python-3.10+-blue.svg)](https://www.python.org/downloads/)
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
-[![Documentation](https://readthedocs.org/projects/smpub/badge/?version=latest)](https://smpub.readthedocs.io/)
+[![Documentation](https://readthedocs.org/projects/smpub/badge/?version=latest)](https://smartpublisher.readthedocs.io/)
 [![Part of Genro-Libs](https://img.shields.io/badge/Part%20of-Genro--Libs-blue)](https://github.com/softwell/genro-libs)
 [![LLM Docs](https://img.shields.io/badge/LLM-Docs-purple)](llm-docs/)
 
@@ -63,7 +63,7 @@ class MyService:
         return {"result": param}
 
 # 2. Publishing layer (uses smpub) - just ~20 lines!
-from smpub import Publisher
+from smartpublisher import Publisher
 
 class MyApp(Publisher):
     def on_init(self):
@@ -99,7 +99,7 @@ SmartSwitch provides an **elegant Pythonic dispatch** system with:
 
 When you use SmartSwitch, your code is already well-structured for dispatch. smpub simply transforms that dispatch into multiple interfaces.
 
-**Learn more**: See how a real application uses SmartSwitch plugins in the [Demo Shop documentation](https://github.com/genropy/smpub/tree/main/examples/demo_shop) (SQL database with transaction management, validation, and format negotiation).
+**Learn more**: See how a real application uses SmartSwitch plugins in the [Demo Shop documentation](https://github.com/genropy/smartpublisher/tree/main/examples/demo_shop) (SQL database with transaction management, validation, and format negotiation).
 
 ## Features
 
@@ -114,10 +114,10 @@ When you use SmartSwitch, your code is already well-structured for dispatch. smp
 ## Installation
 
 ```bash
-pip install smpub
+pip install smartpublisher
 
 # With HTTP support
-pip install smpub[http]
+pip install smartpublisher[http]
 ```
 
 ## Quick Start
@@ -178,7 +178,7 @@ class MailHandler:
 ### 2. Create Publisher (with smpub)
 
 ```python
-from smpub import Publisher
+from smartpublisher import Publisher
 
 class MailApp(Publisher):
     def on_init(self):
@@ -249,7 +249,7 @@ smpub unregister mailapp
 
 ### Main Documentation
 
-For complete framework documentation, visit [smpub.readthedocs.io](https://smpub.readthedocs.io).
+For complete framework documentation, visit [smartpublisher.readthedocs.io](https://smartpublisher.readthedocs.io).
 
 Topics covered:
 - Publisher and handler patterns
@@ -263,7 +263,7 @@ Topics covered:
 
 For a complete example showing SmartSwitch plugins, database adapters, and advanced patterns, see:
 
-**[Demo Shop Documentation](https://github.com/genropy/smpub/tree/main/examples/demo_shop)** - E-commerce library with:
+**[Demo Shop Documentation](https://github.com/genropy/smartpublisher/tree/main/examples/demo_shop)** - E-commerce library with:
 - SQL database system with adapters (SQLite/PostgreSQL)
 - Table managers with CRUD operations
 - SmartSwitch plugin chain (Logging, Pydantic, DbOp)
@@ -292,7 +292,7 @@ smpub is part of the [Genro-Libs toolkit](https://github.com/softwell/genro-libs
 ## Development
 
 ```bash
-git clone https://github.com/genropy/smpub.git
+git clone https://github.com/genropy/smartpublisher.git
 cd smpub
 pip install -e ".[dev]"
 pytest
@@ -304,7 +304,7 @@ MIT License - see [LICENSE](LICENSE) file for details.
 
 ## Links
 
-- [Documentation](https://smpub.readthedocs.io)
-- [GitHub](https://github.com/genropy/smpub)
-- [PyPI](https://pypi.org/project/smpub/)
-- [Issue Tracker](https://github.com/genropy/smpub/issues)
+- [Documentation](https://smartpublisher.readthedocs.io)
+- [GitHub](https://github.com/genropy/smartpublisher)
+- [PyPI](https://pypi.org/project/smartpublisher/)
+- [Issue Tracker](https://github.com/genropy/smartpublisher/issues)

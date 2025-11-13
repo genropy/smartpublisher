@@ -7,7 +7,7 @@ Get started with smpub in 5 minutes.
 Create a file `myapp.py`:
 
 ```python
-from smpub import Publisher, PublishedClass
+from smartpublisher import Publisher, PublishedClass
 from smartswitch import Switcher
 
 class GreetingHandler(PublishedClass):
@@ -89,7 +89,7 @@ python myapp.py greeting hello --interactive
 Install HTTP support:
 
 ```bash
-pip install smpub[http]
+pip install smartpublisher[http]
 ```
 
 Start the server:

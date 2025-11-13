@@ -255,7 +255,7 @@ result = api.process("hello")
 ### Using smpub (SmartSwitch + More)
 
 ```python
-from smpub import Publisher, PublishedClass
+from smartpublisher import Publisher, PublishedClass
 from smartswitch import Switcher
 
 class MyHandler(PublishedClass):

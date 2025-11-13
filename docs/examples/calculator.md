@@ -4,7 +4,7 @@ Complete calculator application demonstrating smpub features.
 
 ## Source Code
 
-See [examples/calculator_http.py](https://github.com/genropy/smpub/blob/main/examples/calculator_http.py)
+See [examples/calculator_http.py](https://github.com/genropy/smartpublisher/blob/main/examples/calculator_http.py)
 
 ## Features
 

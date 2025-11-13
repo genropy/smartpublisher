@@ -8,11 +8,11 @@
 
 </div>
 
-[![PyPI](https://img.shields.io/pypi/v/smpub)](https://pypi.org/project/smpub/)
-[![Python](https://img.shields.io/pypi/pyversions/smpub)](https://pypi.org/project/smpub/)
-[![License](https://img.shields.io/pypi/l/smpub)](https://github.com/genropy/smpub/blob/main/LICENSE)
+[![PyPI](https://img.shields.io/pypi/v/smpub)](https://pypi.org/project/smartpublisher/)
+[![Python](https://img.shields.io/pypi/pyversions/smpub)](https://pypi.org/project/smartpublisher/)
+[![License](https://img.shields.io/pypi/l/smpub)](https://github.com/genropy/smartpublisher/blob/main/LICENSE)
 [![codecov](https://codecov.io/gh/genropy/smpub/branch/main/graph/badge.svg)](https://codecov.io/gh/genropy/smpub)
-[![Documentation](https://readthedocs.org/projects/smpub/badge/?version=latest)](https://smpub.readthedocs.io)
+[![Documentation](https://readthedocs.org/projects/smpub/badge/?version=latest)](https://smartpublisher.readthedocs.io)
 [![Part of Genro-Libs](https://img.shields.io/badge/Genro--Libs-toolkit-blue)](https://github.com/softwell/genro-libs)
 
 Build CLI and API applications with automatic command dispatch using [SmartSwitch](https://github.com/genropy/smartswitch).
@@ -59,7 +59,7 @@ class MyService:
         return {"result": param}
 
 # 2. Publishing layer (uses smpub) - just ~20 lines!
-from smpub import Publisher
+from smartpublisher import Publisher
 
 class MyApp(Publisher):
     def on_init(self):
@@ -107,7 +107,7 @@ SmartSwitch provides an **elegant Pythonic dispatch** system with:
 
 When you use SmartSwitch, your code is already well-structured for dispatch. smpub simply transforms that dispatch into multiple interfaces.
 
-**Real-world example**: See the [Demo Shop](https://github.com/genropy/smpub/tree/main/examples/demo_shop) - a complete e-commerce application showing SmartSwitch plugins for database transactions, validation, and format negotiation. Published in ~20 lines with smpub.
+**Real-world example**: See the [Demo Shop](https://github.com/genropy/smartpublisher/tree/main/examples/demo_shop) - a complete e-commerce application showing SmartSwitch plugins for database transactions, validation, and format negotiation. Published in ~20 lines with smpub.
 
 ## Features
 
@@ -125,10 +125,10 @@ When you use SmartSwitch, your code is already well-structured for dispatch. smp
 ### Installation
 
 ```bash
-pip install smpub
+pip install smartpublisher
 
 # With HTTP support
-pip install smpub[http]
+pip install smartpublisher[http]
 
 # Interactive mode uses questionary (install separately)
 pip install questionary
@@ -137,7 +137,7 @@ pip install questionary
 ### Basic Example
 
 ```python
-from smpub import Publisher, PublishedClass
+from smartpublisher import Publisher, PublishedClass
 from smartswitch import Switcher
 
 class UserHandler(PublishedClass):
@@ -259,7 +259,7 @@ smpub is part of the [Genro-Libs toolkit](https://github.com/softwell/genro-libs
 
 ## License
 
-MIT License - see [LICENSE](https://github.com/genropy/smpub/blob/main/LICENSE) file for details.
+MIT License - see [LICENSE](https://github.com/genropy/smartpublisher/blob/main/LICENSE) file for details.
 
 ## Author
 
@@ -267,7 +267,7 @@ MIT License - see [LICENSE](https://github.com/genropy/smpub/blob/main/LICENSE) 
 
 ## Links
 
-- [GitHub Repository](https://github.com/genropy/smpub)
-- [Documentation](https://smpub.readthedocs.io)
-- [PyPI Package](https://pypi.org/project/smpub/)
-- [Issue Tracker](https://github.com/genropy/smpub/issues)
+- [GitHub Repository](https://github.com/genropy/smartpublisher)
+- [Documentation](https://smartpublisher.readthedocs.io)
+- [PyPI Package](https://pypi.org/project/smartpublisher/)
+- [Issue Tracker](https://github.com/genropy/smartpublisher/issues)

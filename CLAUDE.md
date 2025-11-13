@@ -22,8 +22,8 @@ smpub provides:
 ## Repository Information
 
 - **Owner**: genropy
-- **Repository**: https://github.com/genropy/smpub
-- **Documentation**: https://smpub.readthedocs.io (planned)
+- **Repository**: https://github.com/genropy/smartpublisher
+- **Documentation**: https://smartpublisher.readthedocs.io (planned)
 - **License**: MIT
 - **Part of**: Genro-Libs toolkit
 

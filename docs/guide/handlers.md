@@ -5,7 +5,7 @@ Handlers contain your business logic.
 ## Basic Handler
 
 ```python
-from smpub import PublishedClass
+from smartpublisher import PublishedClass
 from smartswitch import Switcher
 
 class MyHandler(PublishedClass):

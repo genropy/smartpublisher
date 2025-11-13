@@ -57,7 +57,7 @@ def divide(numerator: float, denominator: float) -> float:
 ### Step 1: Install smpub
 
 ```bash
-pip install smpub
+pip install smartpublisher
 
 # Optional: for interactive mode
 brew install dialog  # macOS
@@ -73,7 +73,7 @@ Create handlers that wrap your library's functionality. Place them in a `handler
 """Handler that exposes calculator functions via smpub."""
 
 from smartswitch import Switcher
-from smpub import PublishedClass
+from smartpublisher import PublishedClass
 
 # Import your existing library
 from mylib import calculator
@@ -177,7 +177,7 @@ class CalculatorHandler(PublishedClass):
 ```python
 """Main application that publishes handlers."""
 
-from smpub import Publisher
+from smartpublisher import Publisher
 from myapp.handlers.calculator_handler import CalculatorHandler
 
 
@@ -308,7 +308,7 @@ mycalc calc history
 
 1. **Use PublishedClass** when using `__slots__`:
    ```python
-   from smpub import PublishedClass
+   from smartpublisher import PublishedClass
 
    class MyHandler(PublishedClass):
        __slots__ = ('data', 'config')  # Your slots
@@ -555,7 +555,7 @@ Here's a complete working example that wraps a hypothetical data processing libr
 """Handler for data processing operations."""
 
 from smartswitch import Switcher
-from smpub import PublishedClass
+from smartpublisher import PublishedClass
 from mylib.processor import DataProcessor
 from mylib.validators import SchemaValidator
 
@@ -669,7 +669,7 @@ class DataHandler(PublishedClass):
 ```python
 """Main application."""
 
-from smpub import Publisher
+from smartpublisher import Publisher
 from myapp.handlers.data_handler import DataHandler
 
 
@@ -724,4 +724,4 @@ dataapp data transform --interactive
 
 ---
 
-**Questions?** Open an issue at https://github.com/genropy/smpub/issues
+**Questions?** Open an issue at https://github.com/genropy/smartpublisher/issues

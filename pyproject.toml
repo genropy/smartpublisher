@@ -3,7 +3,7 @@ requires = ["setuptools>=61.0"]
 build-backend = "setuptools.build_meta"
 
 [project]
-name = "smpub"
+name = "smartpublisher"
 version = "0.2.0"
 description = "Smart Publisher - CLI/API framework based on SmartSwitch"
 readme = "README.md"
@@ -75,13 +75,13 @@ all = [
 ]
 
 [project.urls]
-Homepage = "https://github.com/genropy/smpub"
-Documentation = "https://smpub.readthedocs.io"
-Repository = "https://github.com/genropy/smpub"
-"Bug Tracker" = "https://github.com/genropy/smpub/issues"
+Homepage = "https://github.com/genropy/smartpublisher"
+Documentation = "https://smartpublisher.readthedocs.io"
+Repository = "https://github.com/genropy/smartpublisher"
+"Bug Tracker" = "https://github.com/genropy/smartpublisher/issues"
 
 [project.scripts]
-smpub = "smpub.cli:main"
+smpub = "smartpublisher.cli:main"
 
 [tool.setuptools.packages.find]
 where = ["src"]
@@ -91,7 +91,7 @@ testpaths = ["tests"]
 python_files = "test_*.py"
 python_classes = "Test*"
 python_functions = "test_*"
-addopts = "-v --cov=smpub --cov-report=term-missing --cov-report=html --cov-report=xml"
+addopts = "-v --cov=smartpublisher --cov-report=term-missing --cov-report=html --cov-report=xml"
 asyncio_mode = "auto"
 asyncio_default_fixture_loop_scope = "function"
 

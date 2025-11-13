@@ -95,7 +95,7 @@ def analyze_results(data_dir: str, threshold: float = 0.5) -> list:
 ### Step 2: Publish with smpub
 
 ```python
-from smpub import Publisher, PublishedClass
+from smartpublisher import Publisher, PublishedClass
 from smpub.apiswitcher import ApiSwitcher
 
 class DataTools(PublishedClass):
@@ -535,7 +535,7 @@ This completes our two-part series on building consistent developer toolkits:
 **Python**: 3.10+
 **License**: MIT
 **Dependencies**: smartswitch, fastapi, textual (optional)
-**GitHub**: [github.com/genropy/smpub](https://github.com/genropy/smpub)
+**GitHub**: [github.com/genropy/smartpublisher](https://github.com/genropy/smartpublisher)
 
 **Use it for internal tools. Don't use it for public APIs.**
 

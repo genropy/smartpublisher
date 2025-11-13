@@ -10,7 +10,7 @@
 Install smpub from PyPI:
 
 ```bash
-pip install smpub
+pip install smartpublisher
 ```
 
 This installs the core package with CLI and basic functionality.
@@ -22,7 +22,7 @@ This installs the core package with CLI and basic functionality.
 For FastAPI integration and Swagger UI:
 
 ```bash
-pip install smpub[http]
+pip install smartpublisher[http]
 ```
 
 This includes:
@@ -44,7 +44,7 @@ Questionary is a pure Python package that works on all platforms (Windows, macOS
 For contributing to smpub:
 
 ```bash
-pip install smpub[dev]
+pip install smartpublisher[dev]
 ```
 
 This includes pytest, coverage, black, ruff, and mypy.
@@ -54,7 +54,7 @@ This includes pytest, coverage, black, ruff, and mypy.
 For building documentation:
 
 ```bash
-pip install smpub[docs]
+pip install smartpublisher[docs]
 ```
 
 This includes mkdocs, mkdocs-material, and mkdocstrings.
@@ -64,7 +64,7 @@ This includes mkdocs, mkdocs-material, and mkdocstrings.
 Install everything:
 
 ```bash
-pip install smpub[all]
+pip install smartpublisher[all]
 ```
 
 ## Verify Installation

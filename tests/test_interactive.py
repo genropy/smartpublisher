@@ -6,7 +6,7 @@ from unittest.mock import Mock, patch
 
 import pytest
 
-from smpub.interactive import (
+from smartpublisher.interactive import (
     is_textual_available,
     prompt_for_parameters,
 )
@@ -20,10 +20,10 @@ class TestIsTextualAvailable:
         # If we're running tests, textual should be available
         assert is_textual_available() is True
 
-    @patch("smpub.interactive.App", None)
+    @patch("smartpublisher.interactive.App", None)
     def test_textual_not_available(self):
         """Should return False when textual is not imported."""
-        from smpub.interactive import is_textual_available as check
+        from smartpublisher.interactive import is_textual_available as check
 
         assert check() is False
 
@@ -31,7 +31,7 @@ class TestIsTextualAvailable:
 class TestPromptForParameters:
     """Test parameter prompting with Textual."""
 
-    @patch("smpub.interactive.is_textual_available", return_value=False)
+    @patch("smartpublisher.interactive.is_textual_available", return_value=False)
     @patch("sys.exit", side_effect=SystemExit(1))
     def test_textual_not_available(self, mock_exit, mock_available):
         """Should exit when textual is not available."""
@@ -43,8 +43,8 @@ class TestPromptForParameters:
             prompt_for_parameters(dummy_method)
         mock_exit.assert_called_once_with(1)
 
-    @patch("smpub.interactive.ParameterForm")
-    @patch("smpub.interactive.get_parameter_info")
+    @patch("smartpublisher.interactive.ParameterForm")
+    @patch("smartpublisher.interactive.get_parameter_info")
     def test_no_parameters(self, mock_get_params, mock_form_class):
         """Should return empty list when no parameters."""
         # Mock get_parameter_info to return empty list
@@ -58,8 +58,8 @@ class TestPromptForParameters:
         # Form should not be created if no parameters
         mock_form_class.assert_not_called()
 
-    @patch("smpub.interactive.ParameterForm")
-    @patch("smpub.interactive.get_parameter_info")
+    @patch("smartpublisher.interactive.ParameterForm")
+    @patch("smartpublisher.interactive.get_parameter_info")
     def test_prompt_all_parameters(self, mock_get_params, mock_form_class):
         """Should prompt for all parameters and return results."""
         # Mock parameter info
@@ -84,8 +84,8 @@ class TestPromptForParameters:
         assert result == ["Alice", "30", "True"]
         mock_form.run.assert_called_once()
 
-    @patch("smpub.interactive.ParameterForm")
-    @patch("smpub.interactive.get_parameter_info")
+    @patch("smartpublisher.interactive.ParameterForm")
+    @patch("smartpublisher.interactive.get_parameter_info")
     def test_mixed_types(self, mock_get_params, mock_form_class):
         """Should handle mixed parameter types."""
         # Mock parameter info
@@ -109,8 +109,8 @@ class TestPromptForParameters:
         result = prompt_for_parameters(dummy_method)
         assert result == ["Bob", "42", "False"]
 
-    @patch("smpub.interactive.ParameterForm")
-    @patch("smpub.interactive.get_parameter_info")
+    @patch("smartpublisher.interactive.ParameterForm")
+    @patch("smartpublisher.interactive.get_parameter_info")
     def test_optional_parameters_with_defaults(self, mock_get_params, mock_form_class):
         """Should handle optional parameters with default values."""
         # Mock parameter info
@@ -133,8 +133,8 @@ class TestPromptForParameters:
         result = prompt_for_parameters(dummy_method)
         assert result == ["Charlie", "8080"]
 
-    @patch("smpub.interactive.ParameterForm")
-    @patch("smpub.interactive.get_parameter_info")
+    @patch("smartpublisher.interactive.ParameterForm")
+    @patch("smartpublisher.interactive.get_parameter_info")
     @patch("sys.exit", side_effect=SystemExit(0))
     def test_cancelled(self, mock_exit, mock_get_params, mock_form_class):
         """Should exit when user cancels."""

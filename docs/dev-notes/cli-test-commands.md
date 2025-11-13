@@ -68,7 +68,7 @@ pip install questionary  # macOS
 pip install questionary  # Debian/Ubuntu
 
 # Installa smpub
-pip install smpub
+pip install smartpublisher
 
 # Registra l'app se non già fatto
 smpub add calculator --path ./examples

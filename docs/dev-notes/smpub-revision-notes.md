@@ -83,7 +83,7 @@ docs/
 #### Message 1: "Built with SmartSwitch? Publishing is trivial"
 Show that if you use SmartSwitch for your library, adding smpub is just:
 ```python
-from smpub import Publisher
+from smartpublisher import Publisher
 from mylib import MyClass
 
 class MyApp(Publisher):

@@ -1,8 +1,8 @@
 """
-smpub - Smart Publisher: CLI/API framework based on SmartSwitch.
+smartpublisher - Smart Publisher: CLI/API framework based on SmartSwitch.
 
 Example:
-    from smpub import Publisher
+    from smartpublisher import Publisher
     from smartswitch import Switcher
 
     class MyHandler:
@@ -27,8 +27,8 @@ Example:
         app.run()
 """
 
-from smpub.publisher import Publisher
-from smpub.published import PublisherContext, discover_api_json
+from smartpublisher.publisher import Publisher
+from smartpublisher.published import PublisherContext, discover_api_json
 
 __version__ = "0.2.0"
 __all__ = ["Publisher", "PublisherContext", "discover_api_json"]

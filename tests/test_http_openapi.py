@@ -1,8 +1,8 @@
 """Test http/openapi.py module for comprehensive coverage."""
 
-from smpub import Publisher
+from smartpublisher import Publisher
 from smartswitch import Switcher
-from smpub.http.openapi import generate_openapi_schema, _python_type_to_openapi
+from smartpublisher.http.openapi import generate_openapi_schema, _python_type_to_openapi
 
 
 class SimpleHandler:

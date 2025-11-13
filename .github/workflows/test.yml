@@ -29,15 +29,15 @@ jobs:
 
     - name: Lint with ruff
       run: |
-        ruff check src/smpub/
+        ruff check src/smartpublisher/
 
     - name: Format check with black
       run: |
-        black --check src/smpub/
+        black --check src/smartpublisher/
 
     - name: Run tests with coverage
       run: |
-        pytest tests/ -v --cov=smpub --cov-report=xml --cov-report=term
+        pytest tests/ -v --cov=smartpublisher --cov-report=xml --cov-report=term
 
     - name: Upload coverage to Codecov
       if: matrix.os == 'ubuntu-latest' && matrix.python-version == '3.11'

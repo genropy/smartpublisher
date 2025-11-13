@@ -52,7 +52,7 @@ See [Interactive Mode](../README.md#interactive-mode-with-dialog) for details.
 ### Publisher
 
 ```python
-from smpub import Publisher
+from smartpublisher import Publisher
 
 class MyApp(Publisher):
     def initialize(self):
@@ -68,7 +68,7 @@ class MyApp(Publisher):
 ### PublishedClass
 
 ```python
-from smpub import PublishedClass
+from smartpublisher import PublishedClass
 from smartswitch import Switcher
 
 class MyHandler(PublishedClass):
@@ -125,9 +125,9 @@ See [CONTRIBUTING.md](../CONTRIBUTING.md) for guidelines.
 
 ## Links
 
-- [GitHub Repository](https://github.com/genropy/smpub)
-- [Issue Tracker](https://github.com/genropy/smpub/issues)
-- [PyPI Package](https://pypi.org/project/smpub/)
+- [GitHub Repository](https://github.com/genropy/smartpublisher)
+- [Issue Tracker](https://github.com/genropy/smartpublisher/issues)
+- [PyPI Package](https://pypi.org/project/smartpublisher/)
 - [Genro-Libs Toolkit](https://github.com/softwell/genro-libs)
 
 ---

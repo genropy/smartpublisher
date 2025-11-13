@@ -16,7 +16,7 @@ from pathlib import Path
 # Add src to path for development
 sys.path.insert(0, str(Path(__file__).parent.parent / "src"))
 
-from smpub import Publisher, PublishedClass
+from smartpublisher import Publisher, PublishedClass
 from smartswitch import Switcher
 
 

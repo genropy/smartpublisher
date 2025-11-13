@@ -169,7 +169,7 @@ class L1_alpha:
     api = Switcher(prefix='alpha_')
 
 # After
-from smpub import PublishedClass
+from smartpublisher import PublishedClass
 
 class L1_alpha(PublishedClass):
     __slots__ = ('registry',)

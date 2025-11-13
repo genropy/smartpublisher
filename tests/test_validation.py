@@ -5,7 +5,7 @@ Tests for validation module (Pydantic-based parameter validation).
 import pytest
 from pydantic import ValidationError
 
-from smpub.validation import (
+from smartpublisher.validation import (
     create_pydantic_model,
     validate_args,
     format_validation_error,
