@@ -135,45 +135,6 @@ def my_info(self) -> dict:
 3. **Introspection**: Runtime API discovery
 4. **Documentation**: Auto-generated docs
 
-## SmartSwitch Features Not Used
-
-smpub uses SmartSwitch primarily for:
-- Method registration (`@api`)
-- Name-based dispatch
-- Parent-child relationships
-- API introspection
-
-smpub does **not** currently use:
-- **Value rules**: Type-based dispatch
-- **Type rules**: Pattern matching
-- **Custom rules**: Complex dispatch logic
-
-These features are available if you need them in handlers:
-
-```python
-from smartswitch import Switcher, ValRule
-
-class AdvancedHandler(PublishedClass):
-    api = Switcher(prefix='adv_')
-
-    @api
-    def adv_process(self, data):
-        """Process data (dispatches by type)."""
-        pass
-
-    @api
-    @ValRule(type(data) == str)
-    def adv_process(self, data: str):
-        """Process string data."""
-        return f"String: {data}"
-
-    @api
-    @ValRule(type(data) == dict)
-    def adv_process(self, data: dict):
-        """Process dict data."""
-        return f"Dict: {len(data)} keys"
-```
-
 ## Benefits of SmartSwitch Foundation
 
 ### 1. Clean Method Registration

@@ -4,7 +4,6 @@ Tests for published module (API discovery and PublisherContext).
 
 from unittest.mock import Mock
 
-import pytest
 
 from smartpublisher.published import discover_api_json, PublisherContext
 

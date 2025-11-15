@@ -2,9 +2,8 @@
 Tests for api_server module (FastAPI integration).
 """
 
-import inspect
 from enum import Enum
-from unittest.mock import Mock, patch, MagicMock
+from unittest.mock import Mock
 
 import pytest
 

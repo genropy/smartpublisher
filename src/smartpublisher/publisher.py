@@ -172,46 +172,26 @@ class MyPublisher(Publisher):
         Args:
             handler_api: The Switcher instance from the handler class
         """
-        # Get current plugin names
-        current_plugins = {p.plugin_name for p in handler_api._plugins if hasattr(p, "plugin_name")}
+        # Get current plugin names using public API
+        current_plugins = {p.name for p in handler_api.iter_plugins()}
 
-        # Check for SmartasyncPlugin and remove it temporarily (must be last)
-        smartasync_plugin = None
-        for plugin in handler_api._plugins[:]:  # Copy list to modify during iteration
-            if isinstance(plugin, SmartasyncPlugin):
-                smartasync_plugin = plugin
-                handler_api._plugins.remove(plugin)
-                # Also remove from registry
-                if "smartasync" in handler_api._plugin_registry:
-                    del handler_api._plugin_registry["smartasync"]
-                break
+        # Check if we need to add any plugins
+        needs_logging = "logging" not in current_plugins
+        needs_pydantic = "pydantic" not in current_plugins
+        has_smartasync = "SmartasyncPlugin" in current_plugins
 
-        # Track which plugins we add (for retroactive on_decorate)
-        new_plugins = []
-
-        # Add Logging if missing
-        if "logger" not in current_plugins:
+        # Add missing plugins
+        # Note: SmartasyncPlugin should be last, but plug() maintains order
+        # If smartasync is present, we rely on user having set correct order
+        if needs_logging:
             handler_api.plug("logging", mode="silent")
-            new_plugins.append(("logger", handler_api._plugins[-1]))
 
-        # Add Pydantic if missing
-        if "pydantic" not in current_plugins:
+        if needs_pydantic:
             handler_api.plug("pydantic")
-            new_plugins.append(("pydantic", handler_api._plugins[-1]))
 
-        # Re-add or add SmartasyncPlugin at the end
-        if smartasync_plugin:
-            handler_api._plugins.append(smartasync_plugin)
-            handler_api._plugin_registry["smartasync"] = smartasync_plugin
-        else:
+        # Add SmartasyncPlugin at end if not present
+        if not has_smartasync:
             handler_api.plug(SmartasyncPlugin())
-
-        # Apply on_decorate retroactively for newly added plugins
-        if new_plugins:
-            for method_name, method_func in handler_api._handlers.items():
-                for plugin_name, plugin in new_plugins:
-                    if hasattr(plugin, "on_decorate"):
-                        plugin.on_decorate(method_func, handler_api)
 
     def run(self, mode: str | None = None, port: int = 8000):
         """

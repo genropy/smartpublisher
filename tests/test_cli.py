@@ -3,8 +3,7 @@
 import sys
 import json
 import pytest
-from pathlib import Path
-from unittest.mock import patch, MagicMock, mock_open
+from unittest.mock import patch
 from smartpublisher import cli
 
 
@@ -199,12 +198,19 @@ class TestAddApp:
 
     def test_add_app_default_path(self, tmp_path, capsys):
         """Test adding app with default path (current directory)."""
+        import os
+
         registry_file = tmp_path / "registry.json"
         (tmp_path / "app.py").write_text("class App(Publisher): pass")
 
-        with patch.object(cli, "LOCAL_REGISTRY", registry_file):
-            with patch("pathlib.Path.cwd", return_value=tmp_path):
+        # Change to tmp_path directory
+        old_cwd = os.getcwd()
+        try:
+            os.chdir(tmp_path)
+            with patch.object(cli, "LOCAL_REGISTRY", registry_file):
                 cli.add_app("testapp")
+        finally:
+            os.chdir(old_cwd)
 
         registry = json.loads(registry_file.read_text())
         assert "testapp" in registry["apps"]
@@ -473,8 +479,10 @@ class MyApp(Publisher):
         pass
 
     def run(self, mode=None, port=None):
+        # Verify parameters without calling super().run()
         assert mode == "http"
         assert port == 8000
+        # Don't call super().run() to avoid starting real server
 """)
 
         test_data = {
@@ -488,9 +496,18 @@ class MyApp(Publisher):
         }
         registry_file.write_text(json.dumps(test_data))
 
-        with patch.object(cli, "LOCAL_REGISTRY", registry_file):
-            with patch.object(sys, "argv", ["smpub", "testapp", "serve"]):
-                cli.main()
+        # Cleanup module cache after test
+        if "main" in sys.modules:
+            del sys.modules["main"]
+
+        try:
+            with patch.object(cli, "LOCAL_REGISTRY", registry_file):
+                with patch.object(sys, "argv", ["smpub", "testapp", "serve"]):
+                    cli.main()
+        finally:
+            # Always cleanup
+            if "main" in sys.modules:
+                del sys.modules["main"]
 
     def test_main_serve_custom_port(self, tmp_path):
         """Test main with serve command (custom port)."""
@@ -505,8 +522,10 @@ class MyApp(Publisher):
         pass
 
     def run(self, mode=None, port=None):
+        # Verify parameters without calling super().run()
         assert mode == "http"
         assert port == 9000
+        # Don't call super().run() to avoid starting real server
 """)
 
         test_data = {
@@ -520,9 +539,18 @@ class MyApp(Publisher):
         }
         registry_file.write_text(json.dumps(test_data))
 
-        with patch.object(cli, "LOCAL_REGISTRY", registry_file):
-            with patch.object(sys, "argv", ["smpub", "testapp", "serve", "9000"]):
-                cli.main()
+        # Cleanup module cache before test
+        if "main" in sys.modules:
+            del sys.modules["main"]
+
+        try:
+            with patch.object(cli, "LOCAL_REGISTRY", registry_file):
+                with patch.object(sys, "argv", ["smpub", "testapp", "serve", "9000"]):
+                    cli.main()
+        finally:
+            # Always cleanup
+            if "main" in sys.modules:
+                del sys.modules["main"]
 
     def test_main_cli_mode(self, tmp_path):
         """Test main in CLI mode."""
@@ -537,7 +565,9 @@ class MyApp(Publisher):
         pass
 
     def run(self, mode=None):
+        # Verify parameters without calling super().run()
         assert mode == "cli"
+        # Don't call super().run() to avoid running real CLI
 """)
 
         test_data = {
@@ -551,6 +581,15 @@ class MyApp(Publisher):
         }
         registry_file.write_text(json.dumps(test_data))
 
-        with patch.object(cli, "LOCAL_REGISTRY", registry_file):
-            with patch.object(sys, "argv", ["smpub", "testapp", "handler", "method"]):
-                cli.main()
+        # Cleanup module cache before test
+        if "main" in sys.modules:
+            del sys.modules["main"]
+
+        try:
+            with patch.object(cli, "LOCAL_REGISTRY", registry_file):
+                with patch.object(sys, "argv", ["smpub", "testapp", "handler", "method"]):
+                    cli.main()
+        finally:
+            # Always cleanup
+            if "main" in sys.modules:
+                del sys.modules["main"]

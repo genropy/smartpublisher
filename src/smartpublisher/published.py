@@ -52,8 +52,23 @@ def discover_api_json(target, recursive=False, switcher_name="api") -> dict:
     switcher = getattr(target_class, switcher_name)
     prefix = getattr(switcher, "prefix", None) or ""
 
-    # Get all registered methods
-    entries = switcher.entries() if hasattr(switcher, "entries") else []
+    # Get all registered methods using public API
+    # Try new API first (smartswitch 0.9.1+)
+    entries = []
+    try:
+        description = switcher.describe()
+        if isinstance(description, dict) and "methods" in description:
+            entries = list(description["methods"].keys())
+    except (AttributeError, TypeError):
+        pass
+
+    # Fallback to old API (for backward compatibility and tests)
+    if not entries:
+        try:
+            entries_result = switcher.entries() if callable(getattr(switcher, "entries", None)) else getattr(switcher, "entries", [])
+            entries = list(entries_result) if entries_result else []
+        except (AttributeError, TypeError):
+            entries = []
 
     for method_key in entries:
         # method_key is the display name (without prefix)

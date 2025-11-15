@@ -21,7 +21,7 @@ Then: "Can we add the third one too?"
 In our previous article on SmartSwitch (see [SmartSwitch documentation](https://github.com/genropy/smartswitch)), we explored SmartSwitch as a standard dispatch pattern for your toolkit. We established that:
 
 - **SmartSwitch organizes functions** with decorator-based registration
-- **Three dispatch modes**: by-name, by-type (typerule), by-value (valrule)
+- **Plugin system** enables composable cross-cutting concerns (logging, validation, transactions)
 - **It's a foundation**, not just dispatch - consistent patterns enable powerful tools
 
 But we left something hanging: *"What tools can understand and extend SmartSwitch handlers?"*

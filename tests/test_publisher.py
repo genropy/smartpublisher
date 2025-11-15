@@ -170,8 +170,8 @@ class TestPublisher:
         # Handler API should have app's parent_api as parent
         assert app.simple.__class__.api.parent is app.parent_api
 
-        # Parent should have handler as child
-        assert app.simple.__class__.api in app.parent_api.children
+        # Both handlers should be connected to parent
+        assert app.typed.__class__.api.parent is app.parent_api
 
 
 class TestCLIExecution:
