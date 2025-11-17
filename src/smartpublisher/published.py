@@ -35,12 +35,13 @@ class PublishedClass(RoutedClass):
     The Publisher connects multiple apps together.
     """
 
-    api = Router(name="root")
+    # Router with pydantic plugin - applied at class level
+    api = Router(name="root").plug("pydantic")
 
     def __init__(self):
         """Initialize PublishedClass with its own root Router."""
-        # Apply pydantic plugin to root router
-        self.api.plug("pydantic")
+        # Note: plugins are applied at class level on the Router descriptor
+        # self.api is now a BoundRouter instance with plugins already configured
 
         # Track handlers published by this app
         self.published_instances = {}
@@ -94,10 +95,11 @@ class PublishedClass(RoutedClass):
             "handler_class": handler_instance.__class__.__name__
         }
 
-        # Get methods from SmartRoute API
+        # TODO: Get methods from SmartRoute API once describe() is implemented
+        # See: https://github.com/genropy/smartroute/issues/1
         if hasattr(handler_instance, 'api'):
-            schema = handler_instance.api.describe()
-            result["methods"] = list(schema.get("methods", {}).keys())
+            # Temporary workaround: access private _entries
+            result["methods"] = list(handler_instance.api._entries.keys()) if hasattr(handler_instance.api, '_entries') else []
         else:
             result["methods"] = []
 
