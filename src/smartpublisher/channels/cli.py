@@ -9,7 +9,7 @@ Key principle: Use ONLY SmartSwitch APIs!
 """
 
 import sys
-from smartroute.core import Router, RoutedClass, route
+from smartroute.core import Router
 
 # Try relative import first (when used as package)
 # Fall back to absolute import (when run directly)

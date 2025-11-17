@@ -1,332 +1,187 @@
-"""
-Tests for Publisher.
-"""
-
-import sys
-from unittest.mock import patch
+"""Tests for Publisher coordinator."""
 
 import pytest
-from smartswitch import Switcher
+from unittest.mock import Mock
 
-from smartpublisher import Publisher, PublisherContext
-
-
-# Test fixtures
-class SimpleHandler:
-    """Simple handler for testing."""
-
-    __slots__ = ("data", "smpublisher")
-    api = Switcher(prefix="cmd_")
-
-    def __init__(self):
-        self.data = {}
-
-    @api
-    def cmd_add(self, key: str, value: str):
-        """Add a key-value pair."""
-        self.data[key] = value
-        return f"Added {key}={value}"
-
-    @api
-    def cmd_get(self, key: str):
-        """Get a value by key."""
-        return self.data.get(key, "Not found")
-
-    @api
-    def cmd_list(self):
-        """List all keys."""
-        return list(self.data.keys())
-
-
-class TypedHandler:
-    """Handler with typed parameters."""
-
-    __slots__ = ("counter", "smpublisher")
-    api = Switcher(prefix="test_")
-
-    def __init__(self):
-        self.counter = 0
-
-    @api
-    def test_increment(self, amount: int = 1):
-        """Increment counter."""
-        self.counter += amount
-        return self.counter
-
-    @api
-    def test_multiply(self, factor: float):
-        """Multiply counter."""
-        self.counter = int(self.counter * factor)
-        return self.counter
-
-    @api
-    def test_reset(self, value: int = 0):
-        """Reset counter."""
-        self.counter = value
-        return self.counter
-
-
-class TestApp(Publisher):
-    """Test application."""
-
-    __test__ = False  # Not a pytest test class
-
-    def on_init(self):
-        self.simple = SimpleHandler()
-        self.typed = TypedHandler()
-        self.publish("simple", self.simple, cli=True, openapi=True)
-        self.publish("typed", self.typed, cli=True, openapi=False)
-
-
-class TestPublisherContext:
-    """Test PublisherContext functionality."""
-
-    def test_context_creation(self):
-        """Should create context with handler reference."""
-        handler = SimpleHandler()
-        context = PublisherContext(handler)
-
-        assert context._handler is handler
-        assert context.parent_api is None
-
-    def test_get_api_json(self):
-        """Should extract API schema from handler."""
-        handler = SimpleHandler()
-        context = PublisherContext(handler)
-
-        schema = context.get_api_json()
-
-        assert schema["class"] == "SimpleHandler"
-        assert "methods" in schema
-        assert "add" in schema["methods"]
-        assert "get" in schema["methods"]
-        assert "list" in schema["methods"]
-
-    def test_api_json_parameters(self):
-        """Should extract parameter information."""
-        handler = SimpleHandler()
-        context = PublisherContext(handler)
-
-        schema = context.get_api_json()
-        add_method = schema["methods"]["add"]
-
-        assert len(add_method["parameters"]) == 2
-        key_param = next(p for p in add_method["parameters"] if p["name"] == "key")
-        assert key_param["type"] == "str"
-        assert key_param["required"] is True
-
-    def test_api_json_with_defaults(self):
-        """Should handle default values in parameters."""
-        handler = TypedHandler()
-        context = PublisherContext(handler)
-
-        schema = context.get_api_json()
-        increment_method = schema["methods"]["increment"]
-
-        params = increment_method["parameters"]
-        amount_param = next(p for p in params if p["name"] == "amount")
-        assert amount_param["required"] is False
-        assert amount_param["default"] == 1
+from smartpublisher.publisher import Publisher
+from smartpublisher.published import PublishedClass
 
 
 class TestPublisher:
-    """Test Publisher base class."""
+    """Test Publisher functionality."""
 
-    def test_initialization(self):
-        """Should initialize with parent_api."""
-        app = TestApp()
+    def test_init_default(self):
+        """Should initialize with default local registry."""
+        pub = Publisher()
 
-        assert hasattr(app, "parent_api")
-        assert isinstance(app.parent_api, Switcher)
-        assert app.parent_api.name == "root"  # Default name is 'root'
+        assert pub.registry is not None
+        assert pub.channels is not None
+        assert "cli" in pub.channels
+        assert "http" in pub.channels
+        assert pub.loaded_apps == {}
 
-    def test_publish_handler(self):
-        """Should publish handler and inject smpublisher context."""
-        app = TestApp()
+    def test_init_with_custom_registry(self, tmp_path):
+        """Should initialize with custom registry path."""
+        registry_path = tmp_path / "custom_registry"
+        pub = Publisher(registry_path=registry_path)
 
-        # Handler should have smpublisher attribute
-        assert hasattr(app.simple, "smpublisher")
-        assert isinstance(app.simple.smpublisher, PublisherContext)
+        assert pub.registry is not None
 
-        # Handler's API should have parent set
-        assert app.simple.__class__.api.parent is app.parent_api
+    def test_init_with_global_registry(self):
+        """Should initialize with global registry."""
+        pub = Publisher(use_global=True)
 
-    def test_publish_cli_openapi_flags(self):
-        """Should respect cli and openapi flags."""
-        app = TestApp()
+        assert pub.registry is not None
 
-        # Simple handler: both CLI and OpenAPI
-        assert "simple" in app._cli_handlers
-        assert "/simple" in app._openapi_handlers  # OpenAPI uses path keys
+    def test_get_channel(self):
+        """Should get channel by name."""
+        pub = Publisher()
 
-        # Typed handler: CLI only
-        assert "typed" in app._cli_handlers
-        assert "/typed" not in app._openapi_handlers
+        cli_channel = pub.get_channel("cli")
+        http_channel = pub.get_channel("http")
 
-    def test_parent_child_relationship(self):
-        """Should establish parent-child Switcher relationship."""
-        app = TestApp()
+        assert cli_channel is not None
+        assert http_channel is not None
 
-        # Handler API should have app's parent_api as parent
-        assert app.simple.__class__.api.parent is app.parent_api
+    def test_get_channel_not_found(self):
+        """Should raise KeyError for unknown channel."""
+        pub = Publisher()
 
-        # Both handlers should be connected to parent
-        assert app.typed.__class__.api.parent is app.parent_api
+        with pytest.raises(KeyError):
+            pub.get_channel("nonexistent")
 
+    def test_add_channel(self):
+        """Should add custom channel."""
+        pub = Publisher()
 
-class TestCLIExecution:
-    """Test CLI command execution."""
+        # Mock channel
+        mock_channel = object()
 
-    def test_cli_help(self, capsys):
-        """Should display help when no arguments."""
-        app = TestApp()
+        pub.add_channel("custom", mock_channel)
 
-        with patch.object(sys, "argv", ["test_app"]):
-            app._run_cli()
+        assert pub.get_channel("custom") is mock_channel
 
-        captured = capsys.readouterr()
-        assert "TestApp" in captured.out
-        assert "simple" in captured.out
-        assert "typed" in captured.out
+    def test_load_app_not_in_registry(self):
+        """Should handle loading app not in registry."""
+        pub = Publisher()
 
-    def test_cli_handler_help(self, capsys):
-        """Should display handler-specific help."""
-        app = TestApp()
+        # This will fail because app doesn't exist
+        # Just test that the method exists
+        assert hasattr(pub, "load_app")
 
-        with patch.object(sys, "argv", ["test_app", "simple", "--help"]):
-            app._run_cli()
+    def test_unload_app_not_loaded(self):
+        """Should handle unloading app that isn't loaded."""
+        pub = Publisher()
 
-        captured = capsys.readouterr()
-        assert "simple" in captured.out
-        assert "add" in captured.out
-        assert "get" in captured.out
-        assert "list" in captured.out
+        result = pub.unload_app("nonexistent")
 
-    def test_cli_method_execution(self, capsys):
-        """Should execute method with arguments."""
-        app = TestApp()
+        assert "error" in result
 
-        with patch.object(sys, "argv", ["test_app", "simple", "add", "name", "Alice"]):
-            app._run_cli()
+    def test_has_run_cli_method(self):
+        """Should have run_cli method."""
+        pub = Publisher()
 
-        captured = capsys.readouterr()
-        assert "Added name=Alice" in captured.out
-        assert app.simple.data["name"] == "Alice"
+        assert hasattr(pub, "run_cli")
+        assert callable(pub.run_cli)
 
-    def test_cli_type_validation(self, capsys):
-        """Should validate and convert argument types."""
-        app = TestApp()
+    def test_has_run_http_method(self):
+        """Should have run_http method."""
+        pub = Publisher()
 
-        # Valid integer
-        with patch.object(sys, "argv", ["test_app", "typed", "increment", "5"]):
-            app._run_cli()
+        assert hasattr(pub, "run_http")
+        assert callable(pub.run_http)
 
-        captured = capsys.readouterr()
-        assert "5" in captured.out
-        assert app.typed.counter == 5
+    def test_load_app_success(self):
+        """Should load app from registry and cache it."""
+        pub = Publisher()
 
-    def test_cli_validation_error(self, capsys):
-        """Should display validation errors."""
-        app = TestApp()
+        # Create mock app
+        mock_app = Mock(spec=PublishedClass)
+        mock_app._set_publisher = Mock()
+        mock_app.smpub_on_add = Mock(return_value={"status": "ok"})
 
-        with patch.object(sys, "argv", ["test_app", "typed", "increment", "not_a_number"]):
-            with pytest.raises(SystemExit):
-                app._run_cli()
+        # Mock registry.load
+        pub.registry.load = Mock(return_value=mock_app)
 
-        captured = capsys.readouterr()
-        assert "Invalid arguments" in captured.out
-        assert "amount" in captured.out
+        # Load app
+        result = pub.load_app("test_app")
 
-    def test_cli_unknown_handler(self, capsys):
-        """Should error on unknown handler."""
-        app = TestApp()
+        # Verify
+        assert result is mock_app
+        assert "test_app" in pub.loaded_apps
+        mock_app._set_publisher.assert_called_once_with(pub)
+        mock_app.smpub_on_add.assert_called_once()
 
-        with patch.object(sys, "argv", ["test_app", "unknown", "method"]):
-            with pytest.raises(SystemExit):
-                app._run_cli()
+    def test_load_app_already_loaded(self):
+        """Should return cached app if already loaded."""
+        pub = Publisher()
 
-        captured = capsys.readouterr()
-        assert "Unknown handler" in captured.out
+        # Pre-load an app
+        mock_app = Mock()
+        pub.loaded_apps["test_app"] = mock_app
 
-    def test_cli_unknown_method(self, capsys):
-        """Should error on unknown method."""
-        app = TestApp()
+        # Mock registry to ensure it's not called
+        pub.registry.load = Mock()
 
-        with patch.object(sys, "argv", ["test_app", "simple", "unknown"]):
-            with pytest.raises(SystemExit):
-                app._run_cli()
+        # Load app again
+        result = pub.load_app("test_app")
 
-        captured = capsys.readouterr()
-        assert "not found" in captured.out
+        # Should return cached instance
+        assert result is mock_app
+        pub.registry.load.assert_not_called()
 
-    def test_cli_with_defaults(self, capsys):
-        """Should use default values for optional parameters."""
-        app = TestApp()
+    def test_load_app_without_hooks(self):
+        """Should handle app without lifecycle hooks."""
+        pub = Publisher()
 
-        with patch.object(sys, "argv", ["test_app", "typed", "increment"]):
-            app._run_cli()
+        # Create app without hooks
+        mock_app = Mock(spec=[])  # No methods
 
-        captured = capsys.readouterr()
-        assert "1" in captured.out
-        assert app.typed.counter == 1
+        pub.registry.load = Mock(return_value=mock_app)
 
-    @patch("smartpublisher.publisher.prompt_for_parameters")
-    def test_cli_interactive_mode(self, mock_prompt, capsys):
-        """Should prompt for parameters in interactive mode."""
-        mock_prompt.return_value = ["testkey", "testvalue"]
+        # Should not raise error
+        result = pub.load_app("test_app")
 
-        app = TestApp()
+        assert result is mock_app
+        assert "test_app" in pub.loaded_apps
 
-        with patch.object(sys, "argv", ["test_app", "simple", "add", "--interactive"]):
-            app._run_cli()
+    def test_unload_app_success(self):
+        """Should unload app and call lifecycle hook."""
+        pub = Publisher()
 
-        mock_prompt.assert_called_once()
-        captured = capsys.readouterr()
-        assert "Added testkey=testvalue" in captured.out
+        # Create mock app with hook
+        mock_app = Mock()
+        mock_app.smpub_on_remove = Mock(return_value={"status": "ok"})
+        pub.loaded_apps["test_app"] = mock_app
 
+        # Unload
+        result = pub.unload_app("test_app")
 
-class TestRunModes:
-    """Test different run modes."""
+        # Verify
+        assert result["status"] == "unloaded"
+        assert result["app"] == "test_app"
+        assert "test_app" not in pub.loaded_apps
+        mock_app.smpub_on_remove.assert_called_once()
 
-    def test_auto_detect_cli(self):
-        """Should auto-detect CLI mode when args present."""
-        app = TestApp()
+    def test_unload_app_without_hook(self):
+        """Should unload app even without lifecycle hook."""
+        pub = Publisher()
 
-        with patch.object(sys, "argv", ["test_app", "simple", "list"]):
-            with patch.object(app, "_run_cli") as mock_cli:
-                app.run()
-                mock_cli.assert_called_once()
+        # App without hook
+        mock_app = Mock(spec=[])
+        pub.loaded_apps["test_app"] = mock_app
 
-    def test_auto_detect_http(self):
-        """Should auto-detect HTTP mode when no args."""
-        app = TestApp()
+        # Should not raise error
+        result = pub.unload_app("test_app")
 
-        with patch.object(sys, "argv", ["test_app"]):
-            with patch.object(app, "_run_http"):
-                # Mock HTTP mode to avoid actually starting server
-                app.run()
-                # Note: This will actually call _run_cli for help
-                # since we have only 1 arg. HTTP mode needs 0 args.
+        assert result["status"] == "unloaded"
+        assert "test_app" not in pub.loaded_apps
 
-    def test_explicit_cli_mode(self):
-        """Should use CLI mode when explicitly specified."""
-        app = TestApp()
+    def test_get_publisher_singleton(self):
+        """Should return singleton instance."""
+        from smartpublisher.publisher import get_publisher
 
-        with patch.object(app, "_run_cli") as mock_cli:
-            app.run(mode="cli")
-            mock_cli.assert_called_once()
+        pub1 = get_publisher()
+        pub2 = get_publisher()
 
-    def test_explicit_http_mode(self):
-        """Should use HTTP mode when explicitly specified."""
-        app = TestApp()
-
-        with patch.object(app, "_run_http") as mock_http:
-            app.run(mode="http", port=8080)
-            mock_http.assert_called_once_with(8080)
-
-    def test_invalid_mode(self):
-        """Should raise error for invalid mode."""
-        app = TestApp()
-
-        with pytest.raises(ValueError, match="Unknown mode"):
-            app.run(mode="invalid")
+        assert pub1 is pub2

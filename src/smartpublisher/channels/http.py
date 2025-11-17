@@ -8,7 +8,7 @@ Examples: health, openapi_schema, metrics, etc.
 These commands make sense in HTTP but not necessarily in CLI.
 """
 
-from smartroute.core import Router, RoutedClass, route
+from smartroute.core import Router
 
 
 class PublisherHTTP:
@@ -67,7 +67,7 @@ class PublisherHTTP:
             dict: OpenAPI specification
         """
         # Generate from publisher.api
-        api_schema = self.publisher.api.describe()
+        self.publisher.api.describe()
 
         # Convert to OpenAPI format
         openapi_spec = {

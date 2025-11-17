@@ -10,7 +10,6 @@ User apps inherit from PublishedClass, not Publisher.
 """
 
 from pathlib import Path
-from smartroute.core import Router, RoutedClass
 
 # Try relative imports first (when used as package)
 # Fall back to absolute imports (when run directly)
@@ -89,7 +88,7 @@ class Publisher:
 
         # Call on_add lifecycle hook
         if hasattr(app, 'smpub_on_add'):
-            result = app.smpub_on_add()
+            app.smpub_on_add()
             # TODO: Handle result (logging, etc.)
 
         # Cache loaded app
@@ -116,7 +115,7 @@ class Publisher:
 
         # Call on_remove lifecycle hook
         if hasattr(app, 'smpub_on_remove'):
-            result = app.smpub_on_remove()
+            app.smpub_on_remove()
             # TODO: Handle result
 
         # Remove from cache

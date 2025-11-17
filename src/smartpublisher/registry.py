@@ -13,7 +13,7 @@ Key principles:
 import sys
 import json
 from pathlib import Path
-from smartroute.core import Router, RoutedClass, route
+from smartroute.core import Router
 
 
 class AppRegistry:
@@ -74,7 +74,7 @@ class AppRegistry:
         path_obj = Path(path).resolve()
         if not path_obj.exists():
             return {
-                "error": f"Path does not exist",
+                "error": "Path does not exist",
                 "path": str(path_obj)
             }
 
@@ -107,7 +107,7 @@ class AppRegistry:
         """
         if name not in self._data["apps"]:
             return {
-                "error": f"App not found",
+                "error": "App not found",
                 "name": name,
                 "available": list(self._data["apps"].keys())
             }
@@ -148,7 +148,7 @@ class AppRegistry:
         """
         if name not in self._data["apps"]:
             return {
-                "error": f"App not found",
+                "error": "App not found",
                 "name": name,
                 "available": list(self._data["apps"].keys())
             }

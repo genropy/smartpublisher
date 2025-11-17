@@ -7,7 +7,7 @@ They work the same way on CLI, HTTP, or any other channel.
 NO print statements - only structured data returns.
 """
 
-from smartroute.core import Router, RoutedClass, route
+from smartroute.core import Router
 
 
 class SystemCommands:
@@ -44,9 +44,9 @@ class SystemCommands:
                 "has_api": hasattr(instance.__class__, 'api')
             }
 
-            # Get methods from SmartSwitch API (single source of truth)
-            if hasattr(instance.__class__, 'api'):
-                schema = instance.__class__.api.describe()
+            # Get methods from SmartRoute API (single source of truth)
+            if hasattr(instance, 'api'):
+                schema = instance.api.describe()
                 handler_info["methods"] = list(schema.get("methods", {}).keys())
             else:
                 handler_info["methods"] = []
@@ -79,8 +79,8 @@ class SystemCommands:
 
         # Get API schema if available
         api_schema = None
-        if hasattr(instance.__class__, 'api'):
-            api_schema = instance.__class__.api.describe()
+        if hasattr(instance, 'api'):
+            api_schema = instance.api.describe()
 
         return {
             "name": handler_name,

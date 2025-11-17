@@ -11,7 +11,7 @@ Example:
             self.publish("users", UsersHandler())
 """
 
-from smartroute.core import Router, RoutedClass, route
+from smartroute.core import Router, RoutedClass
 
 # Try relative import first (when used as package)
 # Fall back to absolute import (when run directly)
