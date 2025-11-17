@@ -1,34 +1,31 @@
 """
-smartpublisher - Smart Publisher: CLI/API framework based on SmartSwitch.
+SmartPublisher - Framework for building CLI/API applications with SmartSwitch.
 
-Example:
-    from smartpublisher import Publisher
-    from smartswitch import Switcher
+Key classes:
+- PublishedClass: Mixin for user apps (inherit from this)
+- Publisher: Central coordinator (ONE instance per system)
+- AppRegistry: Registry for managing apps
 
-    class MyHandler:
-        # If using __slots__, include 'smpublisher'
-        __slots__ = ('data', 'smpublisher')
-        api = Switcher(prefix='handler_')
-
-        def __init__(self):
-            self.data = {}
-
-        @api
-        def handler_add(self, key, value):
-            self.data[key] = value
-
-    class MyApp(Publisher):
-        def initialize(self):
-            self.handler = MyHandler()
-            self.publish('handler', self.handler)
-
-    if __name__ == "__main__":
-        app = MyApp()
-        app.run()
+Architecture:
+- User apps inherit from PublishedClass
+- Each app has its own root Switcher
+- Publisher coordinates multiple apps and channels
+- Channels (CLI, HTTP) expose apps via different transports
 """
 
-from smartpublisher.publisher import Publisher
-from smartpublisher.published import PublisherContext, discover_api_json
+from .published import PublishedClass
+from .publisher import Publisher, get_publisher
+from .registry import AppRegistry, get_local_registry, get_global_registry
+from .system_commands import SystemCommands
+from .output_formatter import OutputFormatter
 
-__version__ = "0.3.0"
-__all__ = ["Publisher", "PublisherContext", "discover_api_json"]
+__all__ = [
+    'PublishedClass',
+    'Publisher',
+    'get_publisher',
+    'AppRegistry',
+    'get_local_registry',
+    'get_global_registry',
+    'SystemCommands',
+    'OutputFormatter'
+]

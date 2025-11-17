@@ -1,0 +1,111 @@
+================================================================================
+SmartPublisher - REAL Terminal Session Transcript
+================================================================================
+
+$ smpub .apps list
+No apps registered.
+
+$ smpub .apps add myshop /tmp/myshop main MyShop
+✓ App 'myshop' registered
+  Path: /private/tmp/myshop
+
+$ smpub .apps list
+Registered apps (1):
+  myshop → /private/tmp/myshop
+
+$ smpub .apps getapp myshop
+{
+  "name": "myshop",
+  "path": "/private/tmp/myshop",
+  "module": "main",
+  "class": "MyShop"
+}
+
+$ smpub myshop shop list
+{
+  "products": [
+    {
+      "id": 1,
+      "name": "Laptop",
+      "price": 999.99
+    },
+    {
+      "id": 2,
+      "name": "Mouse",
+      "price": 29.99
+    },
+    {
+      "id": 3,
+      "name": "Keyboard",
+      "price": 79.99
+    }
+  ],
+  "total": 3
+}
+
+$ smpub myshop shop get --product_id 1
+Error: ShopHandler.get() missing 1 required positional argument: 'product_id'
+
+$ smpub myshop shop create --name Monitor --price 299.99
+Error: ShopHandler.create() missing 2 required positional arguments: 'name' and 'price'
+
+$ smpub myshop shop list
+{
+  "products": [
+    {
+      "id": 1,
+      "name": "Laptop",
+      "price": 999.99
+    },
+    {
+      "id": 2,
+      "name": "Mouse",
+      "price": 29.99
+    },
+    {
+      "id": 3,
+      "name": "Keyboard",
+      "price": 79.99
+    }
+  ],
+  "total": 3
+}
+
+$ smpub myshop _system list_handlers
+{
+  "total": 2,
+  "handlers": {
+    "_system": {
+      "class": "SystemCommands",
+      "has_api": true,
+      "methods": [
+        "list_handlers",
+        "get_handler_info",
+        "get_api_tree"
+      ]
+    },
+    "shop": {
+      "class": "ShopHandler",
+      "has_api": true,
+      "methods": [
+        "list",
+        "get",
+        "create"
+      ]
+    }
+  }
+}
+
+$ smpub .apps remove myshop
+✓ App 'myshop' removed
+
+$ smpub .apps list
+No apps registered.
+
+================================================================================
+NOTES:
+- Comandi di registry (.apps) funzionano perfettamente
+- Metodi senza parametri (shop list) funzionano
+- System commands (_system) funzionano
+- PROBLEMA: Argument parsing non ancora implementato (get, create falliscono)
+================================================================================

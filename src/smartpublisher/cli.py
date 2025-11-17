@@ -1,358 +1,410 @@
 """
 CLI entry point for smpub command.
 
-Manages app registry and dispatches commands to published apps.
+New architecture with .apps routing and bash completion support.
+
+Key principles:
+- Use ONLY SmartSwitch APIs
+- System commands start with . (dot)
+- App commands are shortcuts: smpub myapp ... = .apps getapp + execute
+- Bash completion driven by Switcher.describe()
 """
 
 import sys
 import json
-import importlib
-from pathlib import Path
+
+# Try relative imports first (when used as package)
+# Fall back to absolute imports (when run directly)
+try:
+    from .registry import get_local_registry, get_global_registry, discover_app
+    from .channels.cli import PublisherCLI
+    from .channels.http import PublisherHTTP
+except ImportError:
+    from registry import get_local_registry, get_global_registry, discover_app
+    from channels.cli import PublisherCLI
+    from channels.http import PublisherHTTP
 
 
-# Registry file locations
-LOCAL_REGISTRY = Path.cwd() / ".published"
-GLOBAL_REGISTRY = Path.home() / ".smartlibs" / "publisher" / "registry.json"
+# ============================================================================
+# OUTPUT FORMATTING
+# ============================================================================
+
+class OutputFormatter:
+    """Format structured data for CLI output."""
+
+    @staticmethod
+    def format(data: dict) -> str:
+        """
+        Format dict for CLI display.
+
+        Args:
+            data: Structured data from SmartSwitch
+
+        Returns:
+            str: Formatted output
+        """
+        if "error" in data:
+            return f"✗ Error: {data['error']}"
+
+        if "status" in data:
+            status = data["status"]
+            if status == "registered":
+                return f"✓ App '{data['name']}' registered\n  Path: {data['path']}"
+            elif status == "removed":
+                return f"✓ App '{data['name']}' removed"
+            elif status == "published":
+                methods = ", ".join(data.get("methods", []))
+                return f"✓ Published '{data['name']}' ({data['handler_class']})\n  Methods: {methods}"
+
+        # List apps
+        if "apps" in data and "total" in data:
+            if data["total"] == 0:
+                return "No apps registered."
+            lines = [f"Registered apps ({data['total']}):"]
+            for name, info in data["apps"].items():
+                lines.append(f"  {name} → {info['path']}")
+            return "\n".join(lines)
+
+        # Generic dict formatting
+        return json.dumps(data, indent=2)
 
 
-def load_registry(global_mode=False):
-    """Load app registry from file."""
-    registry_path = GLOBAL_REGISTRY if global_mode else LOCAL_REGISTRY
+# ============================================================================
+# BASH COMPLETION
+# ============================================================================
 
-    if not registry_path.exists():
-        return {"apps": {}}
-
-    with open(registry_path) as f:
-        return json.load(f)
-
-
-def save_registry(registry, global_mode=False):
-    """Save app registry to file."""
-    registry_path = GLOBAL_REGISTRY if global_mode else LOCAL_REGISTRY
-
-    # Create parent directory if needed
-    registry_path.parent.mkdir(parents=True, exist_ok=True)
-
-    with open(registry_path, "w") as f:
-        json.dump(registry, f, indent=2)
-
-
-def discover_publisher_class(path):
+def handle_completion(args: list):
     """
-    Discover Publisher class in the given path.
-
-    Returns tuple (module_name, class_name) or (None, None) if not found.
-    """
-    path = Path(path)
-    if not path.is_dir():
-        return None, None
-
-    # Find all Python files (excluding __pycache__, etc.)
-    py_files = [f for f in path.glob("*.py") if not f.name.startswith("_")]
-
-    for py_file in py_files:
-        # Read file and look for "class X(Publisher):"
-        try:
-            content = py_file.read_text()
-            # Simple pattern matching for class definition
-            import re
-
-            pattern = r"class\s+(\w+)\s*\([^)]*Publisher[^)]*\)\s*:"
-            matches = re.findall(pattern, content)
-            if matches:
-                # Found a Publisher subclass
-                module_name = py_file.stem  # filename without .py
-                class_name = matches[0]
-                return module_name, class_name
-        except Exception:
-            continue
-
-    return None, None
-
-
-def add_app(name, module_class=None, path=None, init_params=None, global_mode=False):
-    """Register an app in registry and optionally start CLI.
+    Handle bash completion requests.
 
     Args:
-        name: App name for registry
-        module_class: Optional "module:ClassName" string
-        path: Path to module directory
-        init_params: Dict of initialization parameters
-        global_mode: Use global registry
+        args: ['--complete', level, partial_args...]
+
+    Output:
+        Space-separated list of suggestions (printed to stdout)
     """
-    registry = load_registry(global_mode)
-
-    # Default to current directory if no path specified
-    if path is None:
-        path = "."
-
-    path = Path(path).resolve()
-    if not path.exists():
-        print(f"Error: Path {path} does not exist")
-        sys.exit(1)
-
-    # Parse module:ClassName if provided
-    if module_class and ":" in module_class:
-        module_name, class_name = module_class.split(":", 1)
-    else:
-        # Auto-discover module and class (Publisher only)
-        module_name, class_name = discover_publisher_class(path)
-        if module_name is None:
-            print(f"Error: No Publisher class found in {path}")
-            print("Specify explicitly: smpub add <name> module:ClassName --path <path>")
-            sys.exit(1)
-
-    app_entry = {
-        "path": str(path),
-        "module": module_name,
-        "class": class_name
-    }
-
-    if init_params:
-        app_entry["init_params"] = init_params
-
-    registry["apps"][name] = app_entry
-
-    save_registry(registry, global_mode)
-    mode_str = "globally" if global_mode else "locally"
-    print(f"✓ App '{name}' registered {mode_str}")
-    print(f"  Path: {path}")
-    print(f"  Module: {module_name}, Class: {class_name}")
-    if init_params:
-        print(f"  Init params: {init_params}")
-
-
-def list_apps(global_mode=False):
-    """List all registered apps."""
-    registry = load_registry(global_mode)
-
-    if not registry["apps"]:
-        mode_str = "globally" if global_mode else "in this directory"
-        print(f"No apps registered {mode_str}.")
-        print("Use 'smpub add <name> --path <path>' to add one.")
+    try:
+        level = int(args[1])
+        partial_args = args[2:] if len(args) > 2 else []
+    except (IndexError, ValueError):
         return
 
-    mode_str = "Global" if global_mode else "Local"
-    print(f"{mode_str} registered apps:")
-    for name, info in registry["apps"].items():
-        print(f"  {name} → {info['path']}")
+    suggestions = []
 
+    # Level 0: System commands + app names
+    if level == 0:
+        system_cmds = ['.apps']  # Future: .config, .version, etc.
+        suggestions.extend(system_cmds)
 
-def remove_app(name, global_mode=False):
-    """Remove app from registry."""
-    registry = load_registry(global_mode)
-
-    if name in registry["apps"]:
-        del registry["apps"][name]
-        save_registry(registry, global_mode)
-        mode_str = "globally" if global_mode else "locally"
-        print(f"✓ App '{name}' removed {mode_str}")
-    else:
-        mode_str = "global" if global_mode else "local"
-        print(f"Error: App '{name}' not found in {mode_str} registry")
-        sys.exit(1)
-
-
-def load_app(name, global_mode=False):
-    """Load an app from registry and create Publisher wrapper if needed."""
-    registry = load_registry(global_mode)
-
-    if name not in registry["apps"]:
-        # Try the other registry
-        other_global = not global_mode
-        registry = load_registry(other_global)
-        if name not in registry["apps"]:
-            print(f"Error: App '{name}' not found in registry")
-            print(f"Use 'smpub add {name} --path <path>' to register it")
-            sys.exit(1)
-
-    app_info = registry["apps"][name]
-    app_path = Path(app_info["path"])
-
-    # Add to sys.path
-    sys.path.insert(0, str(app_path))
-
-    # Import module
-    try:
-        mod = importlib.import_module(app_info["module"])
-        app_class = getattr(mod, app_info["class"])
-
-        # Import Publisher for type checking
-        from .publisher import Publisher
-
-        # Check if it's already a Publisher subclass
-        if issubclass(app_class, Publisher):
-            return app_class()
-
-        # Not a Publisher - create wrapper
-        # Get init params from registry or use defaults
-        init_params = app_info.get("init_params", {})
-
-        # Try to instantiate the class
+        # Add app names from both registries
         try:
-            instance = app_class(**init_params)
-        except TypeError as e:
-            print(f"Error: Cannot instantiate {app_info['class']}")
-            print(f"Missing required parameters: {e}")
-            print("Add init_params to registry or use --param in add command")
+            local_reg = get_local_registry()
+            suggestions.extend(local_reg._data["apps"].keys())
+        except Exception:
+            pass
+
+        try:
+            global_reg = get_global_registry()
+            suggestions.extend(global_reg._data["apps"].keys())
+        except Exception:
+            pass
+
+    # Level 1: Methods of system handler OR handler names
+    elif level == 1 and len(partial_args) > 0:
+        first_arg = partial_args[0]
+
+        if first_arg.startswith('.'):
+            # System command: return methods
+            system_handler = first_arg[1:]  # Remove dot
+
+            if system_handler == 'apps':
+                # Get methods from AppRegistry Switcher
+                from registry import AppRegistry
+                schema = AppRegistry.api.describe()
+                suggestions = list(schema.get('methods', {}).keys())
+
+        else:
+            # App name: return handler names
+            try:
+                registry = discover_app(first_arg)
+                app = registry.load(first_arg)
+                suggestions = list(app.published_instances.keys())
+            except Exception:
+                pass
+
+    # Level 2: Methods of app handler
+    elif level == 2 and len(partial_args) >= 2:
+        app_name = partial_args[0]
+        handler_name = partial_args[1]
+
+        try:
+            registry = discover_app(app_name)
+            app = registry.load(app_name)
+            handler = app.published_instances.get(handler_name)
+            if handler and hasattr(handler.__class__, 'api'):
+                schema = handler.__class__.api.describe()
+                suggestions = list(schema.get('methods', {}).keys())
+        except Exception:
+            pass
+
+    # Print suggestions (space-separated)
+    print(' '.join(suggestions))
+
+
+# ============================================================================
+# SYSTEM COMMANDS
+# ============================================================================
+
+def handle_system_command(system_handler: str, args: list, global_mode: bool = False):
+    """
+    Handle system commands (e.g., .apps).
+
+    Args:
+        system_handler: Handler name (e.g., "apps")
+        args: Remaining CLI arguments
+        global_mode: Use global registry
+    """
+    if system_handler == "apps":
+        # Get appropriate registry
+        if global_mode:
+            registry = get_global_registry()
+        else:
+            registry = get_local_registry()
+
+        # No command: show help
+        if len(args) == 0:
+            schema = registry.api.describe()
+            print("Registry commands:")
+            for method_name, method_info in schema.get('methods', {}).items():
+                doc = method_info.get('description', 'No description')
+                print(f"  {method_name}: {doc}")
+            return
+
+        # Get command
+        command = args[0]
+        command_args = args[1:]
+
+        try:
+            # Get method from Switcher (SmartSwitch handles validation!)
+            method = registry.api.get(command)
+
+            # Call with remaining args (SmartSwitch converts CLI args to kwargs)
+            # For now, simple positional mapping
+            # TODO: Use SmartSwitch CLI parsing when available
+            if command == "add":
+                if len(command_args) < 2:
+                    print("Usage: smpub .apps add <name> <path> [module] [class_name]")
+                    sys.exit(1)
+                name = command_args[0]
+                path = command_args[1]
+                module = command_args[2] if len(command_args) > 2 else "main"
+                class_name = command_args[3] if len(command_args) > 3 else "App"
+                result = method(registry, name=name, path=path, module=module, class_name=class_name)
+
+            elif command == "remove":
+                if len(command_args) < 1:
+                    print("Usage: smpub .apps remove <name>")
+                    sys.exit(1)
+                name = command_args[0]
+                result = method(registry, name=name)
+
+            elif command == "list":
+                result = method(registry)
+
+            elif command == "getapp":
+                if len(command_args) < 1:
+                    print("Usage: smpub .apps getapp <name>")
+                    sys.exit(1)
+                name = command_args[0]
+                result = method(registry, name=name)
+
+            else:
+                print(f"Unknown command: {command}")
+                sys.exit(1)
+
+            # Format and print result
+            output = OutputFormatter.format(result)
+            print(output)
+
+        except Exception as e:
+            print(f"Error: {e}")
             sys.exit(1)
 
-        # Create dynamic Publisher wrapper
-        class DynamicPublisher(Publisher):
-            def on_init(self):
-                self.publish(name, instance)
-
-        return DynamicPublisher()
-
-    except (ImportError, AttributeError) as e:
-        print(f"Error loading app '{name}': {e}")
+    else:
+        print(f"Unknown system handler: .{system_handler}")
         sys.exit(1)
+
+
+# ============================================================================
+# APP COMMANDS
+# ============================================================================
+
+def handle_app_command(app_name: str, args: list):
+    """
+    Handle app commands.
+
+    This is shorthand for: .apps getapp <app_name> + execute command
+
+    Args:
+        app_name: Name of the app
+        args: Command and arguments
+    """
+    try:
+        # Discover and load app
+        registry = discover_app(app_name)
+        app = registry.load(app_name)
+
+    except ValueError as e:
+        print(f"Error: {e}")
+        sys.exit(1)
+
+    # No command: show help
+    if len(args) == 0:
+        print(f"App: {app_name}")
+        print(f"Class: {app.__class__.__name__}")
+        print("\nHandlers:")
+        for handler_name in app.published_instances.keys():
+            print(f"  {handler_name}")
+        return
+
+    # Create CLI channel and execute
+    cli = PublisherCLI(app)
+    cli.run(args)
+
+
+# ============================================================================
+# SPECIAL COMMANDS
+# ============================================================================
+
+def handle_serve_command(app_name: str, port: int = 8000):
+    """
+    Start HTTP server for an app.
+
+    Args:
+        app_name: Name of the app
+        port: Port to listen on
+    """
+    try:
+        # Discover and load app
+        registry = discover_app(app_name)
+        app = registry.load(app_name)
+
+    except ValueError as e:
+        print(f"Error: {e}")
+        sys.exit(1)
+
+    # Create HTTP channel and run
+    http = PublisherHTTP(app)
+    print(f"Starting {app_name} on http://0.0.0.0:{port}")
+    print(f"Swagger UI: http://localhost:{port}/docs")
+    print(f"Health: http://localhost:{port}/_http/health")
+    http.run(port=port)
 
 
 def print_help():
     """Print CLI help."""
-    print(
-        """
+    print("""
 smpub - Smart Publisher CLI
 
-Management:
-    smpub add <name> [--path <path>] [--global]
-                                Register an app (defaults to current directory)
-    smpub remove <name> [--global]
-                                Unregister an app
-    smpub list [--global]       List registered apps
+System Commands (start with .):
+    smpub .apps add <name> <path> [module] [class]
+                                Register an app
+    smpub .apps remove <name>   Unregister an app
+    smpub .apps list            List registered apps
+    smpub .apps getapp <name>   Get app info
 
-Execution:
-    smpub <app-name> [command] [args...]
-                                Run app command
-    smpub <app-name> --help     Show app help
+App Commands (shorthand):
+    smpub <app-name> [handler] [method] [args...]
+                                Execute app command
+    smpub serve <app-name> [--port PORT]
+                                Start HTTP server
+
+Flags:
+    --global                    Use global registry (~/.smartlibs/publisher/)
+    --complete <level> [args...]
+                                Bash completion (internal use)
 
 Examples:
-    # Register app in current directory (auto-discovers Publisher class)
-    cd ~/projects/myapp
-    smpub add myapp
+    # Register app
+    smpub .apps add myapp ~/projects/myapp main ShopApp
 
-    # Register app with explicit path
-    smpub add myapp --path ~/projects/myapp
+    # List apps
+    smpub .apps list
 
-    # Run app commands (CLI mode)
-    smpub myapp --help
-    smpub myapp handler add key value
+    # Run commands (shorthand)
+    smpub myapp shop list
+    smpub myapp _system list_handlers
 
-    # Start HTTP server
-    smpub myapp serve           # default port 8000
-    smpub myapp serve 8084      # custom port
+    # Start server
+    smpub serve myapp
+    smpub serve myapp --port 8080
 
-    # List and remove
-    smpub list
-    smpub remove myapp
+Notes:
+    - System commands start with . (dot)
+    - App commands are shortcuts: smpub myapp = .apps getapp myapp
+    - Use --global for global registry, local by default
+    """)
 
-Options:
-    --path <path>               Path to app directory (default: current directory)
-    --global                    Use global registry (~/.smartlibs/publisher/)
-                                instead of local (./.published)
-    """
-    )
 
+# ============================================================================
+# MAIN
+# ============================================================================
 
 def main():
     """CLI entry point."""
+    # No args: show help
     if len(sys.argv) < 2:
         print_help()
         return
 
-    command = sys.argv[1]
+    # Parse flags
     global_mode = "--global" in sys.argv
+    args = [arg for arg in sys.argv[1:] if arg != "--global"]
 
-    # Management commands
-    if command == "add":
-        if len(sys.argv) < 3:
-            print("Usage: smpub add <name> [module:ClassName] [--path <path>] [--param key=value] [--global]")
-            sys.exit(1)
-        name = sys.argv[2]
-
-        # Check for module:ClassName (optional 3rd argument)
-        module_class = None
-        if len(sys.argv) >= 4 and ":" in sys.argv[3] and not sys.argv[3].startswith("--"):
-            module_class = sys.argv[3]
-
-        # Check if --path is specified
-        path = None
-        if "--path" in sys.argv:
-            path_idx = sys.argv.index("--path") + 1
-            if path_idx >= len(sys.argv):
-                print("Error: --path requires a value")
-                sys.exit(1)
-            path = sys.argv[path_idx]
-
-        # Parse --param arguments
-        init_params = {}
-        i = 0
-        while i < len(sys.argv):
-            if sys.argv[i] == "--param":
-                if i + 1 >= len(sys.argv):
-                    print("Error: --param requires a value")
-                    sys.exit(1)
-                param_str = sys.argv[i + 1]
-                if "=" not in param_str:
-                    print(f"Error: --param value must be in format key=value, got: {param_str}")
-                    sys.exit(1)
-                key, value = param_str.split("=", 1)
-                init_params[key] = value
-                i += 2
-            else:
-                i += 1
-
-        add_app(name, module_class, path, init_params or None, global_mode)
+    # Handle bash completion
+    if "--complete" in args:
+        handle_completion(args)
         return
 
-    if command == "list":
-        list_apps(global_mode)
-        return
-
-    if command == "remove":
-        if len(sys.argv) < 3:
-            print("Usage: smpub remove <name> [--global]")
-            sys.exit(1)
-        name = sys.argv[2]
-        remove_app(name, global_mode)
-        return
-
-    if command == "--help" or command == "-h":
+    # Handle help
+    if args[0] in ["--help", "-h", "help"]:
         print_help()
         return
 
-    # App execution
-    app_name = command
-    app = load_app(app_name, global_mode)
+    # Handle serve (special command)
+    if args[0] == "serve":
+        if len(args) < 2:
+            print("Usage: smpub serve <app-name> [--port PORT]")
+            sys.exit(1)
 
-    # Check if next argument is 'serve'
-    if len(sys.argv) >= 3 and sys.argv[2] == "serve":
-        # HTTP mode: smpub <appname> serve [port]
-        port = 8000  # default port
-        if len(sys.argv) >= 4:
+        app_name = args[1]
+        port = 8000
+
+        if "--port" in args:
             try:
-                port = int(sys.argv[3])
-            except ValueError:
-                print(f"Error: Invalid port number '{sys.argv[3]}'")
+                port_idx = args.index("--port") + 1
+                port = int(args[port_idx])
+            except (IndexError, ValueError):
+                print("Error: Invalid port")
                 sys.exit(1)
 
-        # Run in HTTP mode with specified port
-        print(f"Starting {app_name} on http://0.0.0.0:{port}")
-        print(f"Swagger UI available at http://localhost:{port}/docs")
-        print(f"ReDoc available at http://localhost:{port}/redoc")
-        app.run(mode="http", port=port)
+        handle_serve_command(app_name, port)
         return
 
-    # Remove 'smpub', app_name, and --global from argv
-    new_argv = [sys.argv[0]]
-    for arg in sys.argv[2:]:
-        if arg != "--global":
-            new_argv.append(arg)
-    sys.argv = new_argv
+    # Route based on first arg
+    first_arg = args[0]
 
-    # Run in CLI mode
-    app.run(mode="cli")
+    if first_arg.startswith('.'):
+        # System command
+        system_handler = first_arg[1:]  # Remove leading dot
+        remaining_args = args[1:]
+        handle_system_command(system_handler, remaining_args, global_mode)
+
+    else:
+        # App command (shorthand)
+        app_name = first_arg
+        remaining_args = args[1:]
+        handle_app_command(app_name, remaining_args)
 
 
 if __name__ == "__main__":

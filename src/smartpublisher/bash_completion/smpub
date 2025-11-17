@@ -1,0 +1,40 @@
+#!/bin/bash
+# Bash completion script for smpub
+#
+# Installation:
+#   sudo cp bash_completion/smpub /etc/bash_completion.d/
+#   # OR
+#   mkdir -p ~/.bash_completion.d
+#   cp bash_completion/smpub ~/.bash_completion.d/
+#   echo 'source ~/.bash_completion.d/smpub' >> ~/.bashrc
+#
+# After installation, restart your shell or run: source ~/.bashrc
+
+_smpub_completion() {
+    local cur prev opts
+    COMPREPLY=()
+
+    cur="${COMP_WORDS[COMP_CWORD]}"
+    prev="${COMP_WORDS[COMP_CWORD-1]}"
+
+    # Calculate completion level (number of words after 'smpub')
+    local level=$((COMP_CWORD - 1))
+
+    # Build args string for smpub --complete
+    local args=""
+    for ((i=1; i<COMP_CWORD; i++)); do
+        args="$args ${COMP_WORDS[i]}"
+    done
+
+    # Call smpub to get suggestions
+    # Suppress errors to avoid cluttering completion
+    opts=$(smpub --complete $level $args 2>/dev/null)
+
+    # Generate completion options
+    COMPREPLY=( $(compgen -W "${opts}" -- ${cur}) )
+
+    return 0
+}
+
+# Register completion function for smpub command
+complete -F _smpub_completion smpub

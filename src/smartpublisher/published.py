@@ -1,181 +1,142 @@
 """
-Utilities for publishable handlers and API discovery.
+PublishedClass - Mixin for publishable applications.
+
+This is the base class that user apps inherit from.
+Each app has its own root Router and handlers.
+
+Example:
+    class MyApp(PublishedClass):
+        def on_init(self):
+            self.publish("shop", ShopHandler())
+            self.publish("users", UsersHandler())
 """
 
-import inspect
+from smartroute.core import Router, RoutedClass, route
+
+# Try relative import first (when used as package)
+# Fall back to absolute import (when run directly)
+try:
+    from .system_commands import SystemCommands
+except ImportError:
+    from system_commands import SystemCommands
 
 
-def discover_api_json(target, recursive=False, switcher_name="api") -> dict:
+class PublishedClass(RoutedClass):
     """
-    Discover API schema from a handler (class or instance).
+    Mixin for publishable applications.
 
-    Args:
-        target: Class or instance to discover
-        recursive: If True, include nested handlers (not yet implemented)
-        switcher_name: Name of the Switcher class attribute (default: 'api')
+    User apps inherit from this class and get:
+    - Root Router for business logic (self.api)
+    - publish() method to register handlers
+    - System commands for introspection (_system)
+    - Lifecycle hooks
 
-    Returns:
-        {
-            "class": "ClassName",
-            "description": "Class docstring",
-            "methods": {
-                "method_name": {
-                    "description": "Method docstring",
-                    "parameters": [
-                        {
-                            "name": "param_name",
-                            "type": "str",
-                            "required": True,
-                            "default": None
-                        }
-                    ]
-                }
-            }
-        }
-    """
-    # Get class from instance if needed
-    if not inspect.isclass(target):
-        target_class = target.__class__
-    else:
-        target_class = target
-
-    result = {
-        "class": target_class.__name__,
-        "description": (target_class.__doc__ or "").strip(),
-        "methods": {},
-    }
-
-    # Check if class has a Switcher API
-    if not hasattr(target_class, switcher_name):
-        return result
-
-    switcher = getattr(target_class, switcher_name)
-    prefix = getattr(switcher, "prefix", None) or ""
-
-    # Get all registered methods using public API
-    # Try new API first (smartswitch 0.9.1+)
-    entries = []
-    try:
-        description = switcher.describe()
-        if isinstance(description, dict) and "methods" in description:
-            entries = list(description["methods"].keys())
-    except (AttributeError, TypeError):
-        pass
-
-    # Fallback to old API (for backward compatibility and tests)
-    if not entries:
-        try:
-            entries_result = switcher.entries() if callable(getattr(switcher, "entries", None)) else getattr(switcher, "entries", [])
-            entries = list(entries_result) if entries_result else []
-        except (AttributeError, TypeError):
-            entries = []
-
-    for method_key in entries:
-        # method_key is the display name (without prefix)
-        # We need to construct the full method name with prefix
-        full_method_name = f"{prefix}{method_key}" if prefix else method_key
-        display_name = method_key
-
-        # Get the actual method
-        if not hasattr(target_class, full_method_name):
-            continue
-
-        method = getattr(target_class, full_method_name)
-
-        # Extract method info
-        method_info = {
-            "description": (method.__doc__ or "").strip().split("\n")[0],
-            "parameters": [],
-        }
-
-        # Try to use pre-prepared metadata from PydanticPlugin (fast path)
-        used_metadata = False
-        if hasattr(switcher, '_methods') and isinstance(switcher._methods, dict) and method_key in switcher._methods:
-            entry = switcher._methods[method_key]
-            pydantic_meta = entry.metadata.get("pydantic", {})
-            if pydantic_meta and "param_info" in pydantic_meta:
-                # Use pre-extracted parameter info (no inspect!)
-                method_info["parameters"] = pydantic_meta["param_info"]
-                used_metadata = True
-
-        # Fallback: extract signature if metadata not available
-        if not used_metadata:
-            try:
-                sig = inspect.signature(method)
-                for param_name, param in sig.parameters.items():
-                    if param_name == "self":
-                        continue
-
-                    # Extract type annotation
-                    param_type = "Any"
-                    if param.annotation != inspect.Parameter.empty:
-                        param_type = (
-                            param.annotation.__name__
-                            if hasattr(param.annotation, "__name__")
-                            else str(param.annotation)
-                        )
-
-                    # Check if required
-                    required = param.default == inspect.Parameter.empty
-                    default = None if required else param.default
-
-                    method_info["parameters"].append(
-                        {
-                            "name": param_name,
-                            "type": param_type,
-                            "required": required,
-                            "default": default,
-                        }
-                    )
-            except Exception:
-                # If signature extraction fails, just skip parameters
-                pass
-
-        result["methods"][display_name] = method_info
-
-    return result
-
-
-class PublisherContext:
-    """
-    Context object providing publisher-related functionality to handlers.
-
-    This object is injected into handlers via the 'smpublisher' attribute
-    and provides access to publisher features without polluting the
-    handler's namespace.
+    Each app has its own isolated Router tree with instance binding.
+    The Publisher connects multiple apps together.
     """
 
-    __slots__ = ("parent_api", "_handler", "switcher_name")
+    api = Router(name="root")
 
-    def __init__(self, handler, switcher_name="api"):
+    def __init__(self):
+        """Initialize PublishedClass with its own root Router."""
+        # Apply pydantic plugin to root router
+        self.api.plug("pydantic")
+
+        # Track handlers published by this app
+        self.published_instances = {}
+
+        # Reference to Publisher (set when registered)
+        self._publisher = None
+
+        # System commands for app introspection
+        self._init_system_commands()
+
+        # Call user hook for app-specific initialization
+        if hasattr(self, "on_init") and callable(self.on_init):
+            self.on_init()
+
+    def _init_system_commands(self):
+        """Initialize system commands for app introspection."""
+        # System commands provide info about THIS app
+        system = SystemCommands(self)
+
+        # Publish system handler like any other handler
+        self.published_instances['_system'] = system
+
+        # Add system handler as child using SmartRoute's add_child()
+        if hasattr(system, 'api'):
+            self.api.add_child(system, name="_system")
+
+    def publish(self, name: str, handler_instance, **options):
         """
-        Initialize context for a handler.
+        Publish a handler in this app.
 
         Args:
-            handler: The handler instance this context is attached to
-            switcher_name: Name of the Switcher class attribute (default: 'api')
-        """
-        self._handler = handler
-        self.parent_api = None
-        self.switcher_name = switcher_name
-
-    def get_api_json(self, target=None, recursive=False) -> dict:
-        """
-        Get API schema as JSON.
-
-        Args:
-            target: Target for discovery. If None, uses self._handler.
-                   Can be a class or instance.
-            recursive: If True, include nested handlers (not yet implemented)
+            name: Handler name
+            handler_instance: Handler object with Router (should be RoutedClass)
+            **options: Future options (metadata, etc.)
 
         Returns:
-            Dictionary containing API schema with methods, parameters, etc.
-
-        Example:
-            >>> schema = handler.smpublisher.get_api_json()
-            >>> print(schema['methods']['add']['parameters'])
-            [{'name': 'key', 'type': 'str', 'required': True, 'default': None}]
+            dict: Publication result
         """
-        if target is None:
-            target = self._handler
-        return discover_api_json(target, recursive=recursive, switcher_name=self.switcher_name)
+        # Save instance
+        self.published_instances[name] = handler_instance
+
+        # Add handler as child using SmartRoute's add_child()
+        # This creates hierarchical structure with instance binding
+        if hasattr(handler_instance, 'api'):
+            self.api.add_child(handler_instance, name=name)
+
+        # Return structured result
+        result = {
+            "status": "published",
+            "name": name,
+            "handler_class": handler_instance.__class__.__name__
+        }
+
+        # Get methods from SmartRoute API
+        if hasattr(handler_instance, 'api'):
+            schema = handler_instance.api.describe()
+            result["methods"] = list(schema.get("methods", {}).keys())
+        else:
+            result["methods"] = []
+
+        return result
+
+    def _set_publisher(self, publisher):
+        """
+        Set reference to Publisher (called during registration).
+
+        This allows the app to communicate with the Publisher.
+
+        Args:
+            publisher: Publisher instance
+        """
+        self._publisher = publisher
+
+    def smpub_on_add(self):
+        """
+        Lifecycle hook called when app is registered with Publisher.
+
+        Override in subclass for custom initialization.
+
+        Returns:
+            dict: Registration result
+        """
+        return {
+            "message": f"{self.__class__.__name__} registered successfully",
+            "handlers": list(self.published_instances.keys())
+        }
+
+    def smpub_on_remove(self):
+        """
+        Lifecycle hook called when app is unregistered from Publisher.
+
+        Override in subclass for custom cleanup.
+
+        Returns:
+            dict: Cleanup result
+        """
+        return {
+            "message": f"{self.__class__.__name__} unregistered"
+        }

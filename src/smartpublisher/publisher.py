@@ -1,415 +1,196 @@
 """
-Publisher - Base class for publishing handlers with CLI/API exposure.
+Publisher - Central coordinator for SmartPublisher system.
+
+This is the ONE instance that manages:
+- App registry (AppRegistry)
+- Channels (CLI, HTTP, etc.)
+- Published apps coordination
+
+User apps inherit from PublishedClass, not Publisher.
 """
 
-import os
-import sys
-from pydantic import ValidationError
-from smartswitch import Switcher
-from .published import PublisherContext
-from .validation import validate_args, validate_args_fast, format_validation_error
-from .interactive import prompt_for_parameters
+from pathlib import Path
+from smartroute.core import Router, RoutedClass
+
+# Try relative imports first (when used as package)
+# Fall back to absolute imports (when run directly)
+try:
+    from .registry import AppRegistry, get_local_registry, get_global_registry
+    from .channels.cli import PublisherCLI
+    from .channels.http import PublisherHTTP
+except ImportError:
+    from registry import AppRegistry, get_local_registry, get_global_registry
+    from channels.cli import PublisherCLI
+    from channels.http import PublisherHTTP
 
 
 class Publisher:
     """
-    Base class for applications that publish handlers with SmartSwitch APIs.
+    Central Publisher coordinator.
 
-    Provides:
-    - Handler registration via publish()
-    - Automatic parent_api injection
-    - CLI and HTTP/OpenAPI exposure control
-    - Multi-modal run() method
+    This is a singleton-like class that manages the entire system:
+    - Registry of apps
+    - Multiple channels (CLI, HTTP, etc.)
+    - Coordination between apps and channels
 
-    Example:
-        class MyApp(Publisher):
-            def on_init(self):
-                self.users = UserHandler()
-                self.publish('users', self.users,
-                           cli=True, openapi=True,
-                           cli_name='users',
-                           http_path='/api/v1/users')
-
-        if __name__ == "__main__":
-            app = MyApp()
-            app.run()  # Auto-detect CLI or HTTP mode
+    There is ONE Publisher per process.
+    Apps inherit from PublishedClass, not Publisher.
     """
 
-    def __init__(self):
+    def __init__(self, registry_path: Path = None, use_global: bool = False):
         """
         Initialize Publisher.
 
-        Creates parent_api Switcher with plugin chain:
-        - PydanticPlugin - validates and creates models
-
-        Then calls on_init() hook if defined by subclass.
+        Args:
+            registry_path: Custom registry path (optional)
+            use_global: Use global registry instead of local
         """
-        # Create root Switcher with plugins pre-configured
-        self.parent_api = Switcher(name="root").plug("pydantic")
-        self.published_instances = {}
-        self._cli_handlers = {}
-        self._openapi_handlers = {}
-
-        # Call on_init() hook if defined by subclass
-        if hasattr(self, "on_init") and callable(self.on_init):
-            self.on_init()
+        # Initialize registry
+        if registry_path:
+            self.registry = AppRegistry(registry_path)
+        elif use_global:
+            self.registry = get_global_registry()
         else:
-            # No on_init() defined - publish default help handler
-            self._publish_default_help()
+            self.registry = get_local_registry()
 
-    def _publish_default_help(self):
-        """Publish a default help handler when no on_init() is defined."""
+        # Initialize channels
+        self.channels = {
+            'cli': PublisherCLI(self),
+            'http': PublisherHTTP(self)
+        }
 
-        class DefaultHelp:
-            """Default help handler - shown when Publisher has no on_init()."""
+        # Publisher's own Router (for system-level commands)
+        # Note: For now, keep as simple attribute. Can be converted to RoutedClass pattern later.
+        self.api = None  # TODO: Implement if needed for system commands
 
-            def usage(self) -> dict:
-                """Show how to implement a Publisher subclass."""
-                return {
-                    "message": "This Publisher has no handlers published yet",
-                    "instructions": [
-                        "1. Override on_init() in your Publisher subclass",
-                        "2. Use self.publish(name, handler_instance) to publish handlers",
-                        "3. Example: self.publish('myhandler', MyHandler())",
-                    ],
-                    "example": """
-class MyPublisher(Publisher):
-    def on_init(self):
-        handler = MyHandler()
-        self.publish('myhandler', handler)
-""",
-                }
+        # Currently loaded apps
+        self.loaded_apps = {}
 
-        self.publish("help", DefaultHelp())
-
-    def publish(
-        self,
-        name: str,
-        target_object,
-        cli: bool = True,
-        openapi: bool = True,
-        cli_name: str | None = None,
-        http_path: str | None = None,
-        switcher_name: str = "api",
-    ):
+    def load_app(self, app_name: str):
         """
-        Publish an object and register for CLI/OpenAPI exposure.
+        Load an app from registry.
 
         Args:
-            name: Name for the published instance
-            target_object: Object to publish
-            cli: Expose via CLI (default: True)
-            openapi: Expose via OpenAPI/HTTP (default: True)
-            cli_name: Custom CLI name (default: same as name)
-            http_path: Custom HTTP path (default: /{name})
-            switcher_name: Name of the Switcher class attribute (default: 'api')
+            app_name: Name of the app to load
+
+        Returns:
+            PublishedClass instance
+        """
+        # Check if already loaded
+        if app_name in self.loaded_apps:
+            return self.loaded_apps[app_name]
+
+        # Load from registry
+        app = self.registry.load(app_name)
+
+        # Set publisher reference
+        if hasattr(app, '_set_publisher'):
+            app._set_publisher(self)
+
+        # Call on_add lifecycle hook
+        if hasattr(app, 'smpub_on_add'):
+            result = app.smpub_on_add()
+            # TODO: Handle result (logging, etc.)
+
+        # Cache loaded app
+        self.loaded_apps[app_name] = app
+
+        return app
+
+    def unload_app(self, app_name: str):
+        """
+        Unload an app.
+
+        Args:
+            app_name: Name of the app to unload
+
+        Returns:
+            dict: Unload result
+        """
+        if app_name not in self.loaded_apps:
+            return {
+                "error": f"App '{app_name}' not loaded"
+            }
+
+        app = self.loaded_apps[app_name]
+
+        # Call on_remove lifecycle hook
+        if hasattr(app, 'smpub_on_remove'):
+            result = app.smpub_on_remove()
+            # TODO: Handle result
+
+        # Remove from cache
+        del self.loaded_apps[app_name]
+
+        return {
+            "status": "unloaded",
+            "app": app_name
+        }
+
+    def get_channel(self, channel_name: str):
+        """
+        Get a channel by name.
+
+        Args:
+            channel_name: 'cli', 'http', etc.
+
+        Returns:
+            Channel instance
 
         Raises:
-            TypeError: If target_object uses __slots__ but doesn't include 'smpublisher' slot
+            KeyError: If channel not found
         """
-        # Create and inject PublisherContext
-        context = PublisherContext(target_object, switcher_name=switcher_name)
-        context.parent_api = self.parent_api
+        return self.channels[channel_name]
 
-        try:
-            target_object.smpublisher = context
-        except AttributeError:
-            # Handler uses __slots__ but doesn't include 'smpublisher'
-            raise TypeError(
-                f"Cannot publish {type(target_object).__name__}: "
-                f"class uses __slots__ but doesn't include 'smpublisher' slot.\n"
-                f"Add 'smpublisher' to your __slots__:\n\n"
-                f"    class {type(target_object).__name__}:\n"
-                f"        __slots__ = ('your_attrs', 'smpublisher')  # Add this!\n"
-                f"        api = Switcher()\n"
-            ) from None
-
-        # Link handler's API to parent_api for hierarchical structure
-        if hasattr(target_object.__class__, switcher_name):
-            handler_api = getattr(target_object.__class__, switcher_name)
-            # Set parent to establish parent-child relationship
-            # This automatically registers the child via SmartSwitch's parent.setter
-            handler_api.parent = self.parent_api
-
-            # Apply plugins retroactively to ensure all handlers have required plugins
-            self._ensure_plugins(handler_api)
-
-        # Save instance
-        self.published_instances[name] = target_object
-
-        # Register for exposure with custom names/paths
-        if cli:
-            effective_cli_name = cli_name if cli_name is not None else name
-            self._cli_handlers[effective_cli_name] = {
-                "handler": target_object,
-                "switcher_name": switcher_name,
-            }
-        if openapi:
-            effective_http_path = http_path if http_path is not None else f"/{name}"
-            self._openapi_handlers[effective_http_path] = {
-                "handler": target_object,
-                "name": name,
-                "switcher_name": switcher_name,
-            }
-
-    def _ensure_plugins(self, handler_api):
+    def add_channel(self, channel_name: str, channel_instance):
         """
-        Ensure handler has required plugins, applying them retroactively if needed.
-
-        Required plugins for smpub:
-        1. LoggingPlugin - for call tracking
-        2. PydanticPlugin - for validation and model generation
+        Add a custom channel.
 
         Args:
-            handler_api: The Switcher instance from the handler class
+            channel_name: Channel identifier
+            channel_instance: Channel object
         """
-        # Get current plugin names using public API
-        current_plugins = {p.name for p in handler_api.iter_plugins()}
+        self.channels[channel_name] = channel_instance
 
-        # Check if we need to add any plugins
-        needs_logging = "logging" not in current_plugins
-        needs_pydantic = "pydantic" not in current_plugins
-
-        # Add missing plugins
-        if needs_logging:
-            handler_api.plug("logging")  # Disabled by default
-
-        if needs_pydantic:
-            handler_api.plug("pydantic")
-
-    def run(self, mode: str | None = None, port: int = 8000):
+    def run_cli(self, args: list = None):
         """
-        Run the application in specified mode.
+        Run CLI channel.
 
         Args:
-            mode: 'cli', 'http', or None (auto-detect from sys.argv)
-            port: Port for HTTP mode (default: 8000)
+            args: CLI arguments (uses sys.argv if None)
         """
-        if mode is None:
-            # Auto-detect
-            import sys
+        cli = self.get_channel('cli')
+        cli.run(args)
 
-            if len(sys.argv) > 1:
-                mode = "cli"
-            else:
-                mode = "http"
-
-        if mode == "cli":
-            self._run_cli()
-        elif mode == "http":
-            self._run_http(port)
-        else:
-            raise ValueError(f"Unknown mode: {mode}. Use 'cli' or 'http'")
-
-    def _run_cli(self):
-        """Run CLI mode."""
-        args = sys.argv[1:]
-
-        # General help
-        if not args or args[0] in ["--help", "-h", "help"]:
-            self._print_cli_help()
-            return
-
-        # Parse: handler_name [method_name] [method_args...]
-        handler_name = args[0]
-
-        # Check if handler exists
-        if handler_name not in self._cli_handlers:
-            print(f"Error: Unknown handler '{handler_name}'")
-            print(f"\nAvailable handlers: {', '.join(self._cli_handlers.keys())}")
-            print("Use --help to see full usage")
-            sys.exit(1)
-
-        # Handler help
-        if len(args) == 1 or args[1] in ["--help", "-h", "help"]:
-            self._print_handler_help(handler_name)
-            return
-
-        method_name = args[1]
-
-        # Check for --interactive flag
-        interactive = "--interactive" in args[2:] or "-i" in args[2:]
-        if interactive:
-            # Remove flag from args
-            method_args = [a for a in args[2:] if a not in ["--interactive", "-i"]]
-        else:
-            method_args = args[2:]
-
-        # Get handler instance and switcher name
-        handler_info = self._cli_handlers[handler_name]
-        handler = handler_info["handler"]
-        switcher_name = handler_info["switcher_name"]
-
-        # Get handler's Switcher
-        if not hasattr(handler.__class__, switcher_name):
-            print(
-                f"Error: Handler '{handler_name}' has no Switcher (missing '{switcher_name}' class variable)"
-            )
-            sys.exit(1)
-
-        switcher = getattr(handler.__class__, switcher_name)
-
-        # Build full method name with prefix if needed
-        prefix = getattr(switcher, "prefix", None) or ""
-        full_method_name = f"{prefix}{method_name}"
-
-        # Check if method exists on handler
-        if not hasattr(handler, full_method_name):
-            print(f"Error: Method '{method_name}' not found")
-            print(f"Use 'smpub {sys.argv[0]} {handler_name} --help' to see available methods")
-            sys.exit(1)
-
-        # Get method (bound to instance, will be wrapped by switcher)
-        method = getattr(handler, full_method_name)
-
-        # Get pydantic metadata from switcher entry
-        # PydanticPlugin prepares everything we need during on_decore() phase
-        pydantic_meta = None
-        validation_target = None
-
-        if hasattr(switcher, '_methods') and method_name in switcher._methods:
-            entry = switcher._methods[method_name]
-            pydantic_meta = entry.metadata.get("pydantic", {})
-            # Keep reference to original function for fallback
-            validation_target = entry.func
-
-        # Interactive mode: prompt for parameters
-        if interactive:
-            # Need original function for interactive prompts
-            func = validation_target if validation_target else method
-            method_args = prompt_for_parameters(func)
-
-        # Validate and convert arguments using Pydantic
-        try:
-            # Use fast path if metadata is available (prepared in on_decore)
-            if pydantic_meta and "param_names" in pydantic_meta:
-                validated_params = validate_args_fast(pydantic_meta, method_args)
-            else:
-                # Fallback: use slower path with inspect
-                func = validation_target if validation_target else method
-                validated_params = validate_args(func, method_args)
-        except ValidationError as e:
-            print("Error: Invalid arguments")
-            print(format_validation_error(e))
-            print(f"\nUse 'smpub {sys.argv[0]} {handler_name} --help' to see method signature")
-            sys.exit(1)
-
-        # Call method with validated parameters
-        # Must pass handler as first positional arg so plugins see self in args[0]
-        try:
-            # Get switcher callable with smartasync for CLI (sync context)
-            # This ensures async methods work in CLI without event loop
-            switcher_callable = switcher.get(method_name, use_smartasync=True)
-            result = switcher_callable(handler, **validated_params)
-
-            if result is not None:
-                print(result)
-        except Exception as e:
-            import traceback
-            print(f"Error: {e}")
-            if False:  # Set to True for debugging
-                traceback.print_exc()
-            sys.exit(1)
-
-    def _print_cli_help(self):
-        """Print general CLI help."""
-        app_name = self.__class__.__name__
-        prog_name = os.path.basename(sys.argv[0])
-        print(f"\n{app_name} - Publisher Application\n")
-        print("Usage:")
-        print(f"  {prog_name} <handler> <method> [args...]")
-        print(f"  {prog_name} <handler> <method> --interactive\n")
-        print("Options:")
-        print("  --interactive, -i  Prompt for parameters interactively (requires textual)\n")
-        print("Available handlers:")
-        for name in sorted(self._cli_handlers.keys()):
-            handler = self._cli_handlers[name]["handler"]
-            doc = handler.__class__.__doc__ or "No description"
-            doc = doc.strip().split("\n")[0]  # First line only
-            print(f"  {name:15} {doc}")
-        print(f"\nUse '{prog_name} <handler> --help' for handler-specific help")
-
-    def _print_handler_help(self, handler_name):
-        """Print help for a specific handler."""
-        handler = self._cli_handlers[handler_name]["handler"]
-        handler_class = handler.__class__
-        prog_name = os.path.basename(sys.argv[0])
-
-        print(f"\nHandler: {handler_name}")
-        if handler_class.__doc__:
-            print(f"Description: {handler_class.__doc__.strip()}\n")
-
-        # Get API schema from handler
-        if not hasattr(handler, "smpublisher"):
-            print("No API methods available (handler not properly published)")
-            return
-
-        schema = handler.smpublisher.get_api_json()
-
-        if not schema["methods"]:
-            print("No API methods available")
-            return
-
-        print("Available methods:")
-
-        for method_name in sorted(schema["methods"].keys()):
-            method_info = schema["methods"][method_name]
-
-            # Build parameter string
-            params = []
-            for param in method_info["parameters"]:
-                if param["required"]:
-                    params.append(f"<{param['name']}:{param['type']}>")
-                else:
-                    default_str = repr(param["default"]) if param["default"] is not None else "None"
-                    params.append(f"[{param['name']}:{param['type']}={default_str}]")
-
-            param_str = " ".join(params)
-            description = method_info["description"] or "No description"
-
-            print(f"  {method_name:20} {param_str:30} {description}")
-
-        print(f"\nUsage: {prog_name} {handler_name} <method> [args...]")
-
-    def _run_http(self, port: int):
+    def run_http(self, port: int = 8000, **kwargs):
         """
-        Run HTTP mode with FastAPI + Swagger UI.
+        Run HTTP server.
 
         Args:
-            port: Port to listen on (default: 8000)
+            port: Port to listen on
+            **kwargs: Additional uvicorn options
         """
-        try:
-            from .api_server import create_fastapi_app
-            import uvicorn
-        except ImportError:
-            print("Error: FastAPI is not installed.")
-            print("Install with: pip install smpub[http]")
-            sys.exit(1)
+        http = self.get_channel('http')
+        http.run(port=port, **kwargs)
 
-        # Check if there are any OpenAPI handlers
-        if not self._openapi_handlers:
-            print("Warning: No handlers published with openapi=True")
-            print("Publishing with cli=True, openapi=True to expose via HTTP")
-            return
 
-        # Create FastAPI app
-        app = create_fastapi_app(
-            self,
-            title=f"{self.__class__.__name__} API",
-            description=self.__class__.__doc__ or f"{self.__class__.__name__} API",
-            version="0.1.0",
-        )
+# Singleton instance for convenience
+_default_publisher = None
 
-        # Print startup info
-        print(f"\n{self.__class__.__name__} - HTTP Mode")
-        print(f"Starting server on http://localhost:{port}")
-        print(f"Swagger UI available at http://localhost:{port}/docs")
-        print(f"OpenAPI schema at http://localhost:{port}/openapi.json")
-        print("\nPublished handlers:")
-        for path, handler_info in self._openapi_handlers.items():
-            handler_name = handler_info["name"]
-            print(f"  {handler_name:15} -> {path}")
-        print("\nPress Ctrl+C to stop\n")
 
-        # Run server
-        uvicorn.run(app, host="0.0.0.0", port=port)
+def get_publisher(use_global: bool = False) -> Publisher:
+    """
+    Get the default Publisher instance.
+
+    Args:
+        use_global: Use global registry
+
+    Returns:
+        Publisher instance
+    """
+    global _default_publisher
+
+    if _default_publisher is None:
+        _default_publisher = Publisher(use_global=use_global)
+
+    return _default_publisher

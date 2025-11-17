@@ -5,14 +5,14 @@ build-backend = "setuptools.build_meta"
 [project]
 name = "smartpublisher"
 version = "0.3.0"
-description = "Smart Publisher - CLI/API framework based on SmartSwitch"
+description = "Smart Publisher - CLI/API framework based on SmartRoute"
 readme = "README.md"
 requires-python = ">=3.10"
 license = {text = "MIT"}
 authors = [
     {name = "Genropy Team", email = "info@genropy.org"}
 ]
-keywords = ["cli", "api", "publisher", "smartswitch", "dispatcher"]
+keywords = ["cli", "api", "publisher", "smartroute", "dispatcher"]
 classifiers = [
     "Development Status :: 4 - Beta",
     "Intended Audience :: Developers",
@@ -26,7 +26,7 @@ classifiers = [
 ]
 
 dependencies = [
-    "smartswitch>=0.11.0",
+    "smartroute>=0.1.0",
     "smartasync>=0.2.0",
     "pydantic>=2.0",
 ]
