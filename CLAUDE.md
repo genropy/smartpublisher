@@ -2,7 +2,7 @@
 
 ## Project Context
 
-**smartpublisher** (Smart Publisher) is a CLI/API framework based on SmartSwitch for building command-line and web applications with automatic dispatch.
+**smartpublisher** (Smart Publisher) is a CLI/API framework based on SmartRoute for building command-line and web applications with automatic dispatch.
 
 **Naming Convention**:
 - **Package name**: `smartpublisher` (used in imports: `from smartpublisher import ...`)
@@ -13,7 +13,7 @@
 - **Development Status**: Beta (`Development Status :: 4 - Beta`)
 - **Version**: 0.3.0
 - **Has Implementation**: Complete (all major features implemented)
-- **Dependencies**: smartswitch >= 0.6.0, smartasync >= 0.2.0
+- **Dependencies**: smartroute >= 0.11.0, smartasync >= 0.2.0
 
 ### Project Overview
 
@@ -70,7 +70,7 @@ smartpublisher/
 ### Core Principles
 
 1. **Clean separation**: Publisher (orchestration) vs PublishedClass (handlers)
-2. **SmartSwitch integration**: Leverage smartswitch for dispatch
+2. **SmartRoute integration**: Leverage smartroute for dispatch
 3. **Flexible exposure**: cli/openapi flags per handler
 4. **Registry system**: Local (.published) and global (~/.smartlibs/publisher/)
 
@@ -112,14 +112,14 @@ Tests to be implemented:
 3. **Convention over configuration**: Apps expected to have `main.py` with `MainClass`
 4. **Auto-detect mode**: CLI if args present, HTTP otherwise
 
-## Relationship with SmartSwitch
+## Relationship with SmartRoute
 
-smartpublisher **depends on** smartswitch:
-- Uses `Switcher` for handler method dispatch
-- Handlers define `api = Switcher(...)` class variable
-- Publisher creates root `Switcher()` for routing
+smartpublisher **depends on** smartroute:
+- Uses `Router` for handler method dispatch
+- Handlers define `api = Router(...)` class variable
+- Publisher creates root `Router()` for routing
 - Hierarchical API structure through composition
-- SmartSwitch provides the dispatch mechanism, smartpublisher adds CLI/HTTP interfaces
+- SmartRoute provides the dispatch mechanism, smartpublisher adds CLI/HTTP interfaces
 
 ## Development Workflow
 

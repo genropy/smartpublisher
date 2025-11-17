@@ -8,13 +8,13 @@ Create a file `myapp.py`:
 
 ```python
 from smartpublisher import Publisher, PublishedClass
-from smartswitch import Switcher
+from smartroute import Router, route
 
 class GreetingHandler(PublishedClass):
     """Simple greeting handler."""
 
     __slots__ = ('greetings',)
-    api = Switcher(prefix='greet_')
+    api = Router(name='greet')
 
     def __init__(self):
         self.greetings = []

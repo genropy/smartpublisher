@@ -6,15 +6,15 @@ Handlers contain your business logic.
 
 ```python
 from smartpublisher import PublishedClass
-from smartswitch import Switcher
+from smartroute import Router, route
 
 class MyHandler(PublishedClass):
     __slots__ = ('data',)
-    api = Switcher(prefix='my_')
-    
+    api = Router(name='my')
+
     def __init__(self):
         self.data = {}
-    
+
     @api
     def my_method(self, param: str) -> str:
         """Process something."""

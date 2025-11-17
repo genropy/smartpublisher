@@ -4,7 +4,7 @@
 
 # smpub - Smart Publisher
 
-**CLI/API framework based on SmartSwitch**
+**CLI/API framework based on SmartRoute**
 
 </div>
 
@@ -19,7 +19,7 @@
 
 ---
 
-Build CLI and API applications with automatic command dispatch using [SmartSwitch](https://github.com/genropy/smartswitch).
+Build CLI and API applications with automatic command dispatch using [SmartRoute](https://github.com/genropy/smartroute).
 
 ## What is smpub?
 
@@ -37,25 +37,25 @@ Traditionally, this means writing three different interfaces with lots of boiler
 
 **smpub** (Smart Publisher) offers an elegant approach:
 
-1. **Write your library once** using [SmartSwitch](https://github.com/genropy/smartswitch) for method dispatch
+1. **Write your library once** using [SmartRoute](https://github.com/genropy/smartroute) for method dispatch
 2. **Get three interfaces automatically**: Python, CLI, and HTTP/API
 
-**[SmartSwitch](https://github.com/genropy/smartswitch)** provides an elegant Pythonic dispatch system using decorators. **smpub** takes that dispatch system and automatically transforms it into CLI commands and HTTP endpoints.
+**[SmartRoute](https://github.com/genropy/smartroute)** provides an elegant Pythonic dispatch system using decorators. **smpub** takes that dispatch system and automatically transforms it into CLI commands and HTTP endpoints.
 
 ### Key Concept
 
 ```
-Pythonic dispatch (SmartSwitch) → Automatic CLI + HTTP (smpub)
+Pythonic dispatch (SmartRoute) → Automatic CLI + HTTP (smpub)
 ```
 
 **One codebase, three interfaces:**
 
 ```python
-# 1. Your library (uses SmartSwitch for elegant dispatch)
-from smartswitch import Switcher
+# 1. Your library (uses SmartRoute for elegant dispatch)
+from smartroute import Router, route
 
 class MyService:
-    api = Switcher(prefix='my_')
+    api = Router(name='my')
 
     @api
     def my_operation(self, param: str):
@@ -88,23 +88,23 @@ curl http://localhost:8000/service/operation -d '{"param": "test"}'
 # Plus OpenAPI/Swagger at /docs
 ```
 
-### Why SmartSwitch?
+### Why SmartRoute?
 
-SmartSwitch provides an **elegant Pythonic dispatch** system with:
+SmartRoute provides an **elegant Pythonic dispatch** system with:
 
 - Clean decorator syntax (`@api`)
 - Plugin chain for cross-cutting concerns (logging, validation, transactions)
 - Type-safe method routing
 - Composable behavior
 
-When you use SmartSwitch, your code is already well-structured for dispatch. smpub simply transforms that dispatch into multiple interfaces.
+When you use SmartRoute, your code is already well-structured for dispatch. smpub simply transforms that dispatch into multiple interfaces.
 
 **Learn more**: See complete examples at [smartpublisher-examples](https://github.com/genropy/smartpublisher-examples) including Demo Shop (e-commerce system with database operations, custom plugins, and full documentation).
 
 ## Features
 
 - 🎯 **Publisher Pattern** - Register handlers and expose them via CLI/API
-- 🔀 **SmartSwitch Integration** - Rule-based function dispatch
+- 🔀 **SmartRoute Integration** - Instance-scoped routing and dispatch
 - 💻 **CLI Generation** - Automatic command-line interface
 - ✅ **Pydantic Validation** - Automatic type validation and conversion
 - 🎨 **Interactive Mode** - Optional Textual TUI for parameter prompting
@@ -125,19 +125,19 @@ pip install smartpublisher[http]
 ### Workflow
 
 ```
-1. Write your code with SmartSwitch → 2. Create Publisher → 3. Get CLI + HTTP API
+1. Write your code with SmartRoute → 2. Create Publisher → 3. Get CLI + HTTP API
 ```
 
-### 1. Write Your Service (with SmartSwitch)
+### 1. Write Your Service (with SmartRoute)
 
 ```python
 from typing import Literal
-from smartswitch import Switcher
+from smartroute import Router, route, RoutedClass
 
 class AccountHandler:
     # If using __slots__, include 'smpublisher'
     __slots__ = ('accounts', 'smpublisher')
-    api = Switcher(prefix='account_')
+    api = Router(name='account')
 
     def __init__(self):
         self.accounts = {}
@@ -159,7 +159,7 @@ class AccountHandler:
 class MailHandler:
     # If using __slots__, include 'smpublisher'
     __slots__ = ('account_handler', 'messages', 'smpublisher')
-    api = Switcher(prefix='mail_')
+    api = Router(name='mail')
 
     def __init__(self, account_handler):
         self.account_handler = account_handler
@@ -261,17 +261,17 @@ Topics covered:
 
 ### Real-World Example
 
-For a complete example showing SmartSwitch plugins, database adapters, and advanced patterns, see:
+For a complete example showing SmartRoute plugins, database adapters, and advanced patterns, see:
 
 **[Demo Shop Documentation](https://github.com/genropy/smartpublisher-examples)** - E-commerce library with:
 - SQL database system with adapters (SQLite/PostgreSQL)
 - Table managers with CRUD operations
-- SmartSwitch plugin chain (Logging, Pydantic, DbOp)
+- SmartRoute plugin chain (Logging, Pydantic, DbOp)
 - Transaction management
 - Format negotiation (JSON, Markdown, HTML)
 - Published in ~20 lines with smpub
 
-The demo shows how a well-structured SmartSwitch application becomes trivial to publish.
+The demo shows how a well-structured SmartRoute application becomes trivial to publish.
 
 ## Part of Genro-Libs Family
 
@@ -279,13 +279,13 @@ smpub is part of the [Genro-Libs toolkit](https://github.com/softwell/genro-libs
 
 **Related Projects:**
 
-- [smartswitch](https://github.com/genropy/smartswitch) - Rule-based function dispatch (used by smpub)
+- [smartroute](https://github.com/genropy/smartroute) - Instance-scoped routing engine (used by smpub)
 - [gtext](https://github.com/genropy/gtext) - Text transformation tool
 
 ## Requirements
 
 - Python 3.10+
-- smartswitch >= 0.1.0
+- smartroute >= 0.11.0
 - pydantic >= 2.0
 - textual >= 0.41.0 (optional, for interactive mode)
 

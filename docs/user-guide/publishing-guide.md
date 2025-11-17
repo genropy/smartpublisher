@@ -72,7 +72,7 @@ Create handlers that wrap your library's functionality. Place them in a `handler
 ```python
 """Handler that exposes calculator functions via smpub."""
 
-from smartswitch import Switcher
+from smartroute import Router, route
 from smartpublisher import PublishedClass
 
 # Import your existing library
@@ -89,8 +89,8 @@ class CalculatorHandler(PublishedClass):
     # Define slots (optional, but recommended for memory efficiency)
     __slots__ = ('history',)
 
-    # Create API with prefix to avoid naming conflicts
-    api = Switcher(prefix='calc_')
+    # Create API router
+    api = Router(name='calc')
 
     def __init__(self):
         """Initialize handler with empty history."""
@@ -276,9 +276,9 @@ mycalc calc history
 
 ### Required Elements
 
-1. **Switcher API definition**:
+1. **Router API definition**:
    ```python
-   api = Switcher(prefix='handler_')
+   api = Router(name='handler')
    ```
 
 2. **Type-hinted methods**:
@@ -335,7 +335,7 @@ mycalc calc history
 
 ```python
 class DataHandler(PublishedClass):
-    api = Switcher(prefix='data_')
+    api = Router(name='data')
 
     def __init__(self):
         self.processor = DataProcessor()  # Your library
@@ -353,7 +353,7 @@ class DataHandler(PublishedClass):
 
 ```python
 class DataHandler(PublishedClass):
-    api = Switcher(prefix='data_')
+    api = Router(name='data')
 
     @api
     def data_process(self, input_file: str, format: str = 'json'):
@@ -480,7 +480,7 @@ def initialize(self):
 ```python
 class DatabaseHandler(PublishedClass):
     __slots__ = ('db', 'connection')
-    api = Switcher(prefix='db_')
+    api = Router(name='db')
 
     def __init__(self, connection_string: str):
         self.connection_string = connection_string
@@ -505,7 +505,7 @@ class DatabaseHandler(PublishedClass):
 ```python
 class FileHandler(PublishedClass):
     __slots__ = ('current_dir',)
-    api = Switcher(prefix='file_')
+    api = Router(name='file')
 
     def __init__(self):
         self.current_dir = os.getcwd()
@@ -528,7 +528,7 @@ class FileHandler(PublishedClass):
 ```python
 class APIHandler(PublishedClass):
     __slots__ = ('client', 'api_key')
-    api = Switcher(prefix='api_')
+    api = Router(name='api')
 
     def __init__(self, api_key: str):
         self.api_key = api_key
@@ -554,7 +554,7 @@ Here's a complete working example that wraps a hypothetical data processing libr
 ```python
 """Handler for data processing operations."""
 
-from smartswitch import Switcher
+from smartroute import Router, route
 from smartpublisher import PublishedClass
 from mylib.processor import DataProcessor
 from mylib.validators import SchemaValidator
@@ -568,7 +568,7 @@ class DataHandler(PublishedClass):
     """
 
     __slots__ = ('processor', 'validator', 'cache')
-    api = Switcher(prefix='data_')
+    api = Router(name='data')
 
     def __init__(self, cache_size: int = 100):
         """

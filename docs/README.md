@@ -69,11 +69,11 @@ class MyApp(Publisher):
 
 ```python
 from smartpublisher import PublishedClass
-from smartswitch import Switcher
+from smartroute import Router, route
 
 class MyHandler(PublishedClass):
     __slots__ = ('data',)  # Your slots
-    api = Switcher(prefix='my_')
+    api = Router(name='my')
 
     @api
     def my_method(self, param: int) -> str:
