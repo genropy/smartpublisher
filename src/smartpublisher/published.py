@@ -95,11 +95,10 @@ class PublishedClass(RoutedClass):
             "handler_class": handler_instance.__class__.__name__
         }
 
-        # TODO: Get methods from SmartRoute API once describe() is implemented
-        # See: https://github.com/genropy/smartroute/issues/1
+        # Get methods from SmartRoute API
         if hasattr(handler_instance, 'api'):
-            # Temporary workaround: access private _entries
-            result["methods"] = list(handler_instance.api._entries.keys()) if hasattr(handler_instance.api, '_entries') else []
+            schema = handler_instance.api.describe()
+            result["methods"] = list(schema.get("methods", {}).keys())
         else:
             result["methods"] = []
 
