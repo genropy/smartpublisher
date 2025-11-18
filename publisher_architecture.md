@@ -1,4 +1,7 @@
-# Publisher Architecture
+# SmartPublisher Architecture
+
+**Version**: 0.3.0 (with autocompletion system)
+**Last Updated**: 2025-11-18
 
 ## Core Principle: Publisher is a Published App
 
@@ -14,24 +17,23 @@ Publisher is the **primary module** for CLI entry. The flow is:
 2. Pip invokes `smartpublisher.publisher:main` (module-level function)
 3. `main()` creates `Publisher()` instance
 4. Calls `publisher.run_cli()` (instance method)
-5. Which delegates to CLI channel: `self.chan_registry['cli'].run(sys.argv[1:])`
+5. Which delegates to CLI channel: `cli_channel.run(args)`
 
-**Key point**: `cli.py` is an **auxiliary module** (the CLI channel implementation), not the entry point.
+**Key point**: `cli_channel.py` is an **auxiliary module** (the CLI channel implementation), not the entry point.
 
-### Reasoning
-1. Any app has a task and commands to execute it
-2. Publisher is an app with the task of publishing apps
-3. Publisher receives commands to manage apps and channels
-4. → Publisher is a published app
+### Entry Point Code
 
-## Special Status: The Root App (`.self`)
+```python
+# publisher.py
+def main():
+    """Entry point for smpub command."""
+    publisher = Publisher()
+    publisher.run_cli()
 
-Publisher is the **root app** - the implicit `.self` that doesn't need to be registered:
-
-- **Normal apps**: `smpub myapp quit` (explicit app name)
-- **Publisher**: `smpub quit` (`.self` is implicit)
-
-`.self` is the **initial discontinuity point** - the starting point of the system that contains everything else.
+# pyproject.toml
+[project.scripts]
+smpub = "smartpublisher.publisher:main"
+```
 
 ## Inheritance Structure
 
@@ -42,168 +44,438 @@ class Publisher(PublishedClass):
     It's an app like any other, but it's the root app.
     """
 
-    # Override Router to add logging plugin
-    api = Router(name='publisher').plug("logging").plug("pydantic")
+    # Inherits api = Router from PublishedClass
 ```
 
 **What Publisher inherits from PublishedClass**:
+- Router `api` with pydantic plugin
 - `_system` commands (list_handlers, get_handler_info, get_api_tree)
-- `published_instances` dictionary (will contain only `_system`)
+- `published_instances` dictionary
 - Automatic help via `api.describe()`
 - Lifecycle hooks infrastructure
-- `publish()` method (not used by Publisher, but available)
+- `publish()` method
 
 ## Initialization Pattern
 
 ```python
 def __init__(self, registry_path: Path = None, use_global: bool = False):
-    super().__init__()
+    super().__init__()  # Initialize PublishedClass
+
+    # Core registries
     self.app_registry = AppRegistry(self, registry_path=registry_path, use_global=use_global)
+
+    # Track loaded applications
+    self.applications: dict[str, PublishedClass] = {}
+
+    # Channel registry / instances
     self.chan_registry = ChanRegistry(self)
+    self.chan_registry = ChanRegistry(self)
+
+    # Publish registry handlers for CLI exposure
+    self.publish("apps", self.app_registry)
+    self.publish("chan", self.chan_registry)
 ```
 
-**Order matters**:
-1. First: `super().__init__()` initializes PublishedClass
-2. Then: initialize registries as internal attributes
+**Key changes from previous version**:
+- Uses `self.publish()` instead of `self.api.add_child()`
+- Adds handlers to both `published_instances` dict and Router hierarchy
+- Maintains `applications` dict for tracking
 
-## Delegation Pattern: Thin Facade
+## Registry Structure
 
-Publisher is a **thin facade** that only delegates to registries:
+### Paths
 
-- **app_registry**: Manages app registration, loading, unloading
-- **chan_registry**: Manages channels (CLI, HTTP, etc.)
+- **Local registry**: `.published` (file, not directory - current directory)
+- **Global registry**: `~/.smartlibs/publisher/registry.json` (home directory)
 
-Publisher does NOT contain business logic for these tasks. It only:
-1. Holds references to registries
-2. Delegates commands to registries
-3. Provides its own lifecycle methods
+Changed from previous `.smpub/` structure to align with smartlibs conventions.
 
-### Naming Consistency
-- `self.app_registry` (NOT `self.registry`)
-- `self.chan_registry`
-- Clear, explicit naming for both registries
-
-## Registry Initialization
-
-Both registries take `publisher` as first parameter and self-initialize:
+### AppRegistry
 
 ```python
-# AppRegistry
-def __init__(self, publisher, registry_path: Path = None, use_global: bool = False):
-    self._publisher = publisher
-    # ... self-initialize completely
+class AppRegistry(RoutedClass):
+    api = Router(name="apps")
 
-# ChanRegistry
-def __init__(self, publisher):
-    self._publisher = publisher
-    # ... autodiscover and create channels
+    def __init__(self, publisher, registry_path=None, use_global=False):
+        self._publisher = publisher
+        # ... auto-initialize registry
 ```
 
-**Principle**: Each object must know how to initialize, work, and cleanup itself.
+**Methods** (exposed via Router):
+- `add(name, path, module, class_name)` - Register app
+- `remove(name)` - Unregister app
+- `list()` - List registered apps
+- `getapp(name)` - Get app info
+- `load(name)` - Load app instance (internal)
+- `unload(name)` - Unload app instance (internal)
 
-## Workspace Structure
-
-Publisher uses `.smpub/` directory for persistence:
-
-- **Local registry**: `.smpub/registry.json` (current directory)
-- **Global registry**: `~/.smpub/registry.json` (home directory)
-- **No intermediate directories** (removed `~/.smartlibs/publisher/`)
-
-Simple, flat structure for both local and global registries.
-
-## Command Structure
-
-Publisher exposes commands at different levels:
-
-### Direct Publisher Commands (`.self` implicit)
-```bash
-smpub quit           # Publisher.quit() - stop all channels
-smpub serve cli      # Publisher.serve('cli') - start CLI channel
-smpub serve http     # Publisher.serve('http', port=8000) - start HTTP
-```
-
-### App Registry Commands (`.apps` namespace)
-```bash
-smpub .apps list          # app_registry.list()
-smpub .apps add myapp ... # app_registry.add(...)
-smpub .apps remove myapp  # app_registry.remove(...)
-```
-
-### Channel Registry Commands (`.chan` namespace)
-```bash
-smpub .chan list          # chan_registry.get_available_channels()
-# ... other channel management commands
-```
-
-### System Commands (inherited from PublishedClass)
-```bash
-smpub _system list_handlers     # List all handlers (should show _system only)
-smpub _system get_api_tree      # Get complete API tree
-```
-
-## Publisher Methods
-
-Publisher provides these method categories:
-
-### 1. Delegation Methods (delegate to registries)
-- `load_app(app_name)` → `app_registry.load(app_name)`
-- `unload_app(app_name)` → `app_registry.unload(app_name)`
-- `get_channel(name)` → `chan_registry.get(name)`
-
-### 2. Lifecycle Methods (Publisher's own logic)
-- `serve(channel, **kwargs)` - Start a channel server
-- `quit()` - Stop all channels and cleanup
-- (Future: `start()`, `stop()`, `restart()`)
-
-### 3. Inherited Methods (from PublishedClass)
-- `_system.list_handlers()` - Introspection
-- `_system.get_api_tree()` - API schema
-- Help via `api.describe()`
-
-## Router Configuration
-
-Publisher's Router has both pydantic and logging plugins:
+### ChanRegistry
 
 ```python
-api = Router(name='publisher').plug("logging").plug("pydantic")
+class ChanRegistry(RoutedClass):
+    api = Router(name="channels")
+
+    def __init__(self, publisher):
+        self._publisher = publisher
+        self.chan_registry = ChanRegistry(self)
+        # ... autodiscover channels
 ```
 
-- **pydantic**: Inherited from PublishedClass, for validation
-- **logging**: Added by Publisher, for operation logging
+**Autodiscovery**: Scans `channels/` directory and instantiates:
+- `CLIChannel` → registered as `'cli'`
+- `PublisherHTTP` → registered as `'http'`
 
-## Relationship with Other Components
+## Router Hierarchy
+
+The complete Router tree structure:
 
 ```
-Publisher (root app, .self)
-├── app_registry (internal attribute)
-│   └── manages: app registration, loading, unloading
-├── chan_registry (internal attribute)
-│   └── manages: channel discovery, instantiation
-└── _system (published handler, from PublishedClass)
-    └── provides: introspection commands
+Publisher.api (root)
+├── apps (AppRegistry.api)
+│   ├── add
+│   ├── remove
+│   ├── list
+│   └── getapp
+├── chan (ChanRegistry.api)
+│   └── (channel methods, TBD)
+└── _system (SystemCommands.api)
+    ├── list_handlers
+    ├── get_handler_info
+    └── get_api_tree
 ```
 
-Publisher coordinates but does not contain implementation logic.
+**Accessing via Router**:
+```python
+publisher.api.get("apps")      # Returns AppRegistry instance
+publisher.api.get("apps.list") # Returns list method
+```
+
+**Accessing via published_instances**:
+```python
+publisher.published_instances["apps"]     # AppRegistry instance
+publisher.published_instances["chan"]     # ChanRegistry instance
+publisher.published_instances["_system"]  # SystemCommands instance
+```
+
+## Channel Architecture
+
+### CLIChannel
+
+Located in `channels/cli_channel.py`:
+
+```python
+class CLIChannel(RoutedClass):
+    cli_api = Router(name="cli")
+
+    def __init__(self, publisher):
+        self.publisher = publisher
+        self.formatter = OutputFormatter()
+
+    def run(self, args: list = None):
+        """Main entry point for CLI execution."""
+        # Handle completion requests
+        if args and args[0] == '--complete':
+            self._handle_completion(args[1:])
+            return
+
+        # Handle help
+        if not args or args[0] in ['--help', '-h']:
+            self._show_general_help()
+            return
+
+        # Route commands
+        # ...
+```
+
+**Responsibilities**:
+1. Parse command-line arguments
+2. Handle completion requests (shell integration)
+3. Route commands to handlers via Router
+4. Format and display output
+5. Handle errors
+
+### Command Routing
+
+```bash
+# Direct publisher commands (implicit .self)
+smpub serve http           # → publisher.serve('http')
+smpub quit                 # → publisher.quit()
+
+# Registry commands
+smpub apps list            # → publisher.published_instances['apps'].list()
+smpub apps add myapp ...   # → publisher.published_instances['apps'].add(...)
+
+# System commands
+smpub _system list_handlers  # → publisher.published_instances['_system'].list_handlers()
+```
+
+## Autocompletion System
+
+### Overview
+
+SmartPublisher implements a **dynamic, shell-agnostic completion system** that:
+- Uses Router introspection (`api.describe()`)
+- Supports bash, zsh, fish
+- Provides hierarchical suggestions
+- Includes inline hints (parameter signatures)
+
+### Protocol
+
+```bash
+smpub --complete <shell> [cursor] <tokens...>
+```
+
+**Examples**:
+```bash
+smpub --complete bash 0 ""           # Suggest handlers
+smpub --complete bash 0 "ap"         # Partial match → "apps"
+smpub --complete bash 0 "apps" ""    # Suggest methods of apps
+smpub --complete bash 0 "apps" "add" "" # Suggest parameters
+```
+
+### Response Format
+
+JSON payload with structured suggestions:
+
+```json
+{
+  "shell": "bash",
+  "cursor": 0,
+  "current_fragment": "ap",
+  "completed_tokens": [],
+  "suggestions": [
+    {
+      "type": "handler",
+      "value": "apps",
+      "display": "apps",
+      "description": "Registry for managing Published applications...",
+      "inline_hint": ""
+    }
+  ]
+}
+```
+
+**Suggestion types**:
+- `handler` - Top-level handlers (apps, chan, _system)
+- `method` - Handler methods
+- `system` - System commands
+- `parameter` - Method parameters
+
+### Implementation
+
+#### Entry Point (CLIChannel.run)
+
+```python
+if args and args[0] == '--complete':
+    self._handle_completion(args[1:])
+    return
+```
+
+#### Completion Methods
+
+```python
+_handle_completion(completion_args)
+    → _generate_completion_payload(shell, cursor, tokens)
+        → _split_tokens(tokens) → (completed_tokens, current_fragment)
+        → _suggest_for_context(completed_tokens, fragment)
+            → Depth 0: _suggest_handlers(fragment)
+            → Depth 1: _suggest_methods(handler, fragment)
+            → Depth 1 (_system): _suggest_system_methods(fragment)
+            → Depth 2+: _suggest_parameters(handler, method, fragment)
+```
+
+#### Handler Suggestions (Depth 0)
+
+```python
+def _suggest_handlers(self, fragment: str) -> List[dict]:
+    """Suggest handler names from published_instances."""
+    instances = self.publisher.published_instances
+
+    for name, instance in instances.items():
+        if fragment and not name.lower().startswith(fragment.lower()):
+            continue
+
+        yield {
+            "type": "handler",
+            "value": name,
+            "display": name,
+            "description": instance.__class__.__doc__ or "",
+            "inline_hint": ""
+        }
+```
+
+#### Method Suggestions (Depth 1)
+
+```python
+def _suggest_methods(self, handler_name: str, fragment: str) -> List[dict]:
+    """Suggest methods for a handler using Router schema."""
+    handler = self.publisher.published_instances[handler_name]
+
+    # IMPORTANT: Use __class__.api to get blueprint schema
+    schema = handler.__class__.api.describe()
+    methods = schema.get('methods', {})
+
+    for method_name, info in methods.items():
+        if fragment and not method_name.lower().startswith(fragment.lower()):
+            continue
+
+        # Build inline hint from parameters
+        params = info.get('parameters', [])
+        inline_hint = " ".join(
+            f"<{p['name']}>" if p.get('required') else f"[{p['name']}]"
+            for p in params
+        )
+
+        yield {
+            "type": "method",
+            "value": method_name,
+            "display": method_name,
+            "description": info.get('description', ''),
+            "inline_hint": inline_hint
+        }
+```
+
+**Key**: Uses `handler.__class__.api.describe()` to get the class-level Router blueprint, not the instance-bound Router.
+
+#### Parameter Suggestions (Depth 2+)
+
+```python
+def _suggest_parameters(self, handler_name: str, method_name: str, fragment: str):
+    """Suggest parameters for a specific method."""
+    handler = self.publisher.published_instances[handler_name]
+    schema = handler.__class__.api.describe()
+    method_schema = schema['methods'][method_name]
+
+    for param in method_schema.get('parameters', []):
+        if fragment and not param['name'].lower().startswith(fragment.lower()):
+            continue
+
+        yield {
+            "type": "parameter",
+            "value": param['name'],
+            "display": param['name'],
+            "description": param.get('description') or 'parameter',
+            "inline_hint": f"<{param.get('type', 'any')}>",
+            "required": param.get('required', False)
+        }
+```
+
+### Shell Integration (Future)
+
+The completion system is designed for integration with shell scripts:
+
+**Bash** (`scripts/completion/bash.sh`):
+```bash
+_smpub_complete() {
+    local cur="${COMP_WORDS[COMP_CWORD]}"
+    local json=$(smpub --complete bash "$COMP_POINT" "${COMP_WORDS[@]:1}")
+    # Parse JSON and populate COMPREPLY
+}
+complete -F _smpub_complete smpub
+```
+
+**Zsh** (`scripts/completion/zsh.sh`):
+```zsh
+_smpub_complete() {
+    local json=$(smpub --complete zsh "$CURSOR" "${words[@]:1}")
+    # Parse JSON and use compadd
+}
+compdef _smpub_complete smpub
+```
+
+**Fish** (`scripts/completion/fish.fish`):
+```fish
+complete -c smpub -a '(smpub --complete fish (commandline -cp) (commandline -opc)[2..])'
+```
 
 ## Design Principles Summary
 
 1. **Publisher is an app** (PublishedClass), not a special meta-object
 2. **Publisher is the root app** (`.self` implicit)
-3. **Thin facade pattern** (delegates everything to registries)
-4. **Self-managing objects** (each object initializes, works, cleans up itself)
-5. **Naming consistency** (`app_registry`, `chan_registry`)
-6. **Clean separation** (Publisher coordinates, registries implement)
+3. **Thin facade pattern** (delegates to registries and channels)
+4. **Self-managing objects** (each initializes, works, cleans up itself)
+5. **Router-based dispatch** (SmartRoute handles all routing)
+6. **Dynamic introspection** (completion uses `api.describe()`)
+7. **Channel abstraction** (CLI, HTTP as transport layers)
 
-## Future Extensions
+## Component Relationships
 
-Publisher can be extended with:
-- Additional lifecycle methods (start, stop, restart)
-- Configuration management
-- Plugin system
-- Event system
-- Monitoring/metrics
+```
+Publisher (root PublishedClass)
+├── registry (AppRegistry, RoutedClass)
+│   ├── Router api with methods
+│   └── manages: registration, loading, unloading
+├── chan_registry (ChanRegistry, RoutedClass)
+│   ├── Router api with methods
+│   ├── channels: {cli: CLIChannel, http: HTTPChannel}
+│   └── manages: channel discovery, instantiation
+├── _system (SystemCommands, from PublishedClass)
+│   └── introspection methods
+└── applications: dict[str, PublishedClass]
+    └── runtime cache of loaded apps
+
+Channels (transport layer)
+├── CLIChannel (cli_channel.py)
+│   ├── run(args) - main entry point
+│   ├── _handle_completion() - shell completion
+│   └── _handle_business_command() - dispatch to handlers
+└── HTTPChannel (http_channel.py)
+    └── run(port, **kwargs) - FastAPI server (future)
+```
+
+## Testing the System
+
+### Manual CLI Testing
+
+```bash
+# Basic command
+smpub apps list
+
+# Completion testing (bypass shell)
+python -m smartpublisher.publisher --complete bash 0 ""
+python -m smartpublisher.publisher --complete bash 0 "ap"
+python -m smartpublisher.publisher --complete bash 0 "apps" ""
+python -m smartpublisher.publisher --complete bash 0 "apps" "add" ""
+```
+
+### Expected Completion Results
+
+| Command | Expected Output |
+|---------|----------------|
+| `--complete bash 0 ""` | Handlers: `_system`, `apps`, `chan` |
+| `--complete bash 0 "ap"` | Partial match: `apps` |
+| `--complete bash 0 "apps" ""` | Methods: `add`, `remove`, `list`, `getapp` |
+| `--complete bash 0 "apps" "add" ""` | Params: `name`, `path`, `module`, `class_name` |
+
+## Future Enhancements
+
+### Completion System
+- [ ] Shell installation scripts (`scripts/completion/`)
+- [ ] `smpub install-completion <shell>` command
+- [ ] Fuzzy matching support
+- [ ] Caching for performance
+
+### Publisher Features
+- [ ] `start()`, `stop()`, `restart()` lifecycle methods
+- [ ] Configuration file support
+- [ ] Plugin system
+- [ ] Event system for app/channel lifecycle
+- [ ] Monitoring/metrics
+
+### Channel Features
+- [ ] HTTP channel with FastAPI
+- [ ] WebSocket channel
+- [ ] gRPC channel
+- [ ] Message queue channels
 
 All following the same principles:
 - Delegate to specialized components
 - Keep Publisher thin
 - Maintain clean separation of concerns
+- Use Router introspection for dynamic behavior
+
+---
+
+**Maintained by**: Genropy Team
+**License**: MIT
+**Part of**: Genro-Libs toolkit

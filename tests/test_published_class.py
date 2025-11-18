@@ -20,7 +20,7 @@ class TestPublishedClass:
         assert hasattr(app, 'api')
 
         # Should have _system auto-published
-        assert '_system' in app.published_instances
+        assert '_system' in app.list_handlers()
 
         # Should have _publisher reference (None initially)
         assert app._publisher is None
@@ -52,8 +52,8 @@ class TestPublishedClass:
         assert "greet" in app.result["methods"]
 
         # Check handler is tracked
-        assert "test" in app.published_instances
-        assert isinstance(app.published_instances["test"], TestHandler)
+        assert "test" in app.list_handlers()
+        assert isinstance(app.get_handler("test"), TestHandler)
 
     def test_publish_multiple_handlers(self):
         """Should publish multiple handlers."""
@@ -82,9 +82,9 @@ class TestPublishedClass:
         app = TestApp()
 
         # Both handlers should be tracked
-        assert len(app.published_instances) == 3  # h1, h2, _system
-        assert "h1" in app.published_instances
-        assert "h2" in app.published_instances
+        assert set(app.list_handlers()) == {"_system", "h1", "h2"}
+        assert isinstance(app.get_handler("h1"), Handler1)
+        assert isinstance(app.get_handler("h2"), Handler2)
 
     def test_publish_handler_without_router(self):
         """Should handle publishing handler without router."""
@@ -152,7 +152,7 @@ class TestPublishedClass:
         app = TestApp()
 
         # _system handler should be auto-published
-        assert "_system" in app.published_instances
+        assert app.get_handler("_system") is not None
 
     def test_set_publisher_reference(self):
         """Should allow setting publisher reference."""

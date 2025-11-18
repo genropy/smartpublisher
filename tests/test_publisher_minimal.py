@@ -14,18 +14,18 @@ class TestPublisherMinimal:
         registry_file = tmp_path / "apps.json"
         publisher = Publisher(registry_path=registry_file)
 
-        assert publisher.registry is not None
-        assert publisher.channels is not None
-        assert 'cli' in publisher.channels
-        assert 'http' in publisher.channels
-        assert publisher.loaded_apps == {}
+        assert publisher.app_registry is not None
+        assert publisher.chan_registry.channels is not None
+        assert 'cli' in publisher.chan_registry.channels
+        assert 'http' in publisher.chan_registry.channels
+        assert publisher.app_registry.applications == {}
 
     def test_list_empty_apps(self, tmp_path):
         """Should list zero apps initially."""
         registry_file = tmp_path / "apps.json"
         publisher = Publisher(registry_path=registry_file)
 
-        result = publisher.registry.list()
+        result = publisher.app_registry.list()
 
         assert result['total'] == 0
         assert result['apps'] == {}
@@ -40,7 +40,7 @@ class TestPublisherMinimal:
         app_dir.mkdir()
 
         # Add app
-        result = publisher.registry.add(
+        result = publisher.app_registry.add(
             name='testapp',
             path=str(app_dir),
             module='main',
@@ -51,7 +51,7 @@ class TestPublisherMinimal:
         assert result['name'] == 'testapp'
 
         # Verify it's in the list
-        apps = publisher.registry.list()
+        apps = publisher.app_registry.list()
         assert apps['total'] == 1
         assert 'testapp' in apps['apps']
 
@@ -65,19 +65,19 @@ class TestPublisherMinimal:
         app_dir.mkdir()
 
         # Add app
-        publisher.registry.add(
+        publisher.app_registry.add(
             name='testapp',
             path=str(app_dir)
         )
 
         # Remove app
-        result = publisher.registry.remove(name='testapp')
+        result = publisher.app_registry.remove(name='testapp')
 
         assert result['status'] == 'removed'
         assert result['name'] == 'testapp'
 
         # Verify it's gone
-        apps = publisher.registry.list()
+        apps = publisher.app_registry.list()
         assert apps['total'] == 0
         assert 'testapp' not in apps['apps']
 
@@ -92,19 +92,19 @@ class TestPublisherMinimal:
         (tmp_path / "app3").mkdir()
 
         # Add multiple apps
-        publisher.registry.add(name='app1', path=str(tmp_path / "app1"))
-        publisher.registry.add(name='app2', path=str(tmp_path / "app2"))
-        publisher.registry.add(name='app3', path=str(tmp_path / "app3"))
+        publisher.app_registry.add(name='app1', path=str(tmp_path / "app1"))
+        publisher.app_registry.add(name='app2', path=str(tmp_path / "app2"))
+        publisher.app_registry.add(name='app3', path=str(tmp_path / "app3"))
 
         # Verify count
-        apps = publisher.registry.list()
+        apps = publisher.app_registry.list()
         assert apps['total'] == 3
 
         # Remove one
-        publisher.registry.remove(name='app2')
+        publisher.app_registry.remove(name='app2')
 
         # Verify count
-        apps = publisher.registry.list()
+        apps = publisher.app_registry.list()
         assert apps['total'] == 2
         assert 'app1' in apps['apps']
         assert 'app2' not in apps['apps']

@@ -53,7 +53,7 @@ class PublisherHTTP:
         return {
             "status": "healthy",
             "app": self.publisher.__class__.__name__,
-            "handlers": len(self.publisher.published_instances)
+            "handlers": len(self.publisher.list_handlers())
         }
 
     @route("http_api")
@@ -80,9 +80,9 @@ class PublisherHTTP:
         }
 
         # Build paths from handlers
-        for handler_name, instance in self.publisher.published_instances.items():
-            if hasattr(instance.__class__, 'api'):
-                handler_schema = instance.__class__.api.describe()
+        for handler_name, handler in self.publisher.get_handlers().items():
+            if hasattr(handler, 'api'):
+                handler_schema = handler.api.describe()
 
                 # Convert each method to OpenAPI path
                 for method_name, method_info in handler_schema.get('methods', {}).items():
@@ -129,8 +129,8 @@ class PublisherHTTP:
             dict: Metrics data
         """
         return {
-            "total_handlers": len(self.publisher.published_instances),
-            "handlers": list(self.publisher.published_instances.keys())
+            "total_handlers": len(self.publisher.list_handlers()),
+            "handlers": self.publisher.list_handlers()
         }
 
     def create_fastapi_app(self):
@@ -167,11 +167,11 @@ class PublisherHTTP:
             return self.http_api['metrics']()
 
         # Register business endpoints from publisher.api
-        for handler_name, instance in self.publisher.published_instances.items():
-            if not hasattr(instance.__class__, 'api'):
+        for handler_name, handler in self.publisher.get_handlers().items():
+            if not hasattr(handler, 'api'):
                 continue
 
-            handler_api = instance.__class__.api
+            handler_api = handler.api
 
             for method_name in handler_api.entries():
                 path = f"/{handler_name}/{method_name}"
@@ -182,7 +182,7 @@ class PublisherHTTP:
                 # Create endpoint
                 def make_endpoint(handler_inst, method_nm):
                     async def endpoint():
-                        method_callable = handler_inst.__class__.api.get(method_nm, use_smartasync=True)
+                        method_callable = handler_inst.api.get(method_nm, use_smartasync=True)
                         result = method_callable(handler_inst)
                         # If coroutine, await it
                         if hasattr(result, '__await__'):

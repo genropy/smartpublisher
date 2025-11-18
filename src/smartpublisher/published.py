@@ -43,8 +43,8 @@ class PublishedClass(RoutedClass):
         # Note: plugins are applied at class level on the Router descriptor
         # self.api is now a BoundRouter instance with plugins already configured
 
-        # Track handlers published by this app
-        self.published_instances = {}
+        # Manual handlers without router
+        self._manual_handlers: dict[str, object] = {}
 
         # Reference to Publisher (set when registered)
         self._publisher = None
@@ -60,9 +60,6 @@ class PublishedClass(RoutedClass):
         """Initialize system commands for app introspection."""
         # System commands provide info about THIS app
         system = SystemCommands(self)
-
-        # Publish system handler like any other handler
-        self.published_instances['_system'] = system
 
         # Add system handler as child using SmartRoute's add_child()
         if hasattr(system, 'api'):
@@ -80,13 +77,20 @@ class PublishedClass(RoutedClass):
         Returns:
             dict: Publication result
         """
-        # Save instance
-        self.published_instances[name] = handler_instance
-
         # Add handler as child using SmartRoute's add_child()
         # This creates hierarchical structure with instance binding
-        if hasattr(handler_instance, 'api'):
-            self.api.add_child(handler_instance, name=name)
+        handler_router = getattr(handler_instance, 'api', None)
+        if handler_router is not None:
+            try:
+                self.api.add_child(handler_router, name=name)
+            except TypeError as exc:
+                # Ignore mocks/objects without real Router descriptors
+                if "Router descriptor" not in str(exc):
+                    raise
+            else:
+                self._manual_handlers.pop(name, None)
+        else:
+            self._manual_handlers[name] = handler_instance
 
         # Return structured result
         result = {
@@ -96,11 +100,17 @@ class PublishedClass(RoutedClass):
         }
 
         # Get methods from SmartRoute API
-        if hasattr(handler_instance, 'api'):
-            schema = handler_instance.api.describe()
-            result["methods"] = list(schema.get("methods", {}).keys())
-        else:
-            result["methods"] = []
+        methods = []
+        handler_api = getattr(handler_instance, 'api', None)
+        if handler_api and hasattr(handler_api, 'describe'):
+            try:
+                schema = handler_api.describe()
+            except TypeError:
+                schema = None
+            if isinstance(schema, dict):
+                methods = list(schema.get("methods", {}).keys())
+
+        result["methods"] = methods
 
         return result
 
@@ -126,7 +136,7 @@ class PublishedClass(RoutedClass):
         """
         return {
             "message": f"{self.__class__.__name__} registered successfully",
-            "handlers": list(self.published_instances.keys())
+            "handlers": self.list_handlers()
         }
 
     def smpub_on_remove(self):
@@ -141,3 +151,37 @@ class PublishedClass(RoutedClass):
         return {
             "message": f"{self.__class__.__name__} unregistered"
         }
+
+    def handler_members(self) -> dict:
+        """Return runtime SmartRoute members."""
+        members = dict(self.api.members().get('children', {}))
+        for name, instance in self._manual_handlers.items():
+            members[name] = {
+                "name": name,
+                "router": None,
+                "instance": instance,
+                "handlers": {},
+                "children": {}
+            }
+        return members
+
+    def get_handler(self, name: str):
+        """Return handler instance by name."""
+        return self.handler_members().get(name, {}).get('instance')
+
+    def list_handlers(self) -> list:
+        """Return list of handler names."""
+        return list(self.handler_members().keys())
+
+    def get_handlers(self) -> dict:
+        """Return mapping name -> handler instance."""
+        return {
+            name: meta.get('instance')
+            for name, meta in self.handler_members().items()
+            if meta.get('instance') is not None
+        }
+
+    @property
+    def published_instances(self) -> dict:
+        """Backward-compatible view of published handlers."""
+        return self.get_handlers()

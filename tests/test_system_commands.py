@@ -154,5 +154,6 @@ class TestSystemCommands:
         app = TestApp()
 
         # _system should be auto-published
-        assert '_system' in app.published_instances
-        assert isinstance(app.published_instances['_system'], SystemCommands)
+        handler = app.get_handler('_system')
+        assert handler is not None
+        assert isinstance(handler, SystemCommands)

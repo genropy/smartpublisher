@@ -14,24 +14,24 @@ class TestPublisher:
         """Should initialize with default local registry."""
         pub = Publisher()
 
-        assert pub.registry is not None
-        assert pub.channels is not None
-        assert "cli" in pub.channels
-        assert "http" in pub.channels
-        assert pub.loaded_apps == {}
+        assert pub.app_registry is not None
+        assert pub.chan_registry.channels is not None
+        assert "cli" in pub.chan_registry.channels
+        assert "http" in pub.chan_registry.channels
+        assert pub.app_registry.applications == {}
 
     def test_init_with_custom_registry(self, tmp_path):
         """Should initialize with custom registry path."""
         registry_path = tmp_path / "custom_registry"
         pub = Publisher(registry_path=registry_path)
 
-        assert pub.registry is not None
+        assert pub.app_registry is not None
 
     def test_init_with_global_registry(self):
         """Should initialize with global registry."""
         pub = Publisher(use_global=True)
 
-        assert pub.registry is not None
+        assert pub.app_registry is not None
 
     def test_get_channel(self):
         """Should get channel by name."""
@@ -101,14 +101,14 @@ class TestPublisher:
         mock_app.smpub_on_add = Mock(return_value={"status": "ok"})
 
         # Mock registry.load
-        pub.registry.load = Mock(return_value=mock_app)
+        pub.app_registry.load = Mock(return_value=mock_app)
 
         # Load app
         result = pub.load_app("test_app")
 
         # Verify
         assert result is mock_app
-        assert "test_app" in pub.loaded_apps
+        assert "test_app" in pub.app_registry.applications
         mock_app._set_publisher.assert_called_once_with(pub)
         mock_app.smpub_on_add.assert_called_once()
 
@@ -118,17 +118,17 @@ class TestPublisher:
 
         # Pre-load an app
         mock_app = Mock()
-        pub.loaded_apps["test_app"] = mock_app
+        pub.app_registry.applications["test_app"] = mock_app
 
         # Mock registry to ensure it's not called
-        pub.registry.load = Mock()
+        pub.app_registry.load = Mock()
 
         # Load app again
         result = pub.load_app("test_app")
 
         # Should return cached instance
         assert result is mock_app
-        pub.registry.load.assert_not_called()
+        pub.app_registry.load.assert_not_called()
 
     def test_load_app_without_hooks(self):
         """Should handle app without lifecycle hooks."""
@@ -137,13 +137,13 @@ class TestPublisher:
         # Create app without hooks
         mock_app = Mock(spec=[])  # No methods
 
-        pub.registry.load = Mock(return_value=mock_app)
+        pub.app_registry.load = Mock(return_value=mock_app)
 
         # Should not raise error
         result = pub.load_app("test_app")
 
         assert result is mock_app
-        assert "test_app" in pub.loaded_apps
+        assert "test_app" in pub.app_registry.applications
 
     def test_unload_app_success(self):
         """Should unload app and call lifecycle hook."""
@@ -152,7 +152,7 @@ class TestPublisher:
         # Create mock app with hook
         mock_app = Mock()
         mock_app.smpub_on_remove = Mock(return_value={"status": "ok"})
-        pub.loaded_apps["test_app"] = mock_app
+        pub.app_registry.applications["test_app"] = mock_app
 
         # Unload
         result = pub.unload_app("test_app")
@@ -160,7 +160,7 @@ class TestPublisher:
         # Verify
         assert result["status"] == "unloaded"
         assert result["app"] == "test_app"
-        assert "test_app" not in pub.loaded_apps
+        assert "test_app" not in pub.app_registry.applications
         mock_app.smpub_on_remove.assert_called_once()
 
     def test_unload_app_without_hook(self):
@@ -169,13 +169,13 @@ class TestPublisher:
 
         # App without hook
         mock_app = Mock(spec=[])
-        pub.loaded_apps["test_app"] = mock_app
+        pub.app_registry.applications["test_app"] = mock_app
 
         # Should not raise error
         result = pub.unload_app("test_app")
 
         assert result["status"] == "unloaded"
-        assert "test_app" not in pub.loaded_apps
+        assert "test_app" not in pub.app_registry.applications
 
     def test_get_publisher_singleton(self):
         """Should return singleton instance."""

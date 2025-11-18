@@ -41,18 +41,23 @@ class AppRegistry(RoutedClass):
             registry_path: Custom registry path (optional, for tests)
             use_global: Use global registry (~/.smpub/) instead of local
         """
+        # Backward compatibility: allow passing registry_path as first positional arg
+        if registry_path is None and isinstance(publisher, (str, Path)):
+            registry_path = Path(publisher)
+            publisher = None
+
         self._publisher = publisher
 
         # Determine registry path
         if registry_path:
             self.registry_path = registry_path
         elif use_global:
-            self.registry_path = Path.home() / ".smpub" / "registry.json"
+            self.registry_path = Path.home() / ".smartlibs" / "publisher" / "registry.json"
         else:
-            self.registry_path = Path.cwd() / ".smpub" / "registry.json"
+            self.registry_path = Path.cwd() / ".published"
 
         self._data = self._load()
-        self._loaded_apps = {}  # Cache of loaded app instances
+        self.applications = {}  # Runtime registry of loaded app instances
 
     def _load(self) -> dict:
         """Load registry from JSON file."""
@@ -187,8 +192,8 @@ class AppRegistry(RoutedClass):
             ValueError: If app not found
         """
         # Check if already loaded
-        if name in self._loaded_apps:
-            return self._loaded_apps[name]
+        if name in self.applications:
+            return self.applications[name]
 
         if name not in self._data["apps"]:
             available = list(self._data["apps"].keys())
@@ -224,12 +229,13 @@ class AppRegistry(RoutedClass):
         # Instantiate
         app = app_class()
 
-        # Call lifecycle hook if exists
-        if hasattr(app, 'smpub_on_add'):
+        # Call lifecycle hook if exists (once)
+        if hasattr(app, 'smpub_on_add') and not getattr(app, '_smpub_on_add_called', False):
             app.smpub_on_add()
+            setattr(app, '_smpub_on_add_called', True)
 
         # Cache and return
-        self._loaded_apps[name] = app
+        self.applications[name] = app
         return app
 
     def unload(self, name: str) -> dict:
@@ -242,19 +248,20 @@ class AppRegistry(RoutedClass):
         Returns:
             dict: Status result
         """
-        if name not in self._loaded_apps:
+        if name not in self.applications:
             return {
                 "error": f"App '{name}' not loaded"
             }
 
-        app = self._loaded_apps[name]
+        app = self.applications[name]
 
-        # Call lifecycle hook if exists
-        if hasattr(app, 'smpub_on_remove'):
+        # Call lifecycle hook if exists (once)
+        if hasattr(app, 'smpub_on_remove') and not getattr(app, '_smpub_on_remove_called', False):
             app.smpub_on_remove()
+            setattr(app, '_smpub_on_remove_called', True)
 
         # Remove from cache
-        del self._loaded_apps[name]
+        del self.applications[name]
 
         return {
             "status": "unloaded",
@@ -265,14 +272,14 @@ class AppRegistry(RoutedClass):
 # Factory functions for registry discovery
 
 def get_local_registry() -> AppRegistry:
-    """Get local registry (.smpub/registry.json in current directory)."""
-    registry_path = Path.cwd() / ".smpub" / "registry.json"
+    """Get local registry (.published in current directory)."""
+    registry_path = Path.cwd() / ".published"
     return AppRegistry(registry_path)
 
 
 def get_global_registry() -> AppRegistry:
-    """Get global registry (~/.smpub/registry.json)."""
-    registry_path = Path.home() / ".smpub" / "registry.json"
+    """Get global registry (~/.smartlibs/publisher/registry.json)."""
+    registry_path = Path.home() / ".smartlibs" / "publisher" / "registry.json"
     return AppRegistry(registry_path)
 
 
