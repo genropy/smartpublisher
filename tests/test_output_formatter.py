@@ -39,11 +39,7 @@ class TestOutputFormatter:
 
     def test_format_json_nested(self):
         """Should format nested structures."""
-        data = {
-            "app": "test",
-            "handlers": ["h1", "h2"],
-            "config": {"key": "value"}
-        }
+        data = {"app": "test", "handlers": ["h1", "h2"], "config": {"key": "value"}}
         result = OutputFormatter.format_json(data)
 
         assert isinstance(result, str)
@@ -54,14 +50,8 @@ class TestOutputFormatter:
         """Should format handler list as table."""
         data = {
             "handlers": {
-                "test": {
-                    "class": "TestHandler",
-                    "methods": ["greet", "farewell"]
-                },
-                "admin": {
-                    "class": "AdminHandler",
-                    "methods": ["login"]
-                }
+                "test": {"class": "TestHandler", "methods": ["greet", "farewell"]},
+                "admin": {"class": "AdminHandler", "methods": ["login"]},
             }
         }
         result = OutputFormatter.format_table(data)
@@ -90,10 +80,7 @@ class TestOutputFormatter:
 
     def test_format_error_with_dict(self):
         """Should format error dictionary."""
-        error_data = {
-            "error": "Handler not found",
-            "available": ["h1", "h2"]
-        }
+        error_data = {"error": "Handler not found", "available": ["h1", "h2"]}
         result = OutputFormatter.format_error(error_data)
 
         assert isinstance(result, str)
@@ -124,16 +111,14 @@ class TestOutputFormatter:
             "methods": {
                 "greet": {
                     "description": "Greet someone",
-                    "parameters": [
-                        {"name": "name", "type": "str", "required": True}
-                    ]
+                    "parameters": [{"name": "name", "type": "str", "required": True}],
                 },
                 "farewell": {
                     "description": "Say goodbye",
                     "parameters": [
                         {"name": "name", "type": "str", "required": False, "default": "World"}
-                    ]
-                }
+                    ],
+                },
             }
         }
         result = OutputFormatter.format_help(api_schema)

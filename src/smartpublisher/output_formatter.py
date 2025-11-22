@@ -50,13 +50,13 @@ class OutputFormatter:
         if not isinstance(data, dict):
             return str(data)
 
-        if 'handlers' in data:
+        if "handlers" in data:
             # Format handler list
             lines = ["Handlers:"]
-            for name, info in data['handlers'].items():
+            for name, info in data["handlers"].items():
                 lines.append(f"  {name:20} {info.get('class', 'Unknown')}")
-                if info.get('methods'):
-                    for method in info['methods']:
+                if info.get("methods"):
+                    for method in info["methods"]:
                         lines.append(f"    - {method}")
             return "\n".join(lines)
 
@@ -74,9 +74,9 @@ class OutputFormatter:
         Returns:
             str: Formatted error
         """
-        if isinstance(error_data, dict) and 'error' in error_data:
+        if isinstance(error_data, dict) and "error" in error_data:
             msg = f"Error: {error_data['error']}"
-            if 'available' in error_data:
+            if "available" in error_data:
                 msg += f"\nAvailable: {', '.join(error_data['available'])}"
             return msg
 
@@ -95,20 +95,20 @@ class OutputFormatter:
         """
         lines = []
 
-        if 'methods' in api_schema:
+        if "methods" in api_schema:
             lines.append("Available commands:")
-            for method_name, method_info in sorted(api_schema['methods'].items()):
+            for method_name, method_info in sorted(api_schema["methods"].items()):
                 # Build parameter string
                 params = []
-                for param in method_info.get('parameters', []):
-                    if param.get('required'):
+                for param in method_info.get("parameters", []):
+                    if param.get("required"):
                         params.append(f"<{param['name']}:{param.get('type', 'any')}>")
                     else:
-                        default = param.get('default', 'None')
+                        default = param.get("default", "None")
                         params.append(f"[{param['name']}:{param.get('type', 'any')}={default}]")
 
                 param_str = " ".join(params)
-                desc = method_info.get('description', 'No description')
+                desc = method_info.get("description", "No description")
 
                 lines.append(f"  {method_name:20} {param_str:30} {desc}")
 

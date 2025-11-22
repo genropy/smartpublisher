@@ -27,16 +27,16 @@ def test_published_class():
     app = ShopApp()
 
     # Check root Switcher
-    assert hasattr(app, 'api'), "App should have 'api' Switcher"
+    assert hasattr(app, "api"), "App should have 'api' Switcher"
     print("✓ App has root Switcher")
 
     # Check published_instances
-    assert hasattr(app, 'published_instances'), "App should have published_instances"
+    assert hasattr(app, "published_instances"), "App should have published_instances"
     print("✓ App has published_instances")
 
     # Check handlers
-    assert 'shop' in app.published_instances, "Shop handler should be published"
-    assert '_system' in app.published_instances, "System handler should be auto-published"
+    assert "shop" in app.published_instances, "Shop handler should be published"
+    assert "_system" in app.published_instances, "System handler should be auto-published"
     print(f"✓ Published handlers: {list(app.published_instances.keys())}")
 
     print()
@@ -54,13 +54,13 @@ def test_smartswitch_api(app):
     print(f"✓ Root API: {schema.get('name')}")
 
     # Check children
-    children = schema.get('children', {})
+    children = schema.get("children", {})
     print(f"✓ Children: {list(children.keys())}")
 
     # Get shop handler schema
-    shop_handler = app.published_instances['shop']
+    shop_handler = app.published_instances["shop"]
     shop_schema = shop_handler.__class__.api.describe()
-    shop_methods = list(shop_schema.get('methods', {}).keys())
+    shop_methods = list(shop_schema.get("methods", {}).keys())
     print(f"✓ Shop methods: {shop_methods}")
 
     print()
@@ -75,25 +75,25 @@ def test_business_logic(shop_handler):
 
     # Test list products
     result = shop_handler.list()
-    assert 'products' in result, "List should return products"
-    assert result['total'] == 3, "Should have 3 products"
+    assert "products" in result, "List should return products"
+    assert result["total"] == 3, "Should have 3 products"
     print(f"✓ list() returned {result['total']} products")
 
     # Test get product
     result = shop_handler.get(product_id=1)
-    assert 'product' in result, "Get should return product"
-    assert result['product']['name'] == "Laptop Pro"
+    assert "product" in result, "Get should return product"
+    assert result["product"]["name"] == "Laptop Pro"
     print(f"✓ get(1) returned: {result['product']['name']}")
 
     # Test search
     result = shop_handler.search(query="Mouse")
-    assert result['matches'] == 1, "Should find 1 match"
+    assert result["matches"] == 1, "Should find 1 match"
     print(f"✓ search('Mouse') found {result['matches']} matches")
 
     # Test update stock
     result = shop_handler.update_stock(product_id=1, quantity=10)
-    assert result['status'] == 'updated'
-    assert result['new_stock'] == 10
+    assert result["status"] == "updated"
+    assert result["new_stock"] == 10
     print(f"✓ update_stock(1, 10) updated stock to {result['new_stock']}")
 
     print()
@@ -105,25 +105,25 @@ def test_system_commands(app):
     print("Test 4: System Commands")
     print("=" * 70)
 
-    system = app.published_instances['_system']
+    system = app.published_instances["_system"]
 
     # Test list_handlers
     result = system.list_handlers()
-    assert 'handlers' in result
-    assert 'shop' in result['handlers']
+    assert "handlers" in result
+    assert "shop" in result["handlers"]
     print(f"✓ list_handlers() found {result['total']} handlers")
 
     # Test get_handler_info
-    result = system.get_handler_info(handler_name='shop')
-    assert result['name'] == 'shop'
-    assert 'api_schema' in result
-    print(f"✓ get_handler_info('shop') returned schema")
+    result = system.get_handler_info(handler_name="shop")
+    assert result["name"] == "shop"
+    assert "api_schema" in result
+    print("✓ get_handler_info('shop') returned schema")
 
     # Test get_api_tree
     result = system.get_api_tree()
-    assert 'name' in result
-    assert result['name'] == 'root'
-    print(f"✓ get_api_tree() returned root schema")
+    assert "name" in result
+    assert result["name"] == "root"
+    print("✓ get_api_tree() returned root schema")
 
     print()
 
@@ -135,20 +135,20 @@ def test_switcher_access(app):
     print("=" * 70)
 
     # Access via SmartSwitch
-    shop_handler = app.published_instances['shop']
+    shop_handler = app.published_instances["shop"]
 
     # Get method via Switcher
-    list_method = shop_handler.__class__.api.get('list')
+    list_method = shop_handler.__class__.api.get("list")
     result = list_method(shop_handler)
 
-    assert 'products' in result
+    assert "products" in result
     print(f"✓ Accessed 'list' via Switcher: {result['total']} products")
 
     # Get with params
-    get_method = shop_handler.__class__.api.get('get')
+    get_method = shop_handler.__class__.api.get("get")
     result = get_method(shop_handler, product_id=2)
 
-    assert 'product' in result
+    assert "product" in result
     print(f"✓ Accessed 'get' via Switcher: {result['product']['name']}")
 
     print()
@@ -200,6 +200,7 @@ def main():
     except Exception as e:
         print(f"\n❌ ERROR: {e}")
         import traceback
+
         traceback.print_exc()
         return 1
 

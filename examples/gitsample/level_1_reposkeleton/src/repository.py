@@ -32,7 +32,7 @@ class Repository:
 
     # Define Switcher for method dispatch
     api = Switcher()
-    api.plug('logging', flags='print,enabled,time')
+    api.plug("logging", flags="print,enabled,time")
 
     def __init__(self, name: str, url: str):
         """
@@ -98,7 +98,7 @@ class Repository:
         return {
             "name": self.name,
             "url": self.url,
-            "note": "This is skeleton data - not real API response"
+            "note": "This is skeleton data - not real API response",
         }
 
     def __repr__(self):
@@ -106,12 +106,9 @@ class Repository:
         return f"Repository(name='{self.name}', url='{self.url}')"
 
 
-if __name__ == '__main__':
+if __name__ == "__main__":
     # Simple example of Repository usage
-    repo = Repository(
-        name="smartpublisher",
-        url="https://github.com/genropy/smartpublisher.git"
-    )
+    repo = Repository(name="smartpublisher", url="https://github.com/genropy/smartpublisher.git")
 
     print("Testing Repository methods...\n")
 

@@ -9,7 +9,7 @@ This shows:
 5. Two-level command structure
 """
 
-from smartroute.core import Router, RoutedClass, route
+from smartroute.core import Router
 
 # Try relative imports first (when used as package)
 # Fall back to absolute imports (when run directly)
@@ -27,6 +27,7 @@ except ImportError:
 # BUSINESS LOGIC - Channel Agnostic
 # ============================================================================
 
+
 class ShopHandler:
     """
     Shop handler - business logic only.
@@ -42,7 +43,7 @@ class ShopHandler:
         self.products = [
             {"id": 1, "name": "Laptop Pro", "price": 1299.99, "stock": 5},
             {"id": 2, "name": "Wireless Mouse", "price": 29.99, "stock": 50},
-            {"id": 3, "name": "USB-C Cable", "price": 12.99, "stock": 100}
+            {"id": 3, "name": "USB-C Cable", "price": 12.99, "stock": 100},
         ]
 
     @api
@@ -52,10 +53,7 @@ class ShopHandler:
 
         Returns structured data - NO print!
         """
-        return {
-            "total": len(self.products),
-            "products": self.products
-        }
+        return {"total": len(self.products), "products": self.products}
 
     @api
     def get(self, product_id: int) -> dict:
@@ -85,16 +83,9 @@ class ShopHandler:
         Returns:
             dict: Matching products
         """
-        matches = [
-            p for p in self.products
-            if query.lower() in p["name"].lower()
-        ]
+        matches = [p for p in self.products if query.lower() in p["name"].lower()]
 
-        return {
-            "query": query,
-            "matches": len(matches),
-            "products": matches
-        }
+        return {"query": query, "matches": len(matches), "products": matches}
 
     @api
     def update_stock(self, product_id: int, quantity: int) -> dict:
@@ -116,7 +107,7 @@ class ShopHandler:
                     "status": "updated",
                     "product_id": product_id,
                     "old_stock": old_stock,
-                    "new_stock": quantity
+                    "new_stock": quantity,
                 }
 
         return {"error": f"Product {product_id} not found"}
@@ -125,6 +116,7 @@ class ShopHandler:
 # ============================================================================
 # APP - Inherits from PublishedClass
 # ============================================================================
+
 
 class ShopApp(PublishedClass):
     """
@@ -156,8 +148,8 @@ class ShopApp(PublishedClass):
                 "",
                 "# Then visit:",
                 "http://localhost:8000/docs  (Swagger UI)",
-                "http://localhost:8000/_http/health  (Health check)"
-            ]
+                "http://localhost:8000/_http/health  (Health check)",
+            ],
         }
 
 
@@ -165,11 +157,12 @@ class ShopApp(PublishedClass):
 # USAGE EXAMPLES
 # ============================================================================
 
+
 def example_cli():
     """Example: CLI usage."""
-    print("\n" + "="*70)
+    print("\n" + "=" * 70)
     print("EXAMPLE 1: CLI Channel")
-    print("="*70 + "\n")
+    print("=" * 70 + "\n")
 
     # Create app
     app = ShopApp()
@@ -179,7 +172,7 @@ def example_cli():
 
     print("1. List products:")
     print("   $ smpub run shopapp shop list")
-    cli.run(['shop', 'list'])
+    cli.run(["shop", "list"])
 
     print("\n2. Get product by ID:")
     print("   $ smpub run shopapp shop get --product_id 1")
@@ -188,18 +181,18 @@ def example_cli():
 
     print("\n3. CLI utility command - help:")
     print("   $ smpub run shopapp cli help")
-    cli.run(['cli', 'help'])
+    cli.run(["cli", "help"])
 
     print("\n4. CLI utility command - version:")
     print("   $ smpub run shopapp cli version")
-    cli.run(['cli', 'version'])
+    cli.run(["cli", "version"])
 
 
 def example_http():
     """Example: HTTP usage."""
-    print("\n" + "="*70)
+    print("\n" + "=" * 70)
     print("EXAMPLE 2: HTTP Channel")
-    print("="*70 + "\n")
+    print("=" * 70 + "\n")
 
     # Create app
     app = ShopApp()
@@ -225,11 +218,11 @@ def example_http():
 
     print("\nTest HTTP utility commands:")
     print("\n- Health check:")
-    health = http.http_api['health']()
+    health = http.http_api["health"]()
     print(f"  {health}")
 
     print("\n- Metrics:")
-    metrics = http.http_api['metrics']()
+    metrics = http.http_api["metrics"]()
     print(f"  {metrics}")
 
     print("\nTo start server:")
@@ -238,9 +231,9 @@ def example_http():
 
 def example_two_level_commands():
     """Example: Two-level command structure."""
-    print("\n" + "="*70)
+    print("\n" + "=" * 70)
     print("EXAMPLE 3: Two-Level Command Structure")
-    print("="*70 + "\n")
+    print("=" * 70 + "\n")
 
     app = ShopApp()
 
@@ -250,7 +243,7 @@ def example_two_level_commands():
 
     print("Handler: ShopHandler")
     print("  Methods in shop.api:")
-    shop_api = app.published_instances['shop'].__class__.api
+    shop_api = app.published_instances["shop"].__class__.api
     for method_name in shop_api.entries():
         print(f"    - {method_name}()")
 
@@ -258,7 +251,7 @@ def example_two_level_commands():
     print("  - CLI:  smpub run shopapp shop list")
     print("  - HTTP: GET /shop/list")
     print("  - SOAP: <future>")
-    print("  - WS:   {\"handler\": \"shop\", \"method\": \"list\"}")
+    print('  - WS:   {"handler": "shop", "method": "list"}')
 
     print("\n\nLEVEL 2: Channel Commands (transport-specific)")
     print("-" * 50)
@@ -278,9 +271,9 @@ def example_two_level_commands():
 
 def example_single_source_of_truth():
     """Example: Single source of truth via Switcher."""
-    print("\n" + "="*70)
+    print("\n" + "=" * 70)
     print("EXAMPLE 4: Single Source of Truth")
-    print("="*70 + "\n")
+    print("=" * 70 + "\n")
 
     app = ShopApp()
 
@@ -293,11 +286,11 @@ def example_single_source_of_truth():
 
     print("\n2. Auto-generated OpenAPI:")
     http = PublisherHTTP(app)
-    openapi_spec = http.http_api['openapi_schema']()
+    openapi_spec = http.http_api["openapi_schema"]()
     print(f"   Paths: {list(openapi_spec.get('paths', {}).keys())}")
 
     print("\n3. Auto-generated system info:")
-    system_info = app.api['_system'].list_handlers()
+    system_info = app.api["_system"].list_handlers()
     print(f"   Handlers: {list(system_info['handlers'].keys())}")
 
     print("\nNO MANUAL DUPLICATION!")
@@ -311,9 +304,9 @@ def example_single_source_of_truth():
 # ============================================================================
 
 if __name__ == "__main__":
-    print("\n" + "="*70)
+    print("\n" + "=" * 70)
     print("SmartPublisher - New Architecture Examples")
-    print("="*70)
+    print("=" * 70)
 
     # Run examples
     example_cli()
@@ -321,10 +314,11 @@ if __name__ == "__main__":
     example_two_level_commands()
     example_single_source_of_truth()
 
-    print("\n" + "="*70)
+    print("\n" + "=" * 70)
     print("Key Takeaways")
-    print("="*70)
-    print("""
+    print("=" * 70)
+    print(
+        """
 1. Publisher is MINIMAL (~80 lines) - orchestration only
 2. Business logic in handlers - NO print, NO transport code
 3. Each channel is separate class with own Switcher
@@ -333,4 +327,5 @@ if __name__ == "__main__":
    - Channel: channel.xxx_api (transport-specific)
 5. Single source of truth: Switcher for introspection
 6. Easy to extend: Add SOAP/WebSocket/gRPC channels
-""")
+"""
+    )

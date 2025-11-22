@@ -32,13 +32,14 @@ from pathlib import Path
 # Add src_new to path
 sys.path.insert(0, str(Path(__file__).parent))
 
-from smartroute.core import Router, RoutedClass, route
+from smartroute.core import Router
 from published import PublishedClass
 
 
 # ============================================================================
 # Level 4: Table handlers (products, customers)
 # ============================================================================
+
 
 class ProductTableHandler:
     """Handler for product table operations."""
@@ -49,17 +50,13 @@ class ProductTableHandler:
         self.products = [
             {"id": 1, "name": "Laptop Pro", "price": 1299.99, "stock": 5},
             {"id": 2, "name": "Wireless Mouse", "price": 29.99, "stock": 50},
-            {"id": 3, "name": "USB-C Cable", "price": 12.99, "stock": 100}
+            {"id": 3, "name": "USB-C Cable", "price": 12.99, "stock": 100},
         ]
 
     @api
     def list(self) -> dict:
         """List all products."""
-        return {
-            "table": "product",
-            "rows": self.products,
-            "count": len(self.products)
-        }
+        return {"table": "product", "rows": self.products, "count": len(self.products)}
 
     @api
     def get(self, id: int) -> dict:
@@ -86,17 +83,13 @@ class CustomerTableHandler:
     def __init__(self):
         self.customers = [
             {"id": 1, "name": "John Doe", "email": "john@example.com"},
-            {"id": 2, "name": "Jane Smith", "email": "jane@example.com"}
+            {"id": 2, "name": "Jane Smith", "email": "jane@example.com"},
         ]
 
     @api
     def list(self) -> dict:
         """List all customers."""
-        return {
-            "table": "customer",
-            "rows": self.customers,
-            "count": len(self.customers)
-        }
+        return {"table": "customer", "rows": self.customers, "count": len(self.customers)}
 
     @api
     def get(self, id: int) -> dict:
@@ -110,6 +103,7 @@ class CustomerTableHandler:
 # ============================================================================
 # Level 3: Tables handler (contains product, customer)
 # ============================================================================
+
 
 class TablesHandler:
     """Handler for database tables."""
@@ -130,6 +124,7 @@ class TablesHandler:
 # Level 2: DB handler (contains tables + query command)
 # ============================================================================
 
+
 class DBHandler:
     """Handler for database operations."""
 
@@ -145,16 +140,13 @@ class DBHandler:
     @api
     def query(self, sql: str) -> dict:
         """Execute raw SQL query (demo)."""
-        return {
-            "sql": sql,
-            "result": "Query executed successfully (demo)",
-            "rows_affected": 0
-        }
+        return {"sql": sql, "result": "Query executed successfully (demo)", "rows_affected": 0}
 
 
 # ============================================================================
 # Level 2: Inventory handler (sibling of db)
 # ============================================================================
+
 
 class InventoryHandler:
     """Handler for inventory operations."""
@@ -162,11 +154,7 @@ class InventoryHandler:
     api = Router(name="inventory")
 
     def __init__(self):
-        self.stock = {
-            1: 5,
-            2: 50,
-            3: 100
-        }
+        self.stock = {1: 5, 2: 50, 3: 100}
 
     @api
     def check(self, product_id: int) -> dict:
@@ -175,13 +163,14 @@ class InventoryHandler:
         return {
             "product_id": product_id,
             "stock": stock,
-            "status": "in_stock" if stock > 0 else "out_of_stock"
+            "status": "in_stock" if stock > 0 else "out_of_stock",
         }
 
 
 # ============================================================================
 # Level 1: Shop handler (root of business logic)
 # ============================================================================
+
 
 class ShopHandler:
     """Main shop handler with hierarchical structure."""
@@ -202,6 +191,7 @@ class ShopHandler:
 # App: PublishedClass
 # ============================================================================
 
+
 class MyShop(PublishedClass):
     """Shop app with hierarchical handler structure."""
 
@@ -213,6 +203,7 @@ class MyShop(PublishedClass):
 # ============================================================================
 # Demo: Test hierarchical access
 # ============================================================================
+
 
 def demo_hierarchical_access():
     """Demonstrate hierarchical path access."""
@@ -229,7 +220,7 @@ def demo_hierarchical_access():
     print("-" * 70)
 
     # Get shop handler
-    shop = app.published_instances['shop']
+    shop = app.published_instances["shop"]
 
     # Test path: shop.db.tables.product.list
     print("\n1. List products via: shop.db.tables.product.list")
@@ -287,7 +278,7 @@ def demo_hierarchical_access():
     # Test: shop.db.tables.product.list
     print("\n1. Resolve: shop.api.get('db.tables.product.list')")
     try:
-        method = shop.__class__.api.get('db.tables.product.list', use_smartasync=True)
+        method = shop.__class__.api.get("db.tables.product.list", use_smartasync=True)
         # Need to call with correct instance (product handler)
         result = method(shop.db.tables.product)
         print(f"   ✅ Success! Found {result['count']} products")
@@ -297,7 +288,7 @@ def demo_hierarchical_access():
     # Test: shop.db.tables.customer.get
     print("\n2. Resolve: shop.api.get('db.tables.customer.get')")
     try:
-        method = shop.__class__.api.get('db.tables.customer.get')
+        method = shop.__class__.api.get("db.tables.customer.get")
         result = method(shop, id=1)
         print(f"   ✅ Success! Got customer: {result['row']['name']}")
     except Exception as e:
@@ -306,16 +297,16 @@ def demo_hierarchical_access():
     # Test: shop.db.query
     print("\n3. Resolve: shop.api.get('db.query')")
     try:
-        method = shop.__class__.api.get('db.query')
+        method = shop.__class__.api.get("db.query")
         result = method(shop, sql="SELECT * FROM products")
-        print(f"   ✅ Success! Query executed")
+        print("   ✅ Success! Query executed")
     except Exception as e:
         print(f"   ❌ Failed: {e}")
 
     # Test: shop.inventory.check
     print("\n4. Resolve: shop.api.get('inventory.check')")
     try:
-        method = shop.__class__.api.get('inventory.check')
+        method = shop.__class__.api.get("inventory.check")
         result = method(shop, product_id=1)
         print(f"   ✅ Success! Stock: {result['stock']}, Status: {result['status']}")
     except Exception as e:

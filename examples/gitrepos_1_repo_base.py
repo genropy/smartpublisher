@@ -31,7 +31,7 @@ class Repository:
 
     # Step 1: Define Switcher with prefix
     # The prefix 'repo_' means: repo_get_branches → exposed as 'get_branches'
-    api = Switcher(prefix='repo_')
+    api = Switcher(prefix="repo_")
 
     def __init__(self, name: str, url: str):
         """
@@ -87,16 +87,13 @@ class Repository:
         """
         # Not implemented yet - just a stub
         print(f"    → {self.name}: Would fetch repo info")
-        return {
-            "name": self.name,
-            "url": self.url,
-            "note": "This is stub data - not real API call"
-        }
+        return {"name": self.name, "url": self.url, "note": "This is stub data - not real API call"}
 
 
 # ============================================================================
 # DEMO: Using Repository as Python Library
 # ============================================================================
+
 
 def demo_python_usage():
     """Demonstrate using Repository as a normal Python class."""
@@ -108,10 +105,7 @@ def demo_python_usage():
 
     print("📦 Creating Repository instance:")
     print("-" * 70)
-    repo = Repository(
-        name="smartpublisher",
-        url="https://github.com/genropy/smartpublisher.git"
-    )
+    repo = Repository(name="smartpublisher", url="https://github.com/genropy/smartpublisher.git")
     print(f"Repository: {repo.name}")
     print(f"URL: {repo.url}")
     print()
@@ -142,13 +136,13 @@ def demo_python_usage():
     print(f"Methods: {len(description['methods'])}")
     print()
 
-    for method_name, method_info in description['methods'].items():
-        params = method_info.get('params', [])
-        param_str = ", ".join([p['name'] for p in params if p['name'] != 'self'])
+    for method_name, method_info in description["methods"].items():
+        params = method_info.get("params", [])
+        param_str = ", ".join([p["name"] for p in params if p["name"] != "self"])
         print(f"  • {method_name}({param_str})")
-        if method_info.get('doc'):
+        if method_info.get("doc"):
             # Show first line of docstring
-            doc_line = method_info['doc'].split('\n')[0].strip()
+            doc_line = method_info["doc"].split("\n")[0].strip()
             print(f"    {doc_line}")
 
     print()
@@ -168,5 +162,5 @@ def demo_python_usage():
     print()
 
 
-if __name__ == '__main__':
+if __name__ == "__main__":
     demo_python_usage()

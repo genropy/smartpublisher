@@ -7,4 +7,4 @@ Each channel is a separate class with its own Router for channel-specific comman
 from .cli_channel import CLIChannel
 from .http_channel import PublisherHTTP
 
-__all__ = ['CLIChannel', 'PublisherHTTP']
+__all__ = ["CLIChannel", "PublisherHTTP"]

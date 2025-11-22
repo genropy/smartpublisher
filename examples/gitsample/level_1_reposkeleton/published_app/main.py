@@ -24,7 +24,7 @@ import sys
 from pathlib import Path
 
 # Add src directory to path
-sys.path.insert(0, str(Path(__file__).parent.parent / 'src'))
+sys.path.insert(0, str(Path(__file__).parent.parent / "src"))
 
 from smartpublisher import Publisher
 from repository import Repository
@@ -50,13 +50,12 @@ class RepoApp(Publisher):
         # Create a Repository instance
         # (In a real app, you might load config or take CLI args)
         repo = Repository(
-            name="smartpublisher",
-            url="https://github.com/genropy/smartpublisher.git"
+            name="smartpublisher", url="https://github.com/genropy/smartpublisher.git"
         )
 
         # Publish it!
         # This single line exposes all @api methods via CLI and HTTP
-        self.publish('repo', repo)
+        self.publish("repo", repo)
 
 
 def main():
@@ -87,5 +86,5 @@ def main():
     app.run()
 
 
-if __name__ == '__main__':
+if __name__ == "__main__":
     main()

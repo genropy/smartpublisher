@@ -14,7 +14,7 @@ from io import StringIO
 from contextlib import redirect_stdout
 
 # Add src directory to path
-sys.path.insert(0, str(Path(__file__).parent.parent / 'src'))
+sys.path.insert(0, str(Path(__file__).parent.parent / "src"))
 
 from smartswitch import Switcher
 
@@ -28,13 +28,15 @@ class TestImplementedConfigAPI(unittest.TestCase):
         class TestClass:
             api = Switcher()
             # Default is before=True, after=False
-            api.plug('logging', flags='print,enabled,after')
+            api.plug("logging", flags="print,enabled,after")
 
             @api
-            def method_a(self): return "A"
+            def method_a(self):
+                return "A"
 
             @api
-            def method_b(self): return "B"
+            def method_b(self):
+                return "B"
 
         obj = TestClass()
         output = StringIO()
@@ -57,10 +59,11 @@ class TestImplementedConfigAPI(unittest.TestCase):
         class TestClass:
             api = Switcher()
             # No enabled flag - should be disabled
-            api.plug('logging', flags='print')
+            api.plug("logging", flags="print")
 
             @api
-            def method_a(self): return "A"
+            def method_a(self):
+                return "A"
 
         obj = TestClass()
         output = StringIO()
@@ -78,21 +81,23 @@ class TestImplementedConfigAPI(unittest.TestCase):
 
         class TestClass:
             api = Switcher()
-            api.plug('logging',
-                flags='print,enabled',
-                method_config={
-                    'method_b': 'enabled:off'  # Disable for method_b
-                }
+            api.plug(
+                "logging",
+                flags="print,enabled",
+                method_config={"method_b": "enabled:off"},  # Disable for method_b
             )
 
             @api
-            def method_a(self): return "A"
+            def method_a(self):
+                return "A"
 
             @api
-            def method_b(self): return "B"
+            def method_b(self):
+                return "B"
 
             @api
-            def method_c(self): return "C"
+            def method_c(self):
+                return "C"
 
         obj = TestClass()
         output = StringIO()
@@ -114,21 +119,23 @@ class TestImplementedConfigAPI(unittest.TestCase):
 
         class TestClass:
             api = Switcher()
-            api.plug('logging',
-                flags='print,enabled',
-                method_config={
-                    'method_a,method_b': 'enabled:off'  # Disable both
-                }
+            api.plug(
+                "logging",
+                flags="print,enabled",
+                method_config={"method_a,method_b": "enabled:off"},  # Disable both
             )
 
             @api
-            def method_a(self): return "A"
+            def method_a(self):
+                return "A"
 
             @api
-            def method_b(self): return "B"
+            def method_b(self):
+                return "B"
 
             @api
-            def method_c(self): return "C"
+            def method_c(self):
+                return "C"
 
         obj = TestClass()
         output = StringIO()
@@ -149,22 +156,26 @@ class TestImplementedConfigAPI(unittest.TestCase):
 
         class TestClass:
             api = Switcher()
-            api.plug('logging',
-                flags='print,enabled,after',  # Global: before + after
+            api.plug(
+                "logging",
+                flags="print,enabled,after",  # Global: before + after
                 method_config={
-                    'method_a': 'before:off,after,time',  # Only after + time
-                    'method_b': 'before,after:off'        # Only before
-                }
+                    "method_a": "before:off,after,time",  # Only after + time
+                    "method_b": "before,after:off",  # Only before
+                },
             )
 
             @api
-            def method_a(self): return "A"
+            def method_a(self):
+                return "A"
 
             @api
-            def method_b(self): return "B"
+            def method_b(self):
+                return "B"
 
             @api
-            def normal(self): return "N"
+            def normal(self):
+                return "N"
 
         obj = TestClass()
         output = StringIO()
@@ -180,8 +191,8 @@ class TestImplementedConfigAPI(unittest.TestCase):
         self.assertNotIn("→ method_a", result)
         self.assertIn("← method_a", result)
         # Check for timing format (has 's)' somewhere in line with method_a)
-        lines_with_a = [l for l in result.split('\n') if 'method_a' in l]
-        self.assertTrue(any('s)' in l for l in lines_with_a))
+        lines_with_a = [l for l in result.split("\n") if "method_a" in l]
+        self.assertTrue(any("s)" in l for l in lines_with_a))
 
         # method_b: has before, no after
         self.assertIn("→ method_b", result)
@@ -196,29 +207,33 @@ class TestImplementedConfigAPI(unittest.TestCase):
 
         class TestClass:
             api = Switcher()
-            api.plug('logging',
-                flags='print,enabled,after',  # Global: enabled with after
+            api.plug(
+                "logging",
+                flags="print,enabled,after",  # Global: enabled with after
                 method_config={
-                    'debug': 'after:off,before,time',  # Override: before + time only
-                    'silent': 'enabled:off'            # Disable completely
-                }
+                    "debug": "after:off,before,time",  # Override: before + time only
+                    "silent": "enabled:off",  # Disable completely
+                },
             )
 
             @api
-            def normal(self): return "normal"
+            def normal(self):
+                return "normal"
 
             @api
-            def debug(self): return "debug"
+            def debug(self):
+                return "debug"
 
             @api
-            def silent(self): return "silent"
+            def silent(self):
+                return "silent"
 
         obj = TestClass()
         output = StringIO()
 
         with redirect_stdout(output):
             TestClass.api("normal")(obj)  # Should have after
-            TestClass.api("debug")(obj)   # Should have before + time only
+            TestClass.api("debug")(obj)  # Should have before + time only
             TestClass.api("silent")(obj)  # Should NOT log
 
         result = output.getvalue()
@@ -234,7 +249,7 @@ class TestImplementedConfigAPI(unittest.TestCase):
         self.assertNotIn("silent", result)
 
 
-if __name__ == '__main__':
+if __name__ == "__main__":
     print("=" * 70)
     print("IMPLEMENTED API TESTS - smartswitch v0.10.0+")
     print("=" * 70)

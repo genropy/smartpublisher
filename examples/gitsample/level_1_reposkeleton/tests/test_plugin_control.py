@@ -14,7 +14,7 @@ from io import StringIO
 from contextlib import redirect_stdout
 
 # Add src directory to path
-sys.path.insert(0, str(Path(__file__).parent.parent / 'src'))
+sys.path.insert(0, str(Path(__file__).parent.parent / "src"))
 
 from repository import Repository
 
@@ -96,22 +96,16 @@ class TestPluginRuntimeControl(unittest.TestCase):
     def test_check_plugin_enabled_status(self):
         """Test is_plugin_enabled returns correct status."""
         # Initially enabled (default)
-        self.assertTrue(
-            Repository.api.is_plugin_enabled(self.repo, "branches", "logging")
-        )
+        self.assertTrue(Repository.api.is_plugin_enabled(self.repo, "branches", "logging"))
 
         # After disabling
         Repository.api.set_plugin_enabled(self.repo, "branches", "logging", enabled=False)
-        self.assertFalse(
-            Repository.api.is_plugin_enabled(self.repo, "branches", "logging")
-        )
+        self.assertFalse(Repository.api.is_plugin_enabled(self.repo, "branches", "logging"))
 
         # After re-enabling
         Repository.api.set_plugin_enabled(self.repo, "branches", "logging", enabled=True)
-        self.assertTrue(
-            Repository.api.is_plugin_enabled(self.repo, "branches", "logging")
-        )
+        self.assertTrue(Repository.api.is_plugin_enabled(self.repo, "branches", "logging"))
 
 
-if __name__ == '__main__':
+if __name__ == "__main__":
     unittest.main()

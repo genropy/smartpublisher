@@ -49,16 +49,15 @@ class GitReposApp(Publisher):
 
         # Create repository instance
         repo = Repository(
-            name="smartpublisher",
-            url="https://github.com/genropy/smartpublisher.git"
+            name="smartpublisher", url="https://github.com/genropy/smartpublisher.git"
         )
 
         # Publish it!
         # This makes all @api methods available via CLI and HTTP
-        self.publish('repo', repo)
+        self.publish("repo", repo)
 
 
-if __name__ == '__main__':
+if __name__ == "__main__":
     print()
     print("=" * 70)
     print("GitRepos Tutorial - Step 1: Published (with stubs + logging)")

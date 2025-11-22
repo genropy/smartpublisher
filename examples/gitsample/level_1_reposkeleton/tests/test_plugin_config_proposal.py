@@ -14,7 +14,7 @@ from io import StringIO
 from contextlib import redirect_stdout
 
 # Add src directory to path
-sys.path.insert(0, str(Path(__file__).parent.parent / 'src'))
+sys.path.insert(0, str(Path(__file__).parent.parent / "src"))
 
 from smartswitch import Switcher
 
@@ -28,13 +28,15 @@ class TestProposedConfigAPI(unittest.TestCase):
         class TestClass:
             api = Switcher()
             # Proposed: 'disabled' flag in mode string
-            api.plug('logging', mode='disabled,print')
+            api.plug("logging", mode="disabled,print")
 
             @api
-            def method_a(self): return "A"
+            def method_a(self):
+                return "A"
 
             @api
-            def method_b(self): return "B"
+            def method_b(self):
+                return "B"
 
         obj = TestClass()
         output = StringIO()
@@ -64,19 +66,25 @@ class TestProposedConfigAPI(unittest.TestCase):
         class TestClass:
             api = Switcher()
             # Proposed: dict config with '*' for default
-            api.plug('logging', config={
-                '*': 'disabled',           # Disabled by default
-                'method_a': 'enabled,print'  # Enable only for method_a
-            })
+            api.plug(
+                "logging",
+                config={
+                    "*": "disabled",  # Disabled by default
+                    "method_a": "enabled,print",  # Enable only for method_a
+                },
+            )
 
             @api
-            def method_a(self): return "A"
+            def method_a(self):
+                return "A"
 
             @api
-            def method_b(self): return "B"
+            def method_b(self):
+                return "B"
 
             @api
-            def method_c(self): return "C"
+            def method_c(self):
+                return "C"
 
         obj = TestClass()
         output = StringIO()
@@ -99,19 +107,25 @@ class TestProposedConfigAPI(unittest.TestCase):
         class TestClass:
             api = Switcher()
             # Proposed: comma-separated method names in dict key
-            api.plug('logging', config={
-                'method_a,method_b': 'enabled,print',  # Enable for a and b
-                'method_c': 'disabled'                  # Disable for c
-            })
+            api.plug(
+                "logging",
+                config={
+                    "method_a,method_b": "enabled,print",  # Enable for a and b
+                    "method_c": "disabled",  # Disable for c
+                },
+            )
 
             @api
-            def method_a(self): return "A"
+            def method_a(self):
+                return "A"
 
             @api
-            def method_b(self): return "B"
+            def method_b(self):
+                return "B"
 
             @api
-            def method_c(self): return "C"
+            def method_c(self):
+                return "C"
 
         obj = TestClass()
         output = StringIO()
@@ -133,20 +147,26 @@ class TestProposedConfigAPI(unittest.TestCase):
         class TestClass:
             api = Switcher()
             # Proposed: different mode combinations per method
-            api.plug('logging', config={
-                '*': 'enabled,print',           # Print by default
-                'timed_method': 'enabled,print,time',  # Add timing
-                'before_only': 'enabled,print,before'  # Only before call
-            })
+            api.plug(
+                "logging",
+                config={
+                    "*": "enabled,print",  # Print by default
+                    "timed_method": "enabled,print,time",  # Add timing
+                    "before_only": "enabled,print,before",  # Only before call
+                },
+            )
 
             @api
-            def normal_method(self): return "normal"
+            def normal_method(self):
+                return "normal"
 
             @api
-            def timed_method(self): return "timed"
+            def timed_method(self):
+                return "timed"
 
             @api
-            def before_only(self): return "before"
+            def before_only(self):
+                return "before"
 
         obj = TestClass()
         output = StringIO()
@@ -164,8 +184,8 @@ class TestProposedConfigAPI(unittest.TestCase):
 
         # timed_method: should have timing info
         # Note: exact format depends on LoggingPlugin implementation
-        timed_lines = [l for l in result.split('\n') if 'timed_method' in l]
-        self.assertTrue(any('s)' in l for l in timed_lines))  # Contains timing
+        timed_lines = [l for l in result.split("\n") if "timed_method" in l]
+        self.assertTrue(any("s)" in l for l in timed_lines))  # Contains timing
 
         # before_only: only before, not after
         self.assertIn("→ before_only", result)
@@ -178,18 +198,19 @@ class TestProposedConfigAPI(unittest.TestCase):
         class TestClass:
             api = Switcher()
             # Proposed: mode sets global default, config overrides
-            api.plug('logging',
-                mode='disabled,print',  # Global default: disabled
-                config={
-                    'enabled_method': 'enabled,print,time'  # Override for one method
-                }
+            api.plug(
+                "logging",
+                mode="disabled,print",  # Global default: disabled
+                config={"enabled_method": "enabled,print,time"},  # Override for one method
             )
 
             @api
-            def regular_method(self): return "regular"
+            def regular_method(self):
+                return "regular"
 
             @api
-            def enabled_method(self): return "enabled"
+            def enabled_method(self):
+                return "enabled"
 
         obj = TestClass()
         output = StringIO()
@@ -208,13 +229,11 @@ class TestProposedConfigAPI(unittest.TestCase):
 
         class TestClass:
             api = Switcher()
-            api.plug('logging', config={
-                '*': 'enabled,print',
-                'method_a': 'disabled'
-            })
+            api.plug("logging", config={"*": "enabled,print", "method_a": "disabled"})
 
             @api
-            def method_a(self): return "A"
+            def method_a(self):
+                return "A"
 
         obj1 = TestClass()
         obj2 = TestClass()
@@ -245,7 +264,7 @@ class TestProposedConfigAPI(unittest.TestCase):
         self.assertEqual(output4.getvalue(), "")
 
 
-if __name__ == '__main__':
+if __name__ == "__main__":
     # Run tests - they will fail until feature is implemented
     print("=" * 70)
     print("PROPOSED FEATURE TESTS - Expected to FAIL")

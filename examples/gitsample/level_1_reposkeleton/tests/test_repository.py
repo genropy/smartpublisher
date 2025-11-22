@@ -14,7 +14,7 @@ import unittest
 from pathlib import Path
 
 # Add src directory to path
-sys.path.insert(0, str(Path(__file__).parent.parent / 'src'))
+sys.path.insert(0, str(Path(__file__).parent.parent / "src"))
 
 from repository import Repository
 
@@ -24,10 +24,7 @@ class TestRepositorySkeleton(unittest.TestCase):
 
     def setUp(self):
         """Set up test repository instance."""
-        self.repo = Repository(
-            name="test-repo",
-            url="https://github.com/test/repo.git"
-        )
+        self.repo = Repository(name="test-repo", url="https://github.com/test/repo.git")
 
     def test_repository_creation(self):
         """Test that Repository can be instantiated."""
@@ -37,24 +34,24 @@ class TestRepositorySkeleton(unittest.TestCase):
 
     def test_switcher_exists(self):
         """Test that Repository has a Switcher API."""
-        self.assertTrue(hasattr(Repository, 'api'))
+        self.assertTrue(hasattr(Repository, "api"))
         self.assertIsNotNone(Repository.api)
 
     def test_branches_registered(self):
         """Test that branches method is registered."""
         description = Repository.api.describe()
-        self.assertIn('methods', description)
-        self.assertIn('branches', description['methods'])
+        self.assertIn("methods", description)
+        self.assertIn("branches", description["methods"])
 
     def test_history_registered(self):
         """Test that history method is registered."""
         description = Repository.api.describe()
-        self.assertIn('history', description['methods'])
+        self.assertIn("history", description["methods"])
 
     def test_info_registered(self):
         """Test that info method is registered."""
         description = Repository.api.describe()
-        self.assertIn('info', description['methods'])
+        self.assertIn("info", description["methods"])
 
     def test_branches_returns_list(self):
         """Test that branches returns a list (even if empty)."""
@@ -80,30 +77,30 @@ class TestRepositorySkeleton(unittest.TestCase):
     def test_info_contains_name(self):
         """Test that info dict contains name field."""
         result = Repository.api("info")(self.repo)
-        self.assertIn('name', result)
-        self.assertEqual(result['name'], "test-repo")
+        self.assertIn("name", result)
+        self.assertEqual(result["name"], "test-repo")
 
     def test_info_contains_url(self):
         """Test that info dict contains url field."""
         result = Repository.api("info")(self.repo)
-        self.assertIn('url', result)
-        self.assertEqual(result['url'], "https://github.com/test/repo.git")
+        self.assertIn("url", result)
+        self.assertEqual(result["url"], "https://github.com/test/repo.git")
 
     def test_api_introspection_has_methods(self):
         """Test that API introspection returns method information."""
         description = Repository.api.describe()
-        methods = description.get('methods', {})
+        methods = description.get("methods", {})
         self.assertEqual(len(methods), 3)  # Should have 3 methods
 
     def test_method_names_are_concise(self):
         """Test that method names are concise and direct."""
         description = Repository.api.describe()
-        methods = description.get('methods', {})
+        methods = description.get("methods", {})
 
         # Should have these concise names
-        self.assertIn('branches', methods)
-        self.assertIn('history', methods)
-        self.assertIn('info', methods)
+        self.assertIn("branches", methods)
+        self.assertIn("history", methods)
+        self.assertIn("info", methods)
 
     def test_repr(self):
         """Test string representation of Repository."""
@@ -123,8 +120,8 @@ class TestRepositorySkeleton(unittest.TestCase):
         info1 = Repository.api("info")(repo1)
         info2 = Repository.api("info")(repo2)
 
-        self.assertEqual(info1['name'], "repo1")
-        self.assertEqual(info2['name'], "repo2")
+        self.assertEqual(info1["name"], "repo1")
+        self.assertEqual(info2["name"], "repo2")
 
 
 class TestRepositoryAPIStructure(unittest.TestCase):
@@ -138,15 +135,15 @@ class TestRepositoryAPIStructure(unittest.TestCase):
     def test_describe_has_methods_key(self):
         """Test that describe() includes methods."""
         description = Repository.api.describe()
-        self.assertIn('methods', description)
+        self.assertIn("methods", description)
 
     def test_describe_methods_is_dict(self):
         """Test that methods is a dictionary."""
         description = Repository.api.describe()
-        methods = description['methods']
+        methods = description["methods"]
         self.assertIsInstance(methods, dict)
         self.assertEqual(len(methods), 3)  # 3 methods registered
 
 
-if __name__ == '__main__':
+if __name__ == "__main__":
     unittest.main()

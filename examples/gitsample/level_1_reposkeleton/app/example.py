@@ -4,7 +4,7 @@
 import sys
 from pathlib import Path
 
-sys.path.insert(0, str(Path(__file__).parent.parent / 'src'))
+sys.path.insert(0, str(Path(__file__).parent.parent / "src"))
 
 from repository import Repository
 
@@ -16,8 +16,5 @@ class Application:
         self.repo = Repository(name=name, url=url)
 
 
-if __name__ == '__main__':
-    app = Application(
-        name="smartpublisher",
-        url="https://github.com/genropy/smartpublisher.git"
-    )
+if __name__ == "__main__":
+    app = Application(name="smartpublisher", url="https://github.com/genropy/smartpublisher.git")

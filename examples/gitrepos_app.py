@@ -33,27 +33,27 @@ from smartpublisher import Publisher
 class RepoManager:
     """Manage git repositories organized by projects."""
 
-    api = Switcher(prefix='')
+    api = Switcher(prefix="")
 
     def __init__(self, config_file: Optional[str] = None):
         """Initialize repository manager."""
         if config_file:
             self.config_file = Path(config_file)
         else:
-            self.config_file = Path.home() / '.gitrepos.json'
+            self.config_file = Path.home() / ".gitrepos.json"
         self.config = self._load_config()
 
     def _load_config(self) -> dict:
         """Load configuration from JSON file."""
         if self.config_file.exists():
-            with open(self.config_file, 'r') as f:
+            with open(self.config_file, "r") as f:
                 return json.load(f)
         return {"projects": {}}
 
     def _save_config(self):
         """Save configuration to JSON file."""
         self.config_file.parent.mkdir(parents=True, exist_ok=True)
-        with open(self.config_file, 'w') as f:
+        with open(self.config_file, "w") as f:
             json.dump(self.config, f, indent=2)
 
     # Project operations
@@ -73,16 +73,13 @@ class RepoManager:
         if name in self.config["projects"]:
             return {"success": False, "error": f"Project '{name}' already exists"}
 
-        self.config["projects"][name] = {
-            "description": description,
-            "repos": {}
-        }
+        self.config["projects"][name] = {"description": description, "repos": {}}
         self._save_config()
 
         return {
             "success": True,
             "message": f"Project '{name}' added",
-            "project": self.config["projects"][name]
+            "project": self.config["projects"][name],
         }
 
     @api
@@ -95,16 +92,11 @@ class RepoManager:
         """
         projects = []
         for name, data in self.config["projects"].items():
-            projects.append({
-                "name": name,
-                "description": data["description"],
-                "repo_count": len(data["repos"])
-            })
+            projects.append(
+                {"name": name, "description": data["description"], "repo_count": len(data["repos"])}
+            )
 
-        return {
-            "count": len(projects),
-            "projects": projects
-        }
+        return {"count": len(projects), "projects": projects}
 
     @api
     def project_info(self, name: str) -> dict:
@@ -125,7 +117,7 @@ class RepoManager:
             "success": True,
             "name": name,
             "description": project["description"],
-            "repos": project["repos"]
+            "repos": project["repos"],
         }
 
     @api
@@ -145,15 +137,14 @@ class RepoManager:
         del self.config["projects"][name]
         self._save_config()
 
-        return {
-            "success": True,
-            "message": f"Project '{name}' removed"
-        }
+        return {"success": True, "message": f"Project '{name}' removed"}
 
     # Repository operations
 
     @api
-    def repo_add(self, project: str, name: str, url: str, path: str = "", branch: str = "main") -> dict:
+    def repo_add(
+        self, project: str, name: str, url: str, path: str = "", branch: str = "main"
+    ) -> dict:
         """
         Add repository to project.
 
@@ -171,19 +162,22 @@ class RepoManager:
             return {"success": False, "error": f"Project '{project}' not found"}
 
         if name in self.config["projects"][project]["repos"]:
-            return {"success": False, "error": f"Repository '{name}' already exists in project '{project}'"}
+            return {
+                "success": False,
+                "error": f"Repository '{name}' already exists in project '{project}'",
+            }
 
         self.config["projects"][project]["repos"][name] = {
             "url": url,
             "path": path,
-            "branch": branch
+            "branch": branch,
         }
         self._save_config()
 
         return {
             "success": True,
             "message": f"Repository '{name}' added to project '{project}'",
-            "repo": self.config["projects"][project]["repos"][name]
+            "repo": self.config["projects"][project]["repos"][name],
         }
 
     @api
@@ -205,25 +199,14 @@ class RepoManager:
                 return {"success": False, "error": f"Project '{project}' not found"}
 
             for name, data in self.config["projects"][project]["repos"].items():
-                repos.append({
-                    "project": project,
-                    "name": name,
-                    **data
-                })
+                repos.append({"project": project, "name": name, **data})
         else:
             # List all repos from all projects
             for proj_name, proj_data in self.config["projects"].items():
                 for repo_name, repo_data in proj_data["repos"].items():
-                    repos.append({
-                        "project": proj_name,
-                        "name": repo_name,
-                        **repo_data
-                    })
+                    repos.append({"project": proj_name, "name": repo_name, **repo_data})
 
-        return {
-            "count": len(repos),
-            "repos": repos
-        }
+        return {"count": len(repos), "repos": repos}
 
     @api
     def repo_info(self, project: str, name: str) -> dict:
@@ -241,13 +224,16 @@ class RepoManager:
             return {"success": False, "error": f"Project '{project}' not found"}
 
         if name not in self.config["projects"][project]["repos"]:
-            return {"success": False, "error": f"Repository '{name}' not found in project '{project}'"}
+            return {
+                "success": False,
+                "error": f"Repository '{name}' not found in project '{project}'",
+            }
 
         return {
             "success": True,
             "project": project,
             "name": name,
-            **self.config["projects"][project]["repos"][name]
+            **self.config["projects"][project]["repos"][name],
         }
 
     @api
@@ -266,19 +252,25 @@ class RepoManager:
             return {"success": False, "error": f"Project '{project}' not found"}
 
         if name not in self.config["projects"][project]["repos"]:
-            return {"success": False, "error": f"Repository '{name}' not found in project '{project}'"}
+            return {
+                "success": False,
+                "error": f"Repository '{name}' not found in project '{project}'",
+            }
 
         del self.config["projects"][project]["repos"][name]
         self._save_config()
 
-        return {
-            "success": True,
-            "message": f"Repository '{name}' removed from project '{project}'"
-        }
+        return {"success": True, "message": f"Repository '{name}' removed from project '{project}'"}
 
     @api
-    def repo_update(self, project: str, name: str, url: Optional[str] = None,
-                    path: Optional[str] = None, branch: Optional[str] = None) -> dict:
+    def repo_update(
+        self,
+        project: str,
+        name: str,
+        url: Optional[str] = None,
+        path: Optional[str] = None,
+        branch: Optional[str] = None,
+    ) -> dict:
         """
         Update repository information.
 
@@ -296,7 +288,10 @@ class RepoManager:
             return {"success": False, "error": f"Project '{project}' not found"}
 
         if name not in self.config["projects"][project]["repos"]:
-            return {"success": False, "error": f"Repository '{name}' not found in project '{project}'"}
+            return {
+                "success": False,
+                "error": f"Repository '{name}' not found in project '{project}'",
+            }
 
         repo = self.config["projects"][project]["repos"][name]
 
@@ -309,11 +304,7 @@ class RepoManager:
 
         self._save_config()
 
-        return {
-            "success": True,
-            "message": f"Repository '{name}' updated",
-            "repo": repo
-        }
+        return {"success": True, "message": f"Repository '{name}' updated", "repo": repo}
 
 
 class GitReposApp(Publisher):
@@ -322,10 +313,10 @@ class GitReposApp(Publisher):
     def on_init(self):
         """Initialize and publish repository manager."""
         manager = RepoManager()
-        self.publish('project', manager)
-        self.publish('repo', manager)
+        self.publish("project", manager)
+        self.publish("repo", manager)
 
 
-if __name__ == '__main__':
+if __name__ == "__main__":
     app = GitReposApp()
     app.run()
