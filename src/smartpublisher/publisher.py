@@ -147,7 +147,8 @@ class Publisher(RoutedClass):
             autosave: Enable automatic save on mutations.
         """
         super().__init__()
-        self.api = Router(self, name="root").plug("pydantic").plug("publish")
+        # Root router for business/system commands
+        self.api = Router(self, name="api").plug("pydantic").plug("publish")
 
         self.applications: dict[str, Any] = {}
         self._metadata: dict[str, dict[str, str]] = {}
