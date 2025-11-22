@@ -53,8 +53,6 @@ Typical usage
 """
 
 from contextlib import contextmanager
-from importlib.machinery import SourceFileLoader
-from importlib.util import module_from_spec, spec_from_loader
 import json
 from pathlib import Path
 from typing import Any, Tuple
@@ -62,58 +60,7 @@ from typing import Any, Tuple
 from smartroute import Router, RoutedClass, route
 from .chan_registry import ChanRegistry
 from .smartroute_plugins import PublishPlugin  # noqa: F401 - needed for plugin registration
-
-
-class AppManager:
-    """Load and instantiate publishable applications from standalone files."""
-
-    def load(self, spec: str, *args, **kwargs) -> tuple[Any, dict[str, str]]:
-        """Load class referenced by spec and instantiate it."""
-        file_path, module_name, class_name = self._parse_spec(spec)
-        app_class = self._import_class(file_path, class_name)
-        instance = app_class(*args, **kwargs)
-        metadata = {
-            "path": str(file_path),
-            "module": module_name,
-            "class": class_name,
-        }
-        return instance, metadata
-
-    def _parse_spec(self, spec: str) -> Tuple[Path, str, str]:
-        if not spec:
-            raise ValueError("Application specification cannot be empty")
-
-        if ":" in spec:
-            path_part, class_name = spec.rsplit(":", 1)
-            class_name = class_name or "Main"
-        else:
-            path_part = spec
-            class_name = "Main"
-
-        file_path = Path(path_part).expanduser().resolve()
-        if not file_path.exists():
-            raise FileNotFoundError(f"Path does not exist: {file_path}")
-        if file_path.is_dir():
-            raise ValueError(
-                f"Application specification must reference a Python module file, got directory: {file_path}"
-            )
-
-        module_name = file_path.stem
-        return file_path, module_name, class_name
-
-    def _import_class(self, file_path: Path, class_name: str):
-        module_name = f"smpub_app_{file_path.stem}_{abs(hash(file_path))}"
-        loader = SourceFileLoader(module_name, str(file_path))
-        spec = spec_from_loader(module_name, loader)
-        if spec is None or spec.loader is None:
-            raise ImportError(f"Cannot create module spec for '{file_path}'")
-
-        module = module_from_spec(spec)
-        loader.exec_module(module)
-        try:
-            return getattr(module, class_name)
-        except AttributeError as exc:
-            raise AttributeError(f"Module '{module_name}' has no class '{class_name}'") from exc
+from .app_manager import AppManager
 
 
 class Publisher(RoutedClass):
@@ -159,11 +106,19 @@ class Publisher(RoutedClass):
             if state_path is not None
             else Path.home() / ".smartlibs" / "publisher" / "state.json"
         )
-        self.app_manager = AppManager()
+        self.app_manager = AppManager(self, autosave=autosave, state_path=state_path)
+        # Aliases for backward compatibility
+        self.applications = self.app_manager.applications
+        self._metadata = self.app_manager._metadata
+        self._state = self.app_manager._state
+        self._autosave = self.app_manager._autosave
+        self.state_path = self.app_manager.state_path
 
         self.chan_registry = ChanRegistry(self)
         # Expose channel registry as root command "/channel"
         self.api.add_child(self.chan_registry, name="/channel")
+        # Expose apps management as "/apps"
+        self.api.add_child(self.app_manager, name="/apps")
 
     @route("api", name="/serve")
     def serve(self, channel: str = "http", port: int | None = None, **options):
@@ -208,61 +163,18 @@ class Publisher(RoutedClass):
 
     @route("api", name="/add")
     def add(self, name: str, spec: str, *app_args, **app_kwargs) -> dict:
-        """
-        Instantiate and publish an application.
-
-        Args:
-            name: Registry name for the application.
-            spec: Filesystem spec in the form "/path/to/module.py[:ClassName]".
-            *app_args: Positional arguments forwarded to the app constructor.
-            **app_kwargs: Keyword arguments forwarded to the app constructor.
-        """
-        if name in self.applications:
-            raise ValueError(f"App '{name}' already registered")
-
-        if name.startswith("/"):
-            raise ValueError("App names cannot start with '/' because those are reserved commands")
-
-        app, metadata = self.app_manager.load(spec, *app_args, **app_kwargs)
-
-        self.applications[name] = app
-        self._metadata[name] = metadata
-        self._state[name] = {
-            "spec": spec,
-            "args": list(app_args),
-            "kwargs": dict(app_kwargs),
-        }
-        self.api.add_child(app, name=name)
-
-        if self._autosave:
-            self.savestate()
-
-        return {"status": "registered", "name": name, **self._metadata[name]}
+        """Proxy to AppManager.add."""
+        return self.app_manager.add(name, spec, *app_args, **app_kwargs)
 
     @route("api", name="/remove")
     def remove(self, name: str) -> dict:
-        """Unregisters a published application."""
-        if name not in self.applications:
-            return {
-                "error": "App not found",
-                "name": name,
-                "available": list(self.applications.keys()),
-            }
-
-        self.applications.pop(name)
-        self._detach_from_publisher(name)
-        self._metadata.pop(name, None)
-        self._state.pop(name, None)
-
-        if self._autosave:
-            self.savestate()
-
-        return {"status": "removed", "name": name}
+        """Proxy to AppManager.remove."""
+        return self.app_manager.remove(name)
 
     @route("api", name="/list")
     def list(self) -> dict:
         """Lists published applications."""
-        return {"total": len(self.applications), "apps": dict(self._metadata)}
+        return self.app_manager.list()
 
     @route("api", name="/getapp")
     def getapp(self, name: str) -> dict:
@@ -273,8 +185,8 @@ class Publisher(RoutedClass):
                 "name": name,
                 "available": list(self.applications.keys()),
             }
-
-        return {"name": name, **self._metadata[name]}
+        meta = self._metadata.get(name, {})
+        return {"name": name, **meta}
 
     @route("api", name="/unload_app")
     def unload_app(self, app_name: str):
@@ -284,22 +196,14 @@ class Publisher(RoutedClass):
         Args:
             app_name: Registered application name
         """
-        if app_name not in self.applications:
-            return {"error": f"App '{app_name}' not registered"}
-
-        self.remove(app_name)
-        return {"status": "unloaded", "app": app_name}
+        return self.app_manager.unload(app_name)
 
     @route("api", name="/savestate")
     def savestate(self, path: str | None = None) -> dict:
         """Persist current registry to JSON file."""
-        dest = self._resolve_state_path(path)
-        self._write_state(dest)
-        return {
-            "status": "saved",
-            "path": str(dest),
-            "total": len(self._state),
-        }
+        dest = self.app_manager._resolve_state_path(path)
+        self.app_manager._write_state(dest)
+        return {"status": "saved", "path": str(dest), "total": len(self._state)}
 
     @route("api", name="/loadstate")
     def loadstate(self, path: str | None = None, skip_missing: bool = False) -> dict:
@@ -311,43 +215,8 @@ class Publisher(RoutedClass):
             skip_missing: If true, skip entries whose spec path is missing
                 instead of failing the entire load.
         """
-        source = self._resolve_state_path(path)
-        if not source.exists():
-            return {"error": "State file not found", "path": str(source)}
-
-        try:
-            snapshot = json.loads(source.read_text())
-        except Exception as exc:
-            return {"error": f"Invalid state file: {exc}", "path": str(source)}
-
-        if "apps" not in snapshot or not isinstance(snapshot["apps"], list):
-            return {"error": "Malformed state: missing 'apps' list", "path": str(source)}
-
-        failed = []
-        with self._suspend_autosave():
-            self._clear_registry()
-            for entry in snapshot["apps"]:
-                try:
-                    name = entry["name"]
-                    spec = entry["spec"]
-                    args = entry.get("args", [])
-                    kwargs = entry.get("kwargs", {})
-                    self.add(name, spec, *args, **kwargs)
-                except Exception as exc:
-                    if skip_missing:
-                        failed.append({"entry": entry, "error": str(exc)})
-                        continue
-                    raise
-
-        if self._autosave:
-            self.savestate()
-
-        return {
-            "status": "loaded",
-            "path": str(source),
-            "total": len(self.applications),
-            "skipped": failed,
-        }
+        result = self.app_manager.loadstate(path, skip_missing=skip_missing)
+        return {"status": "loaded", **result}
 
     @route("api", name="/autosave")
     def autosave(self, enabled: bool | None = None) -> dict:
@@ -357,9 +226,7 @@ class Publisher(RoutedClass):
         Args:
             enabled: Optional flag to update autosave setting.
         """
-        if enabled is not None:
-            self._autosave = bool(enabled)
-        return {"autosave": self._autosave}
+        return self.app_manager.autosave(enabled)
 
     def load_app(self, name: str):
         """
