@@ -2,6 +2,7 @@ from __future__ import annotations
 
 """AppManager - registry for published applications."""
 
+from contextlib import contextmanager
 from importlib.machinery import SourceFileLoader
 from importlib.util import module_from_spec, spec_from_loader
 import json
@@ -106,12 +107,14 @@ class AppManager(RoutedClass):
     @route("api")
     def list(self) -> dict:
         """List registered applications."""
+        apps_dict = {name: self._metadata.get(name, {}) for name in sorted(self.applications.keys())}
         return {
             "total": len(self.applications),
             "applications": [
                 {"name": name, **self._metadata.get(name, {})}
                 for name in sorted(self.applications.keys())
             ],
+            "apps": apps_dict,
         }
 
     @route("api")
@@ -188,28 +191,49 @@ class AppManager(RoutedClass):
         """Load registry state from file."""
         source = self._resolve_state_path(path)
         if not source.exists():
-            raise FileNotFoundError(f"State file not found: {source}")
+            return {"error": "State file not found", "path": str(source)}
 
-        with open(source, "r", encoding="utf-8") as fh:
-            data = json.load(fh)
+        try:
+            data = json.loads(source.read_text())
+        except Exception as exc:
+            return {"error": f"Invalid state file: {exc}", "path": str(source)}
 
-        self._clear_registry()
-        self._autosave = bool(data.get("autosave", True))
+        if not isinstance(data, dict) or "apps" not in data or not isinstance(data["apps"], list):
+            return {"error": "Malformed state: missing 'apps' list", "path": str(source)}
 
-        for entry in data.get("apps", []):
-            name = entry.get("name")
-            spec = entry.get("spec")
-            args = entry.get("args", [])
-            kwargs = entry.get("kwargs", {})
-            try:
-                self.add(name, spec, *args, **kwargs)
-            except Exception:
-                if not skip_missing:
+        skipped = []
+        with self._suspend_autosave():
+            self._clear_registry()
+            self._autosave = bool(data.get("autosave", True))
+            for entry in data.get("apps", []):
+                try:
+                    name = entry["name"]
+                    spec = entry["spec"]
+                    args = entry.get("args", [])
+                    kwargs = entry.get("kwargs", {})
+                    self.add(name, spec, *args, **kwargs)
+                except Exception as exc:
+                    if skip_missing:
+                        skipped.append({"entry": entry, "error": str(exc)})
+                        continue
                     raise
-        return {"loaded": len(self.applications)}
+
+        if self._autosave:
+            self.savestate()
+
+        return {"loaded": len(self.applications), "skipped": skipped, "path": str(source)}
 
     def autosave(self, enabled: bool | None = None) -> dict:
         """Get/set autosave flag."""
         if enabled is not None:
             self._autosave = bool(enabled)
         return {"autosave": self._autosave}
+
+    @contextmanager
+    def _suspend_autosave(self):
+        prev = self._autosave
+        self._autosave = False
+        try:
+            yield
+        finally:
+            self._autosave = prev
