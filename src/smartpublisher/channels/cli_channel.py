@@ -194,7 +194,7 @@ class CLIChannel(BaseChannel):
         try:
             method_callable = self.publisher.api.get(method_name, use_smartasync=True)
             positional, keyword = self._split_cli_args(method_args)
-            result = method_callable(self.publisher, *positional, **keyword)
+            result = method_callable(*positional, **keyword)
             output = self.formatter.format_json(result)
             print(output)
         except ValueError as exc:

@@ -217,12 +217,13 @@ class PublisherHTTP(BaseChannel):
 
         return app
 
-    def run(self, port: int = 8000):
+    def run(self, port: int = 8000, **kwargs):
         """
         Run HTTP server.
 
         Args:
             port: Port to listen on
+            **kwargs: Additional options (ignored)
         """
         try:
             import uvicorn
