@@ -33,16 +33,3 @@ class TestPublisherMinimal:
 
         apps = publisher.app_manager.list()
         assert apps["total"] == 0
-
-    def test_singleton_get_publisher(self):
-        from smartpublisher.publisher import get_publisher
-
-        # Reset singleton for test isolation
-        import smartpublisher.publisher
-
-        smartpublisher.publisher._default_publisher = None
-
-        pub1 = get_publisher()
-        pub2 = get_publisher()
-
-        assert pub1 is pub2

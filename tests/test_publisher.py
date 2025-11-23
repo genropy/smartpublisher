@@ -58,9 +58,9 @@ class TestPublisher:
         spec = create_app()
         pub.app_manager.add("sample", spec.target)
 
-        result = pub.app_manager.unload("sample")
+        result = pub.app_manager.remove("sample")
 
-        assert result["status"] == "unloaded"
+        assert result["status"] == "removed"
         assert "sample" not in pub.applications
 
     def test_list_apps(self, create_app, publisher_factory):
@@ -72,27 +72,6 @@ class TestPublisher:
 
         assert listing["total"] == 1
         assert "sample" in listing["apps"]
-
-    def test_load_app_returns_instance(self, create_app, publisher_factory):
-        pub = publisher_factory()
-        spec = create_app()
-        pub.app_manager.add("sample", spec.target)
-
-        instance = pub.app_manager.get("sample")
-
-        assert instance is pub.applications["sample"]
-
-    def test_load_app_missing(self, publisher_factory):
-        pub = publisher_factory()
-        with pytest.raises(ValueError):
-            pub.app_manager.get("ghost")
-
-    def test_get_publisher_singleton(self):
-        from smartpublisher.publisher import get_publisher
-
-        pub1 = get_publisher()
-        pub2 = get_publisher()
-        assert pub1 is pub2
 
     def test_add_app_passes_init_arguments(self, create_app, publisher_factory):
         pub = publisher_factory()

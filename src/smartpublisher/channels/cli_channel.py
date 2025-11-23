@@ -119,10 +119,7 @@ class CLIChannel(BaseChannel):
         method_name = args[1] if len(args) > 1 else None
         method_args = args[2:]
 
-        if handler_name == "_system":
-            self._handle_system_command(method_name, method_args)
-        else:
-            self._handle_business_command(handler_name, method_name, method_args)
+        self._handle_business_command(handler_name, method_name, method_args)
 
     def _show_general_help(self):
         """Show general help from Publisher API."""
@@ -158,37 +155,6 @@ class CLIChannel(BaseChannel):
 
         # Handler not found or no API - delegate to business command handler
         self._handle_business_command(handler_name, None, [])
-
-    def _handle_system_command(self, method_name: str, method_args: list):
-        """
-        Handle _system commands.
-
-        Args:
-            method_name: System command to execute (None = show help)
-            method_args: Arguments for the command
-        """
-        if not method_name:
-            system_meta = self.publisher.api.members(channel=self.CHANNEL_CODE).get("children", {}).get("_system")
-            schema = (
-                system_meta["router"].describe(channel=self.CHANNEL_CODE) if system_meta else {}
-            )
-            output = self.formatter.format_help(schema)
-            print(output)
-            return
-
-        # Execute system command - SmartSwitch handles everything
-        try:
-            system_handler = self._get_handler("_system")
-            method_callable = system_handler.api.get(method_name, use_smartasync=True)
-            positional, keyword = self._split_cli_args(method_args)
-            # SmartSwitch returns a bound callable, so just forward parsed args
-            result = method_callable(*positional, **keyword)
-            output = self.formatter.format_json(result)
-            print(output)
-
-        except Exception as e:
-            print(f"Error: {e}")
-            sys.exit(1)
 
     def _get_root_methods(self) -> dict:
         """Return publisher root methods that start with '/'."""
@@ -300,13 +266,6 @@ class CLIChannel(BaseChannel):
 
         handler_name = completed_tokens[0]
 
-        if handler_name == "_system":
-            if depth == 1:
-                return self._suggest_system_methods(fragment)
-            if depth >= 2:
-                return self._suggest_parameters("_system", completed_tokens[1], fragment)
-            return []
-
         if handler_name.startswith("/"):
             return self._suggest_root_parameters(handler_name, fragment)
 
@@ -397,33 +356,6 @@ class CLIChannel(BaseChannel):
                     "display": method_name,
                     "description": info.get("description", ""),
                     "inline_hint": inline_hint,
-                }
-            )
-
-        return suggestions
-
-    def _suggest_system_methods(self, fragment: str) -> List[dict]:
-        """Suggest methods under the _system handler."""
-        if "_system" not in self.list_handlers():
-            return []
-
-        system_handler = self._get_handler("_system")
-        schema = system_handler.api.describe(channel=self.CHANNEL_CODE)
-        methods = schema.get("methods", {})
-        fragment_lower = fragment.lower()
-        suggestions = []
-
-        for method_name, info in methods.items():
-            if fragment and not method_name.lower().startswith(fragment_lower):
-                continue
-
-            suggestions.append(
-                {
-                    "type": "system",
-                    "value": method_name,
-                    "display": method_name,
-                    "description": info.get("description", ""),
-                    "inline_hint": "",
                 }
             )
 

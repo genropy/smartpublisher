@@ -2,11 +2,6 @@ from __future__ import annotations
 
 """Publish and orchestrate SmartRoute applications at runtime.
 
-Public API exported
--------------------
-- class ``Publisher``: coordinator and root SmartRoute handler.
-- function ``get_publisher``: singleton accessor.
-
 External dependencies
 ---------------------
 - ``smartroute`` for routing and CLI/HTTP exposure.
@@ -97,20 +92,13 @@ class Publisher(RoutedClass):
         # Root router for business/system commands
         self.api = Router(self, name="api").plug("pydantic").plug("publish")
 
-        # Autosave flag lives on the publisher
-        self._autosave = bool(autosave)
-
-        self.state_path = (
-            Path(state_path).expanduser().resolve()
-            if state_path is not None
-            else Path.home() / ".smartlibs" / "publisher" / "state.json"
-        )
+        # State management (autosave + persistence)
+        self.state_manager = StateManager(self, state_path=state_path, autosave=autosave)
+        self.state_path = self.state_manager.state_path
 
         self.app_manager = AppManager(self)
         # Aliases for backward compatibility
         self.applications = self.app_manager.applications
-        self._metadata = self.app_manager._metadata
-        self._state = self.app_manager._state
 
         self.chan_registry = ChanRegistry(self)
         # Expose channel registry as root command "channel"
@@ -148,21 +136,9 @@ class Publisher(RoutedClass):
         """
         Persist current state to JSON file.
 
-        The publisher aggregates state from managed apps and channels
-        and writes a single snapshot.
+        Delegates to StateManager for aggregation and persistence.
         """
-        dest = self._resolve_state_path(path)
-        dest.parent.mkdir(parents=True, exist_ok=True)
-
-        payload = {
-            "version": 1,
-            "autosave": self._autosave,
-            "apps": self.app_manager.snapshot(),
-            "channels": self.chan_registry.snapshot(),
-        }
-
-        dest.write_text(json.dumps(payload, indent=2))
-        return {"status": "saved", "path": str(dest), "total": len(self._state)}
+        return self.state_manager.savestate(path)
 
     @route("api")
     def loadstate(self, path: str | None = None, skip_missing: bool = False) -> dict:
@@ -174,6 +150,65 @@ class Publisher(RoutedClass):
             skip_missing: If true, skip entries whose spec path is missing
                 instead of failing the entire load.
         """
+        return self.state_manager.loadstate(path, skip_missing=skip_missing)
+
+    @route("api")
+    def autosave(self, enabled: bool | None = None) -> dict:
+        """
+        Get or set autosave mode.
+
+        Args:
+            enabled: Optional flag to update autosave setting.
+        """
+        return self.state_manager.autosave(enabled)
+
+
+
+def main():
+    """Entry point for smpub command."""
+    publisher = Publisher()
+    publisher.chan_registry.get("cli").run()
+
+
+if __name__ == "__main__":
+    main()
+
+
+class StateManager:
+    """Handle state persistence and autosave for a Publisher."""
+
+    def __init__(self, publisher: Publisher, *, state_path: Path | None = None, autosave: bool = True):
+        self.publisher = publisher
+        self.state_path = (
+            Path(state_path).expanduser().resolve()
+            if state_path is not None
+            else Path.home() / ".smartlibs" / "publisher" / "state.json"
+        )
+        self.autosave_enabled = bool(autosave)
+
+    def _resolve_state_path(self, path: str | Path | None) -> Path:
+        """Resolve a state file path relative to configured state_path."""
+        return Path(path).expanduser().resolve() if path else self.state_path
+
+    def snapshot(self) -> dict:
+        """Aggregate publisher state (apps + channels)."""
+        return {
+            "version": 1,
+            "autosave": self.autosave_enabled,
+            "apps": self.publisher.app_manager.snapshot(),
+            "channels": self.publisher.chan_registry.snapshot(),
+        }
+
+    def savestate(self, path: str | None = None) -> dict:
+        """Persist current state to disk."""
+        dest = self._resolve_state_path(path)
+        dest.parent.mkdir(parents=True, exist_ok=True)
+        payload = self.snapshot()
+        dest.write_text(json.dumps(payload, indent=2))
+        return {"status": "saved", "path": str(dest), "total": len(self.publisher.applications)}
+
+    def loadstate(self, path: str | None = None, skip_missing: bool = False) -> dict:
+        """Load state from disk and restore applications."""
         source = self._resolve_state_path(path)
         if not source.exists():
             return {"error": "State file not found", "path": str(source)}
@@ -184,54 +219,33 @@ class Publisher(RoutedClass):
             return {"error": f"Invalid state file: {exc}", "path": str(source)}
 
         if isinstance(payload, dict) and "autosave" in payload:
-            self._autosave = bool(payload.get("autosave"))
+            self.autosave_enabled = bool(payload.get("autosave"))
 
-        result = self.app_manager.restore(payload, skip_missing=skip_missing)
-        return {"status": "loaded", "path": str(source), **result}
+        apps_payload = payload.get("apps", [])
+        if not isinstance(apps_payload, list):
+            return {"error": "Malformed state: missing 'apps' list", "path": str(source)}
+        skipped = []
+        for entry in apps_payload:
+            try:
+                name = entry["name"]
+                spec = entry["spec"]
+                args = entry.get("args", [])
+                kwargs = entry.get("kwargs", {})
+                self.publisher.app_manager.add(name, spec, *args, **kwargs)
+            except Exception as exc:
+                if skip_missing:
+                    skipped.append({"entry": entry, "error": str(exc)})
+                    continue
+                raise
+        return {
+            "status": "loaded",
+            "path": str(source),
+            "loaded": len(self.publisher.applications),
+            "skipped": skipped,
+        }
 
-    @route("api")
     def autosave(self, enabled: bool | None = None) -> dict:
-        """
-        Get or set autosave mode.
-
-        Args:
-            enabled: Optional flag to update autosave setting.
-        """
-        return self.app_manager.autosave(enabled)
-
-    def _resolve_state_path(self, path: str | Path | None) -> Path:
-        """Resolve a state file path relative to configured state_path."""
-        return Path(path).expanduser().resolve() if path else self.state_path
-
-
-# # Singleton instance for convenience
-_default_publisher = None
-
-
-def get_publisher(use_global: bool = False) -> Publisher:
-    """
-    Get the default Publisher instance.
-
-    Args:
-        use_global: Use global registry
-
-    Returns:
-        Publisher instance
-    """
-    global _default_publisher
-
-    if _default_publisher is None:
-        _default_publisher = Publisher(use_global=use_global)
-
-    return _default_publisher
-
-
-# Module-level entry point for CLI
-def main():
-    """Entry point for smpub command."""
-    publisher = Publisher()
-    publisher.chan_registry.get("cli").run()
-
-
-if __name__ == "__main__":
-    main()
+        """Get or update autosave flag."""
+        if enabled is not None:
+            self.autosave_enabled = bool(enabled)
+        return {"autosave": self.autosave_enabled}
