@@ -31,6 +31,10 @@ class BaseChannel(RoutedClass):
     # ------------------------------------------------------------------
     # Handler lookup helpers
     # ------------------------------------------------------------------
+    def members(self) -> dict:
+        """Return router members filtered by this channel code."""
+        return self.publisher.api.members(channel=self.CHANNEL_CODE or None)
+
     def handler_members(self, channel: str | None = None) -> dict:
         """Return immediate child handlers metadata (optionally filtered by channel)."""
         target_channel = channel if channel is not None else self.CHANNEL_CODE or None

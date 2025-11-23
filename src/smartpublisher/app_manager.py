@@ -49,6 +49,7 @@ class AppManager(RoutedClass):
         self.api = Router(self, name="api").plug("pydantic")
         self.applications: dict[str, Any] = {}
         self.apps_restart_dict: dict[str, dict[str, Any]] = {}
+        self._app_attrs: dict[str, str] = {}
 
     def snapshot(self) -> list[dict[str, Any]]:
         """
@@ -83,6 +84,9 @@ class AppManager(RoutedClass):
         app = app_class(*app_args, **app_kwargs)
 
         self.applications[name] = app
+        attr_name = f"_app_{name.replace('/', '_')}"
+        self._app_attrs[name] = attr_name
+        setattr(self, attr_name, app)
         self.apps_restart_dict[name] = {
             "spec": spec,
             "args": list(app_args),
@@ -91,7 +95,7 @@ class AppManager(RoutedClass):
             "class": class_name,
             "path": str(file_path),
         }
-        self.api.add_child(app, name=name)
+        self.api.attach_instance(app, name=name)
 
         return {"status": "registered", "name": name, **self.apps_restart_dict[name]}
 
@@ -105,8 +109,11 @@ class AppManager(RoutedClass):
                 "available": list(self.applications.keys()),
             }
 
-        self.applications.pop(name)
-        self.api._children.pop(name, None)
+        app = self.applications.pop(name)
+        self.api.detach_instance(app)
+        attr_name = self._app_attrs.pop(name, None)
+        if attr_name and hasattr(self, attr_name):
+            delattr(self, attr_name)
         self.apps_restart_dict.pop(name, None)
 
         return {"status": "removed", "name": name}

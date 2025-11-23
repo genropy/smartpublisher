@@ -70,12 +70,12 @@ if hasattr(method, "__wrapped__"):
 
 # Check method entry in switcher
 print("\n=== Switcher entry ===")
-switcher = types_handler.__class__.dbop
+switcher = getattr(types_handler.api, "dbop", None)
 print(f"Switcher type: {type(switcher)}")
-print(f"Switcher name: {switcher.name}")
+print(f"Switcher name: {getattr(switcher, 'name', None)}")
 
 # Try to get the original function from switcher internals
-if hasattr(switcher, "_handlers"):
+if switcher and hasattr(switcher, "_handlers"):
     print("Has _handlers: True")
     if "list" in switcher._handlers:
         entry = switcher._handlers["list"]

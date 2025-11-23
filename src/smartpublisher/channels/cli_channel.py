@@ -36,7 +36,6 @@ class CLIChannel(BaseChannel):
     """
 
     CHANNEL_CODE = "CLI"
-    CHANNEL_CODE = "CLI"
 
     def __init__(self, registry):
         """
@@ -123,14 +122,18 @@ class CLIChannel(BaseChannel):
 
     def _show_general_help(self):
         """Show general help from Publisher API."""
-        tree = self.publisher.api.members()
+        members = self.members()
         methods = {}
-        # root handlers
-        for m in tree.get("handlers", {}) or {}:
-            methods[m] = {"parameters": {}}
-        # children as folders
-        for child_name in tree.get("children", {}) or {}:
-            methods[child_name] = {"parameters": {}, "description": "handler"}
+        for name, meta in (members.get("handlers") or {}).items():
+            methods[name] = {
+                "parameters": {},
+                "description": meta.get("doc") or "",
+            }
+        for name, meta in (members.get("children") or {}).items():
+            methods[name] = {
+                "parameters": {},
+                "description": meta.get("doc") or "handler",
+            }
         output = self.formatter.format_help({"methods": methods})
         print(output)
 
@@ -158,10 +161,15 @@ class CLIChannel(BaseChannel):
 
     def _get_root_methods(self) -> dict:
         """Return publisher root methods that start with '/'."""
-        tree = self.publisher.api.members()
-        methods = {name: {"parameters": {}} for name in (tree.get("handlers", {}) or {})}
-        methods.update({child: {"parameters": {}} for child in (tree.get("children", {}) or {})})
-        return {name: info for name, info in methods.items() if name.startswith("/")}
+        members = self.members()
+        methods = {}
+        for name, meta in (members.get("handlers") or {}).items():
+            if name.startswith("/"):
+                methods[name] = {"parameters": {}, "description": meta.get("doc") or ""}
+        for name, meta in (members.get("children") or {}).items():
+            if name.startswith("/"):
+                methods[name] = {"parameters": {}, "description": meta.get("doc") or "handler"}
+        return methods
 
     def _handle_root_command(self, method_name: str, method_args: List[str]):
         """Invoke a root-level publisher command."""

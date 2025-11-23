@@ -216,7 +216,7 @@ class PublishPlugin(BasePlugin):
         return {"tags": scopes, "channels": channels}
 
     def _resolve_scopes(self, method_name: str) -> List[str]:
-        method_cfg = self._handler_configs.get(method_name, {})
+        method_cfg = self.get_config(method_name)
         if "scopes" in method_cfg:
             return self._normalize_scopes(method_cfg.get("scopes"))
 
@@ -224,14 +224,12 @@ class PublishPlugin(BasePlugin):
         if metadata_scopes:
             return list(metadata_scopes)
 
-        return self._normalize_scopes(self._global_config.get("scopes"))
+        return self._normalize_scopes(self.get_config().get("scopes"))
 
     def _resolve_channels(self, method_name: str, scopes: Iterable[str]) -> Dict[str, List[str]]:
-        global_map = self._normalize_scope_channels(self._global_config.get("scope_channels"))
+        global_map = self._normalize_scope_channels(self.get_config().get("scope_channels"))
         metadata_map = self._entry_overrides.get(method_name, {}).get("scope_channels") or {}
-        method_map = self._normalize_scope_channels(
-            self._handler_configs.get(method_name, {}).get("scope_channels")
-        )
+        method_map = self._normalize_scope_channels(self.get_config(method_name).get("scope_channels"))
 
         merged = self._merge_channel_maps(global_map, metadata_map)
         merged = self._merge_channel_maps(merged, method_map)

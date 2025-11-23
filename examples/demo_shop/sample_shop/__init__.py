@@ -22,6 +22,8 @@ See:
 from .sql import SqlDb, DB_PATH
 from .shop import Shop
 from .tables import ArticleTypes, Articles, Purchases
+# Register demo plugin (dbop) on import
+from . import dbop_plugin  # noqa: F401
 
 __all__ = [
     "SqlDb",

@@ -102,9 +102,9 @@ class Publisher(RoutedClass):
 
         self.chan_registry = ChanRegistry(self)
         # Expose channel registry as root command "channel"
-        self.api.add_child(self.chan_registry, name="channel")
+        self.api.attach_instance(self.chan_registry, name="channel")
         # Expose apps management as "apps"
-        self.api.add_child(self.app_manager, name="apps")
+        self.api.attach_instance(self.app_manager, name="apps")
 
     @route("api")
     def serve(self, channel: str = "http", port: int | None = None, **options):
@@ -130,6 +130,18 @@ class Publisher(RoutedClass):
     def add_application(self, name: str, spec: str, *app_args, **app_kwargs) -> dict:
         """Route-exposed alias to add an application."""
         return self.api.call("apps.add", name=name, spec=spec, *app_args, **app_kwargs)
+
+    @route("api")
+    def configure_plugins(self, target, **options) -> dict:
+        """
+        Configure plugins at runtime using SmartRoute routedclass.configure().
+
+        Args:
+            target: target string or list payload, e.g. "api:logging/_all_" or batch list.
+            **options: plugin-specific configuration parameters.
+        """
+        result = self.routedclass.configure(target, **options)
+        return {"status": "ok", "result": result}
 
     @route("api")
     def savestate(self, path: str | None = None) -> dict:

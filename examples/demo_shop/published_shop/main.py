@@ -53,16 +53,18 @@ class PublishedShop(Publisher):
     def _mount_tables(self):
         for table_name in ("types", "articles", "purchases"):
             table = self._shop.db.table(table_name)
-            # Tables are RoutedClass instances with routers registered on self.api
-            self.api.add_child(table, name=table_name)
+            # Attach the table as a child router (must be referenced as an attribute)
+            attr_name = f"{table_name}_table"
+            setattr(self, attr_name, table)
+            self.api.attach_instance(table, name=table_name)
 
 
 def main(argv: list[str]) -> None:
     app = PublishedShop()
     if argv:
-        app.run_cli(argv)
+        app.chan_registry.get("cli").run(args=argv)
     else:
-        app.run_http()
+        app.chan_registry.get("http").run()
 
 
 if __name__ == "__main__":
