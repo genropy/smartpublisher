@@ -13,7 +13,7 @@ class TestPublisherMinimal:
 
     def test_list_empty_apps(self, publisher_factory):
         publisher = publisher_factory()
-        result = publisher.list()
+        result = publisher.app_manager.list()
         assert result["total"] == 0
         assert result["apps"] == {}
 
@@ -21,17 +21,17 @@ class TestPublisherMinimal:
         publisher = publisher_factory()
         spec = create_app(class_name="MiniApp")
 
-        add_result = publisher.add("mini", spec.target)
+        add_result = publisher.app_manager.add("mini", spec.target)
         assert add_result["status"] == "registered"
 
-        apps = publisher.list()
+        apps = publisher.app_manager.list()
         assert apps["total"] == 1
         assert "mini" in apps["apps"]
 
-        remove_result = publisher.remove("mini")
+        remove_result = publisher.app_manager.remove("mini")
         assert remove_result["status"] == "removed"
 
-        apps = publisher.list()
+        apps = publisher.app_manager.list()
         assert apps["total"] == 0
 
     def test_singleton_get_publisher(self):

@@ -5,7 +5,6 @@ from __future__ import annotations
 from contextlib import contextmanager
 from importlib.machinery import SourceFileLoader
 from importlib.util import module_from_spec, spec_from_loader
-import json
 from pathlib import Path
 from typing import Any, Tuple
 
@@ -15,36 +14,26 @@ from smartroute import Router, RoutedClass, route
 class AppManager(RoutedClass):
     """Load, register, and manage published applications."""
 
-    def __init__(self, publisher, *, autosave: bool = True, state_path: Path | None = None):
+    def __init__(self, publisher):
         self.publisher = publisher
         self.api = Router(self, name="api").plug("pydantic")
         self.applications: dict[str, Any] = {}
         self._metadata: dict[str, dict[str, str]] = {}
         self._state: dict[str, dict[str, Any]] = {}
-        self._autosave = autosave
-        self.state_path = (
-            Path(state_path).expanduser().resolve()
-            if state_path is not None
-            else Path.home() / ".smartlibs" / "publisher" / "state.json"
-        )
+
+    @property
+    def _autosave(self) -> bool:  # type: ignore[override]
+        return bool(getattr(self.publisher, "_autosave", False))
+
+    @_autosave.setter  # type: ignore[override]
+    def _autosave(self, value: bool):
+        self.publisher._autosave = bool(value)
 
     # ------------------------
     # Internal helpers
     # ------------------------
     def _detach_from_publisher(self, name: str):
         self.publisher.api._children.pop(name, None)
-
-    def _resolve_state_path(self, path: str | Path | None) -> Path:
-        return Path(path).expanduser().resolve() if path else self.state_path
-
-    def _write_state(self, dest: Path) -> None:
-        dest.parent.mkdir(parents=True, exist_ok=True)
-        payload = {
-            "version": 1,
-            "autosave": self._autosave,
-            "apps": [{"name": name, **state} for name, state in self._state.items()],
-        }
-        dest.write_text(json.dumps(payload, indent=2))
 
     def _clear_registry(self) -> None:
         for name in list(self.applications.keys()):
@@ -104,6 +93,10 @@ class AppManager(RoutedClass):
     # ------------------------
     # API methods
     # ------------------------
+    def snapshot(self) -> list[dict[str, Any]]:
+        """Return a serializable snapshot of registered applications."""
+        return [{"name": name, **state} for name, state in self._state.items()]
+
     @route("api")
     def list(self) -> dict:
         """List registered applications."""
@@ -182,30 +175,24 @@ class AppManager(RoutedClass):
         return {"status": "unloaded", "app": app_name}
 
     def savestate(self, path: str | Path | None = None) -> dict:
-        """Save current registry state to file."""
-        dest = self._resolve_state_path(path)
-        self._write_state(dest)
-        return {"saved": str(dest), "apps": len(self.applications)}
+        """Save current registry state to file (delegates to publisher)."""
+        return self.publisher.savestate(path)
 
-    def loadstate(self, path: str | Path | None = None, skip_missing: bool = False) -> dict:
-        """Load registry state from file."""
-        source = self._resolve_state_path(path)
-        if not source.exists():
-            return {"error": "State file not found", "path": str(source)}
+    def restore(self, payload: dict, skip_missing: bool = False) -> dict:
+        """
+        Restore applications from a snapshot payload.
 
-        try:
-            data = json.loads(source.read_text())
-        except Exception as exc:
-            return {"error": f"Invalid state file: {exc}", "path": str(source)}
-
-        if not isinstance(data, dict) or "apps" not in data or not isinstance(data["apps"], list):
-            return {"error": "Malformed state: missing 'apps' list", "path": str(source)}
+        Args:
+            payload: Dict containing at least an ``apps`` list.
+            skip_missing: If true, skip entries that fail to load.
+        """
+        if not isinstance(payload, dict) or "apps" not in payload or not isinstance(payload["apps"], list):
+            return {"error": "Malformed state: missing 'apps' list"}
 
         skipped = []
         with self._suspend_autosave():
             self._clear_registry()
-            self._autosave = bool(data.get("autosave", True))
-            for entry in data.get("apps", []):
+            for entry in payload.get("apps", []):
                 try:
                     name = entry["name"]
                     spec = entry["spec"]
@@ -221,7 +208,7 @@ class AppManager(RoutedClass):
         if self._autosave:
             self.savestate()
 
-        return {"loaded": len(self.applications), "skipped": skipped, "path": str(source)}
+        return {"loaded": len(self.applications), "skipped": skipped}
 
     def autosave(self, enabled: bool | None = None) -> dict:
         """Get/set autosave flag."""

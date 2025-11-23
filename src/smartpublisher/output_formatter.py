@@ -100,12 +100,33 @@ class OutputFormatter:
             for method_name, method_info in sorted(api_schema["methods"].items()):
                 # Build parameter string
                 params = []
-                for param in method_info.get("parameters", []):
+                raw_params = method_info.get("parameters", {})
+                if isinstance(raw_params, dict):
+                    iterable = []
+                    for pname, pdata in raw_params.items():
+                        if isinstance(pdata, dict):
+                            entry = {"name": pname, **pdata}
+                        else:
+                            entry = {"name": pname, "type": str(pdata)}
+                        iterable.append(entry)
+                elif isinstance(raw_params, list):
+                    iterable = []
+                    for pdata in raw_params:
+                        if isinstance(pdata, dict):
+                            iterable.append(pdata)
+                        else:
+                            iterable.append({"name": str(pdata)})
+                else:
+                    iterable = []
+
+                for param in iterable:
+                    name = param.get("name", "")
+                    ptype = param.get("type", "any")
                     if param.get("required"):
-                        params.append(f"<{param['name']}:{param.get('type', 'any')}>")
+                        params.append(f"<{name}:{ptype}>")
                     else:
                         default = param.get("default", "None")
-                        params.append(f"[{param['name']}:{param.get('type', 'any')}={default}]")
+                        params.append(f"[{name}:{ptype}={default}]")
 
                 param_str = " ".join(params)
                 desc = method_info.get("description", "No description")

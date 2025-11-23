@@ -52,10 +52,10 @@ Typical usage
 6. Manage autosave: ``/autosave [true|false]``.
 """
 
-from contextlib import contextmanager
-import json
 from pathlib import Path
-from typing import Any, Tuple
+from typing import Any
+
+import json
 
 from smartroute import Router, RoutedClass, route
 from .chan_registry import ChanRegistry
@@ -97,30 +97,28 @@ class Publisher(RoutedClass):
         # Root router for business/system commands
         self.api = Router(self, name="api").plug("pydantic").plug("publish")
 
-        self.applications: dict[str, Any] = {}
-        self._metadata: dict[str, dict[str, str]] = {}
-        self._state: dict[str, dict[str, Any]] = {}
-        self._autosave = autosave
+        # Autosave flag lives on the publisher
+        self._autosave = bool(autosave)
+
         self.state_path = (
             Path(state_path).expanduser().resolve()
             if state_path is not None
             else Path.home() / ".smartlibs" / "publisher" / "state.json"
         )
-        self.app_manager = AppManager(self, autosave=autosave, state_path=state_path)
+
+        self.app_manager = AppManager(self)
         # Aliases for backward compatibility
         self.applications = self.app_manager.applications
         self._metadata = self.app_manager._metadata
         self._state = self.app_manager._state
-        self._autosave = self.app_manager._autosave
-        self.state_path = self.app_manager.state_path
 
         self.chan_registry = ChanRegistry(self)
-        # Expose channel registry as root command "/channel"
-        self.api.add_child(self.chan_registry, name="/channel")
-        # Expose apps management as "/apps"
-        self.api.add_child(self.app_manager, name="/apps")
+        # Expose channel registry as root command "channel"
+        self.api.add_child(self.chan_registry, name="channel")
+        # Expose apps management as "apps"
+        self.api.add_child(self.app_manager, name="apps")
 
-    @route("api", name="/serve")
+    @route("api")
     def serve(self, channel: str = "http", port: int | None = None, **options):
         """
         Start a Publisher channel (e.g., HTTP).
@@ -130,24 +128,9 @@ class Publisher(RoutedClass):
             port: optional port (if supported by the channel)
             **options: additional channel-specific parameters
         """
-        chan_name = (channel or "").lower()
-        try:
-            chan = self.get_channel(chan_name)
-        except KeyError:
-            return {
-                "error": f"Channel '{chan_name}' not available",
-                "available": list(self.chan_registry.channels.keys()),
-            }
+        return self.api.call("channel.run", name=channel, port=port, **options)
 
-        run_opts = dict(options)
-        if port is not None:
-            run_opts.setdefault("port", port)
-
-        # run() may block (e.g., HTTP); let exceptions propagate
-        result = chan.run(**run_opts)
-        return {"status": "started", "channel": chan_name, "options": run_opts, "result": result}
-
-    @route("api", name="/quit")
+    @route("api")
     def quit(self):
         """Placeholder quit command exposed via API."""
         return {
@@ -155,70 +138,58 @@ class Publisher(RoutedClass):
             "message": "Quit command not wired yet",
         }
 
-    # ------------------------------------------------------------------
-    # Registry helpers
-    # ------------------------------------------------------------------
-    def _detach_from_publisher(self, name: str):
-        self.api._children.pop(name, None)
+    @route("api")
+    def add_application(self, name: str, spec: str, *app_args, **app_kwargs) -> dict:
+        """Route-exposed alias to add an application."""
+        return self.api.call("apps.add", name=name, spec=spec, *app_args, **app_kwargs)
 
-    @route("api", name="/add")
-    def add(self, name: str, spec: str, *app_args, **app_kwargs) -> dict:
-        """Proxy to AppManager.add."""
-        return self.app_manager.add(name, spec, *app_args, **app_kwargs)
-
-    @route("api", name="/remove")
-    def remove(self, name: str) -> dict:
-        """Proxy to AppManager.remove."""
-        return self.app_manager.remove(name)
-
-    @route("api", name="/list")
-    def list(self) -> dict:
-        """Lists published applications."""
-        return self.app_manager.list()
-
-    @route("api", name="/getapp")
-    def getapp(self, name: str) -> dict:
-        """Returns stored metadata for an app."""
-        if name not in self.applications:
-            return {
-                "error": "App not found",
-                "name": name,
-                "available": list(self.applications.keys()),
-            }
-        meta = self._metadata.get(name, {})
-        return {"name": name, **meta}
-
-    @route("api", name="/unload_app")
-    def unload_app(self, app_name: str):
-        """
-        Unload an application.
-
-        Args:
-            app_name: Registered application name
-        """
-        return self.app_manager.unload(app_name)
-
-    @route("api", name="/savestate")
+    @route("api")
     def savestate(self, path: str | None = None) -> dict:
-        """Persist current registry to JSON file."""
-        dest = self.app_manager._resolve_state_path(path)
-        self.app_manager._write_state(dest)
+        """
+        Persist current state to JSON file.
+
+        The publisher aggregates state from managed apps and channels
+        and writes a single snapshot.
+        """
+        dest = self._resolve_state_path(path)
+        dest.parent.mkdir(parents=True, exist_ok=True)
+
+        payload = {
+            "version": 1,
+            "autosave": self._autosave,
+            "apps": self.app_manager.snapshot(),
+            "channels": self.chan_registry.snapshot(),
+        }
+
+        dest.write_text(json.dumps(payload, indent=2))
         return {"status": "saved", "path": str(dest), "total": len(self._state)}
 
-    @route("api", name="/loadstate")
+    @route("api")
     def loadstate(self, path: str | None = None, skip_missing: bool = False) -> dict:
         """
-        Rebuild registry from a JSON snapshot.
+        Rebuild registry from a JSON snapshot saved by ``savestate``.
 
         Args:
             path: Override state file path (default: configured state_path).
             skip_missing: If true, skip entries whose spec path is missing
                 instead of failing the entire load.
         """
-        result = self.app_manager.loadstate(path, skip_missing=skip_missing)
-        return {"status": "loaded", **result}
+        source = self._resolve_state_path(path)
+        if not source.exists():
+            return {"error": "State file not found", "path": str(source)}
 
-    @route("api", name="/autosave")
+        try:
+            payload = json.loads(source.read_text())
+        except Exception as exc:
+            return {"error": f"Invalid state file: {exc}", "path": str(source)}
+
+        if isinstance(payload, dict) and "autosave" in payload:
+            self._autosave = bool(payload.get("autosave"))
+
+        result = self.app_manager.restore(payload, skip_missing=skip_missing)
+        return {"status": "loaded", "path": str(source), **result}
+
+    @route("api")
     def autosave(self, enabled: bool | None = None) -> dict:
         """
         Get or set autosave mode.
@@ -228,90 +199,9 @@ class Publisher(RoutedClass):
         """
         return self.app_manager.autosave(enabled)
 
-    def load_app(self, name: str):
-        """
-        Return runtime app instance.
-        """
-        if name not in self.applications:
-            available = list(self.applications.keys())
-            raise ValueError(
-                f"App '{name}' not registered. "
-                f"Available: {', '.join(available) if available else 'none'}"
-            )
-        return self.applications[name]
-
-    def get_channel(self, channel_name: str):
-        """Return channel instance by name."""
-        return self.chan_registry.get(channel_name)
-
-    def add_channel(self, channel_name: str, channel_instance):
-        """Register or override a channel instance."""
-        self.chan_registry.channels[channel_name] = channel_instance
-
-    def run_cli(self, args: list | None = None):
-        """CLI entry point - delegates to CLI channel."""
-        cli_channel = self.get_channel("cli")
-        cli_channel.run(args)
-
-    def run_http(self, port: int = 8000, **kwargs):
-        """Run HTTP channel."""
-        http_channel = self.get_channel("http")
-        http_channel.run(port=port, **kwargs)
-
-    # ------------------------------------------------------------------
-    # Helper APIs used by channels
-    # ------------------------------------------------------------------
-    def handler_members(self, channel: str | None = None) -> dict:
-        """Return immediate child handlers metadata (optionally filtered by channel)."""
-        return self.api.members(channel=channel).get("children", {})
-
-    def get_handler(self, name: str, channel: str | None = None):
-        """Return handler instance by name if available (respecting channel filter)."""
-        meta = self.handler_members(channel=channel).get(name)
-        if not meta:
-            return None
-        return meta.get("instance")
-
-    def list_handlers(self, channel: str | None = None) -> list:
-        """Return list of published handler names."""
-        return list(self.handler_members(channel=channel).keys())
-
-    def get_handlers(self, channel: str | None = None) -> dict:
-        """Return mapping name -> handler instance."""
-        handlers = {}
-        for name, meta in self.handler_members(channel=channel).items():
-            instance = meta.get("instance")
-            if instance is not None:
-                handlers[name] = instance
-        return handlers
-
     def _resolve_state_path(self, path: str | Path | None) -> Path:
+        """Resolve a state file path relative to configured state_path."""
         return Path(path).expanduser().resolve() if path else self.state_path
-
-    def _write_state(self, dest: Path) -> None:
-        dest.parent.mkdir(parents=True, exist_ok=True)
-        payload = {
-            "version": 1,
-            "autosave": self._autosave,
-            "apps": [{"name": name, **state} for name, state in self._state.items()],
-        }
-        dest.write_text(json.dumps(payload, indent=2))
-
-    def _clear_registry(self) -> None:
-        for name in list(self.applications.keys()):
-            self._detach_from_publisher(name)
-        self.applications.clear()
-        self._metadata.clear()
-        self._state.clear()
-
-    @contextmanager
-    def _suspend_autosave(self):
-        prev = self._autosave
-        self._autosave = False
-        try:
-            yield
-        finally:
-            self._autosave = prev
 
 
 # # Singleton instance for convenience
@@ -340,7 +230,7 @@ def get_publisher(use_global: bool = False) -> Publisher:
 def main():
     """Entry point for smpub command."""
     publisher = Publisher()
-    publisher.run_cli()
+    publisher.chan_registry.get("cli").run()
 
 
 if __name__ == "__main__":

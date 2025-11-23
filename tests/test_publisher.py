@@ -17,31 +17,15 @@ class TestPublisher:
         assert "cli" in pub.chan_registry.channels
         assert "http" in pub.chan_registry.channels
 
-    def test_get_channel(self, publisher_factory):
-        pub = publisher_factory()
-        assert pub.get_channel("cli") is pub.chan_registry.channels["cli"]
-        assert pub.get_channel("http") is pub.chan_registry.channels["http"]
-
-    def test_get_channel_not_found(self, publisher_factory):
-        pub = publisher_factory()
-        with pytest.raises(KeyError):
-            pub.get_channel("nonexistent")
-
-    def test_add_channel(self, publisher_factory):
-        pub = publisher_factory()
-        dummy = object()
-        pub.add_channel("custom", dummy)
-        assert pub.get_channel("custom") is dummy
-
     def test_add_app_registers_metadata(self, create_app, publisher_factory):
         pub = publisher_factory()
         spec = create_app(class_name="SampleApp")
 
-        result = pub.add("sample", spec.target)
+        result = pub.app_manager.add("sample", spec.target)
 
         assert result["status"] == "registered"
         assert "sample" in pub.applications
-        assert pub.list()["total"] == 1
+        assert pub.app_manager.list()["total"] == 1
         assert result["module"] == spec.module
         assert result["class"] == spec.class_name
         assert result["path"] == str(spec.file_path)
@@ -49,32 +33,32 @@ class TestPublisher:
     def test_add_app_duplicate_name(self, create_app, publisher_factory):
         pub = publisher_factory()
         spec = create_app()
-        pub.add("sample", spec.target)
+        pub.app_manager.add("sample", spec.target)
 
         with pytest.raises(ValueError):
-            pub.add("sample", spec.target)
+            pub.app_manager.add("sample", spec.target)
 
     def test_remove_app(self, create_app, publisher_factory):
         pub = publisher_factory()
         spec = create_app()
-        pub.add("sample", spec.target)
+        pub.app_manager.add("sample", spec.target)
 
-        result = pub.remove("sample")
+        result = pub.app_manager.remove("sample")
 
         assert result["status"] == "removed"
         assert pub.applications == {}
 
     def test_remove_missing_app(self, publisher_factory):
         pub = publisher_factory()
-        result = pub.remove("ghost")
+        result = pub.app_manager.remove("ghost")
         assert "error" in result
 
     def test_unload_app(self, create_app, publisher_factory):
         pub = publisher_factory()
         spec = create_app()
-        pub.add("sample", spec.target)
+        pub.app_manager.add("sample", spec.target)
 
-        result = pub.unload_app("sample")
+        result = pub.app_manager.unload("sample")
 
         assert result["status"] == "unloaded"
         assert "sample" not in pub.applications
@@ -82,42 +66,26 @@ class TestPublisher:
     def test_list_apps(self, create_app, publisher_factory):
         pub = publisher_factory()
         spec = create_app()
-        pub.add("sample", spec.target)
+        pub.app_manager.add("sample", spec.target)
 
-        listing = pub.list()
+        listing = pub.app_manager.list()
 
         assert listing["total"] == 1
         assert "sample" in listing["apps"]
 
-    def test_getapp_metadata(self, create_app, publisher_factory):
-        pub = publisher_factory()
-        spec = create_app()
-        pub.add("sample", spec.target)
-
-        info = pub.getapp("sample")
-
-        assert info["name"] == "sample"
-        assert info["module"] == spec.module
-        assert info["class"] == spec.class_name
-
-    def test_getapp_missing(self, publisher_factory):
-        pub = publisher_factory()
-        info = pub.getapp("ghost")
-        assert "error" in info
-
     def test_load_app_returns_instance(self, create_app, publisher_factory):
         pub = publisher_factory()
         spec = create_app()
-        pub.add("sample", spec.target)
+        pub.app_manager.add("sample", spec.target)
 
-        instance = pub.load_app("sample")
+        instance = pub.app_manager.get("sample")
 
         assert instance is pub.applications["sample"]
 
     def test_load_app_missing(self, publisher_factory):
         pub = publisher_factory()
         with pytest.raises(ValueError):
-            pub.load_app("ghost")
+            pub.app_manager.get("ghost")
 
     def test_get_publisher_singleton(self):
         from smartpublisher.publisher import get_publisher
@@ -130,7 +98,7 @@ class TestPublisher:
         pub = publisher_factory()
         spec = create_app(class_name="SampleApp")
 
-        pub.add("sample", spec.target, "arg1", option="value")
+        pub.app_manager.add("sample", spec.target, "arg1", option="value")
 
         instance = pub.applications["sample"]
         assert instance.args == ("arg1",)
@@ -141,7 +109,7 @@ class TestPublisher:
         pub = Publisher(state_path=state_file, autosave=False)
         spec = create_app()
 
-        pub.add("sample", spec.target, "one", option="x")
+        pub.app_manager.add("sample", spec.target, "one", option="x")
         save = pub.savestate()
 
         assert save["status"] == "saved"

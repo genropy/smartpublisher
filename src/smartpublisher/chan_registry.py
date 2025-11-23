@@ -122,6 +122,10 @@ class ChanRegistry(RoutedClass):
         result = chan.run(**run_opts)
         return {"status": "started", "channel": chan_name, "options": run_opts, "result": result}
 
+    def snapshot(self) -> dict:
+        """Return serializable channel registry info (for persistence hooks)."""
+        return {"channels": sorted(self._channels.keys())}
+
     def get(self, name: str):
         """
         Get a channel instance by name.

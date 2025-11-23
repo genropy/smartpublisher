@@ -39,7 +39,8 @@ class SystemCommands(RoutedClass):
             dict: Handler information
         """
         handlers = {}
-        for name, meta in self.publisher.handler_members().items():
+        children = self.publisher.api.members().get("children", {})
+        for name, meta in children.items():
             instance = meta.get("instance")
             handler_info = {
                 "class": instance.__class__.__name__ if instance else None,
@@ -68,12 +69,11 @@ class SystemCommands(RoutedClass):
         Returns:
             dict: Handler details
         """
-        handler = self.publisher.get_handler(handler_name)
+        handler_meta = self.publisher.api.members().get("children", {}).get(handler_name)
+        handler = handler_meta.get("instance") if handler_meta else None
         if handler is None:
-            return {
-                "error": f"Handler '{handler_name}' not found",
-                "available": self.publisher.list_handlers(),
-            }
+            available = list(self.publisher.api.members().get("children", {}).keys())
+            return {"error": f"Handler '{handler_name}' not found", "available": available}
 
         # Get API schema if available
         api_schema = None

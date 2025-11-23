@@ -97,7 +97,7 @@ class PublisherHTTP(BaseChannel):
         return {
             "status": "healthy",
             "app": self.publisher.__class__.__name__,
-            "handlers": len(self.publisher.list_handlers()),
+            "handlers": len(self.list_handlers()),
         }
 
     @route("http_api")
@@ -163,7 +163,7 @@ class PublisherHTTP(BaseChannel):
             }
 
         # Children handlers
-        for handler_name, handler in self.publisher.get_handlers().items():
+        for handler_name, handler in self.get_handlers().items():
             if not hasattr(handler, "api"):
                 continue
 
@@ -216,8 +216,8 @@ class PublisherHTTP(BaseChannel):
             dict: Metrics data
         """
         return {
-            "total_handlers": len(self.publisher.list_handlers()),
-            "handlers": self.publisher.list_handlers(),
+            "total_handlers": len(self.list_handlers()),
+            "handlers": self.list_handlers(),
         }
 
     def create_fastapi_app(self):

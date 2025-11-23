@@ -61,7 +61,7 @@ class CLIChannel(BaseChannel):
             dict: Help data from switcher.describe()
         """
         if handler_name:
-            instance = self.publisher.get_handler(handler_name, channel=self.CHANNEL_CODE)
+            instance = self._get_handler(handler_name)
             if instance is None:
                 return {"error": f"Handler '{handler_name}' not found"}
             if hasattr(instance, "api"):
@@ -126,8 +126,15 @@ class CLIChannel(BaseChannel):
 
     def _show_general_help(self):
         """Show general help from Publisher API."""
-        schema = self.publisher.api.describe(channel=self.CHANNEL_CODE)
-        output = self.formatter.format_help(schema)
+        tree = self.publisher.api.members()
+        methods = {}
+        # root handlers
+        for m in tree.get("handlers", {}) or {}:
+            methods[m] = {"parameters": {}}
+        # children as folders
+        for child_name in tree.get("children", {}) or {}:
+            methods[child_name] = {"parameters": {}, "description": "handler"}
+        output = self.formatter.format_help({"methods": methods})
         print(output)
 
     def _show_handler_help(self, handler_name: str):
@@ -142,7 +149,7 @@ class CLIChannel(BaseChannel):
                 print(output)
                 return
 
-        instance = self.publisher.get_handler(handler_name, channel=self.CHANNEL_CODE)
+        instance = self._get_handler(handler_name)
         if instance and hasattr(instance, "api"):
             schema = instance.api.describe(channel=self.CHANNEL_CODE)
             output = self.formatter.format_help(schema)
@@ -161,7 +168,7 @@ class CLIChannel(BaseChannel):
             method_args: Arguments for the command
         """
         if not method_name:
-            system_meta = self.publisher.handler_members(channel=self.CHANNEL_CODE).get("_system")
+            system_meta = self.publisher.api.members(channel=self.CHANNEL_CODE).get("children", {}).get("_system")
             schema = (
                 system_meta["router"].describe(channel=self.CHANNEL_CODE) if system_meta else {}
             )
@@ -171,7 +178,7 @@ class CLIChannel(BaseChannel):
 
         # Execute system command - SmartSwitch handles everything
         try:
-            system_handler = self.publisher.get_handler("_system", channel=self.CHANNEL_CODE)
+            system_handler = self._get_handler("_system")
             method_callable = system_handler.api.get(method_name, use_smartasync=True)
             positional, keyword = self._split_cli_args(method_args)
             # SmartSwitch returns a bound callable, so just forward parsed args
@@ -185,8 +192,9 @@ class CLIChannel(BaseChannel):
 
     def _get_root_methods(self) -> dict:
         """Return publisher root methods that start with '/'."""
-        schema = self.publisher.api.describe(channel=self.CHANNEL_CODE)
-        methods = schema.get("methods", {})
+        tree = self.publisher.api.members()
+        methods = {name: {"parameters": {}} for name in (tree.get("handlers", {}) or {})}
+        methods.update({child: {"parameters": {}} for child in (tree.get("children", {}) or {})})
         return {name: info for name, info in methods.items() if name.startswith("/")}
 
     def _handle_root_command(self, method_name: str, method_args: List[str]):
@@ -316,7 +324,7 @@ class CLIChannel(BaseChannel):
         fragment_lower = fragment.lower()
         suggestions = []
 
-        handlers = self.publisher.get_handlers(channel=self.CHANNEL_CODE)
+        handlers = self.get_handlers()
         root_methods = self._get_root_methods()
 
         for name, instance in sorted(handlers.items()):
@@ -352,7 +360,7 @@ class CLIChannel(BaseChannel):
 
     def _suggest_methods(self, handler_name: str, fragment: str) -> List[dict]:
         """Suggest methods for a handler."""
-        handler = self.publisher.get_handler(handler_name, channel=self.CHANNEL_CODE)
+        handler = self._get_handler(handler_name)
         if not handler or not hasattr(handler, "api"):
             return []
 
@@ -396,10 +404,10 @@ class CLIChannel(BaseChannel):
 
     def _suggest_system_methods(self, fragment: str) -> List[dict]:
         """Suggest methods under the _system handler."""
-        if "_system" not in self.publisher.list_handlers(channel=self.CHANNEL_CODE):
+        if "_system" not in self.list_handlers():
             return []
 
-        system_handler = self.publisher.get_handler("_system", channel=self.CHANNEL_CODE)
+        system_handler = self._get_handler("_system")
         schema = system_handler.api.describe(channel=self.CHANNEL_CODE)
         methods = schema.get("methods", {})
         fragment_lower = fragment.lower()
@@ -423,7 +431,7 @@ class CLIChannel(BaseChannel):
 
     def _suggest_parameters(self, handler_name: str, method_name: str, fragment: str) -> List[dict]:
         """Suggest parameters for a specific method."""
-        handler = self.publisher.get_handler(handler_name, channel=self.CHANNEL_CODE)
+        handler = self._get_handler(handler_name)
         if not handler or not hasattr(handler, "api"):
             return []
 
@@ -512,11 +520,11 @@ class CLIChannel(BaseChannel):
             method_name: Method to execute (None = show help)
             method_args: Arguments for the method
         """
-        handlers = self.publisher.get_handlers(channel=self.CHANNEL_CODE)
+        handlers = self.get_handlers()
         if handler_name not in handlers:
             print(f"Error: Handler '{handler_name}' not found")
             print(
-                f"Available: {', '.join(self.publisher.list_handlers(channel=self.CHANNEL_CODE))}"
+                f"Available: {', '.join(self.list_handlers())}"
             )
             return
 
